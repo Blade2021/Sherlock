@@ -12,7 +12,7 @@ import java.util.List;
 
 public class LogChannel {
     private TextChannel logChannel;
-    private Guild guild;
+    private final Guild guild;
 
     public LogChannel(Guild guild){
         this.guild = guild;

@@ -13,6 +13,8 @@ import rsystems.objects.GuildSettings;
 import java.awt.*;
 import java.util.ArrayList;
 
+import static rsystems.SherlockBot.database;
+
 /*
 AUTHOR: Matt W.
 
@@ -23,8 +25,8 @@ public class JoinGuild extends ListenerAdapter {
     public void onGuildJoin(GuildJoinEvent event) {
         //Initiate and store the new guild in the guildSettings Object
         SherlockBot.guildMap.put(event.getGuild().getId(),new GuildSettings("!",event.getGuild()));
-
         createMuteRole(event.getGuild());
+        database.addGuild(event.getGuild().getId(),event.getGuild().getOwnerId());
     }
 
     /*

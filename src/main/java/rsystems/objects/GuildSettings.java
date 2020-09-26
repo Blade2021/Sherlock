@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class GuildSettings {
     //Guild Uniques
-    private Guild guild;
+    private final Guild guild;
     private String prefix;
     private ArrayList<String> modRoles = new ArrayList<>();
 

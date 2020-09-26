@@ -9,7 +9,8 @@ import rsystems.SherlockBot;
 
 import java.util.ArrayList;
 
-public class ChannelManager extends ListenerAdapter {
+
+public class LocalChannelManager extends ListenerAdapter {
 
     /*
 
@@ -27,10 +28,8 @@ public class ChannelManager extends ListenerAdapter {
                 assert muteRole != null;
                 event.getChannel().createPermissionOverride(muteRole).setDeny(mutePerms).queue();
             } catch(NullPointerException e){
-                //todo error
             }
         } catch(NullPointerException e){
-            //todo error
         }
     }
 
@@ -45,10 +44,8 @@ public class ChannelManager extends ListenerAdapter {
                 assert muteRole != null;
                 event.getChannel().createPermissionOverride(muteRole).setDeny(mutePerms).queue();
             } catch(NullPointerException e){
-                //todo error
             }
         } catch(NullPointerException e){
-            //todo error
         }
     }
 

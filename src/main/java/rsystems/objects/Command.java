@@ -93,9 +93,7 @@ public class Command {
     public boolean checkCommand(String message, String prefix, Member member) {
         String formattedMessage = message.toLowerCase();
         if(formattedMessage.startsWith(prefix + this.command.toLowerCase())){
-            if(member.hasPermission(Permission.ADMINISTRATOR)) {
-                return true;
-            }
+            return member.hasPermission(Permission.ADMINISTRATOR);
         } else {
             final Boolean[] returnValue = {false};
             this.alias.forEach(alias -> {
@@ -107,7 +105,6 @@ public class Command {
             });
             return returnValue[0];
         }
-        return false;
     }
 
     public boolean helpCheck(String command){

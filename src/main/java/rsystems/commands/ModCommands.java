@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
 
-public class EditModRoles extends ListenerAdapter {
+public class ModCommands extends ListenerAdapter {
 
     public void onMessageReceived(MessageReceivedEvent event) {
 
