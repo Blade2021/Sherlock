@@ -1,27 +1,30 @@
 package rsystems.objects;
 
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Role;
-
 import java.util.ArrayList;
 
 public class GuildSettings {
     //Guild Uniques
-    private final Guild guild;
+    //private final Guild guild;
     private String prefix;
     private ArrayList<String> modRoles = new ArrayList<>();
-
-    //Guild Objects
-    public LogChannel logChannel;
+    public String logChannelID;
 
     //Guild IDs
     private String muteRoleID;
 
     // CONSTRUCTOR
-    public GuildSettings(String prefix, Guild guild){
+    public GuildSettings(String prefix) {
         this.prefix = prefix;
-        this.logChannel = new LogChannel(guild);
-        this.guild = guild;
+        //this.logChannel = new LogChannel(guild);
+        //this.guild = guild;
+    }
+
+    public String getLogChannelID() {
+        return logChannelID;
+    }
+
+    public void setLogChannelID(String logChannelID) {
+        this.logChannelID = logChannelID;
     }
 
     public void setPrefix(String prefix) {
@@ -50,7 +53,7 @@ public class GuildSettings {
 
     public boolean addModRole(String roleID){
         try{
-            Role roleCheck = this.guild.getRoleById(roleID);
+            //Role roleCheck = leById(roleID);
             this.modRoles.add(roleID);
             return true;
         } catch(NullPointerException e){
@@ -67,9 +70,5 @@ public class GuildSettings {
             }
         }
         return false;
-    }
-
-    public void logError(String message){
-        System.out.println("Error from Guild: " + this.guild.getId() + "\n" + message + "\n");
     }
 }

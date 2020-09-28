@@ -24,7 +24,7 @@ DESCRIPTION: This class will setup the guild roles, and channel overrides when j
 public class JoinGuild extends ListenerAdapter {
     public void onGuildJoin(GuildJoinEvent event) {
         //Initiate and store the new guild in the guildSettings Object
-        SherlockBot.guildMap.put(event.getGuild().getId(),new GuildSettings("!",event.getGuild()));
+        SherlockBot.guildMap.put(event.getGuild().getId(),new GuildSettings("!"));
         createMuteRole(event.getGuild());
         database.addGuild(event.getGuild().getId(),event.getGuild().getOwnerId());
     }
@@ -63,6 +63,7 @@ public class JoinGuild extends ListenerAdapter {
 
             //Write the roleID to settings for later use.
             SherlockBot.guildMap.get(guild.getId()).setMuteRoleID(success.getId());
+            database.updateLong("GuildTable","MuteRoleID","GuildID",guild.getIdLong(),success.getIdLong());
         });
     }
 }

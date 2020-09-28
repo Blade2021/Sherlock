@@ -5,11 +5,11 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
+import rsystems.handlers.LogChannel;
 
 import java.util.List;
 
-import static rsystems.SherlockBot.botID;
-import static rsystems.SherlockBot.database;
+import static rsystems.SherlockBot.*;
 
 public class Infraction extends ListenerAdapter {
 
@@ -21,7 +21,7 @@ public class Infraction extends ListenerAdapter {
 
         String[] args = event.getMessage().getContentRaw().split("\\s+");
 
-        // INFRACTION COMMAND
+        // WRITE INFRACTION COMMAND
         if (SherlockBot.commands.get(1).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
             //Get a list of members
             List<Member> MentionedMembers = event.getMessage().getMentionedMembers();
@@ -29,26 +29,17 @@ public class Infraction extends ListenerAdapter {
                 database.insertInfraction(event.getGuild().getId(),member.getIdLong(),args[1],event.getMember().getIdLong());
             });
 
-            //Log action in the log channel for event's guild
-            SherlockBot.guildMap.get(event.getGuild().getId()).logChannel.logAction(
-                    "Infraction Violation",
-                    MentionedMembers,
-                    "Infraction submitted for the following user(s)",
-                    event.getMember()
-            );
+            LogChannel logChannel = new LogChannel();
+            logChannel.logAction(event.getGuild(),"Infraction Violation",MentionedMembers,event.getMember());
         }
     }
 
-
+    // AUTOMATIC INFRACTION
     public void automaticInfraction(Guild guild, Member member) {
-        database.insertInfraction(guild.getId(),member.getIdLong(),"Auto BoT Infraction",botID);
+        database.insertInfraction(guild.getId(),member.getIdLong(),"Auto BoT Infraction", bot.getIdLong());
 
-        SherlockBot.guildMap.get(guild.getId()).logChannel.logAction(
-                "Infraction submitted for User",
-                member,
-                "Infraction submitted for User",
-                "BOT"
-        );
+        LogChannel logChannel = new LogChannel();
+        logChannel.logAction(guild,"Automatic Infraction",member, bot);
     }
 
 }

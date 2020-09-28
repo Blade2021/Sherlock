@@ -7,7 +7,7 @@ plugins {
 group 'rsystems'
 version '0.0.1'
 
-mainClassName = 'rsystems.Sherlock'
+mainClassName = 'rsystems.SherlockBot'
 
 sourceCompatibility = 1.8
 targetCompatibility = 11
