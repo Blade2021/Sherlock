@@ -1,6 +1,7 @@
 package rsystems.events;
 
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
@@ -43,6 +44,14 @@ public class JoinGuild extends ListenerAdapter {
             mutePerms.add(Permission.MESSAGE_ADD_REACTION);
             mutePerms.add(Permission.VOICE_STREAM);
             mutePerms.add(Permission.VOICE_SPEAK);
+
+            for(Category category : guild.getCategories()){
+                try{
+                    category.createPermissionOverride(success).setDeny(mutePerms).reason("Initiating bot perms").queue();
+                } catch (PermissionException e){
+                    break;
+                }
+            }
 
             //Set the mute role permission override for each channel
             for (TextChannel channel : guild.getTextChannels()) {

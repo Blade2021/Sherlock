@@ -1,6 +1,8 @@
 package rsystems.objects;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GuildSettings {
     //Guild Uniques
@@ -8,6 +10,8 @@ public class GuildSettings {
     private String prefix;
     private ArrayList<String> modRoles = new ArrayList<>();
     public String logChannelID;
+    public int embedFilter = 0;
+    public Map<String, Long> assignableRoleMap = new HashMap<>();
 
     //Guild IDs
     private String muteRoleID;
@@ -43,6 +47,14 @@ public class GuildSettings {
         this.muteRoleID = muteRoleID;
     }
 
+    public int getEmbedFilter() {
+        return embedFilter;
+    }
+
+    public void setEmbedFilter(int embedFilter) {
+        this.embedFilter = embedFilter;
+    }
+
     public ArrayList<String> getModRoles() {
         return modRoles;
     }
@@ -70,5 +82,13 @@ public class GuildSettings {
             }
         }
         return false;
+    }
+
+    public void addAssignableRole(String roleCommand, Long roleID){
+        assignableRoleMap.putIfAbsent(roleCommand,roleID);
+    }
+
+    public void removeAssignableRole(String roleCommand){
+        assignableRoleMap.remove(roleCommand);
     }
 }

@@ -7,9 +7,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import rsystems.commands.Infraction;
-import rsystems.commands.Leave;
-import rsystems.commands.Mute;
+import rsystems.commands.*;
 import rsystems.events.JoinGuild;
 import rsystems.events.LeaveGuild;
 import rsystems.events.LocalChannelManager;
@@ -42,6 +40,8 @@ public class SherlockBot {
         api.addEventListener(new LeaveGuild());
         api.addEventListener(new Infraction());
         api.addEventListener(new Mute());
+        api.addEventListener(new AssignableRoles());
+        api.addEventListener(new ModifyGuildSettings());
 
         try{
             api.awaitReady();
@@ -62,10 +62,19 @@ public class SherlockBot {
     }
 
     private static void loadCommands(){
-        commands.add(new Command("leave"));
-        commands.add(new Command("infract"));
-        commands.add(new Command("mute"));
-        commands.add(new Command("unmute"));
+        commands.add(new Command("leave")); // 0
+        commands.add(new Command("infract")); // 1
+        commands.add(new Command("mute")); // 2
+        commands.add(new Command("unmute")); // 3
+        commands.add(new Command("resign")); // 4
+        commands.add(new Command("assign")); // 5
+        commands.add(new Command("placeholder")); // 6
+        commands.add(new Command("placeholder")); // 7
+        commands.add(new Command("placeholder")); // 8
+        commands.add(new Command("placeholder")); // 9
+        commands.add(new Command("placeholder")); // 10
+        commands.add(new Command("placeholder")); // 11
+        commands.add(new Command("placeholder")); // 12
     }
 
 }

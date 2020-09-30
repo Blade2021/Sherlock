@@ -22,7 +22,7 @@ public class SQLHandler {
 
     /*
 
-    GENERALIZED METHODS FOR SQL INTERACTION
+            GENERALIZED METHODS FOR SQL INTERACTION
 
      */
     public void connect() {
@@ -117,7 +117,7 @@ public class SQLHandler {
 
     /*
 
-    GUILD RELATED INTERACTIONS
+            GUILD RELATED INTERACTIONS
 
      */
     public boolean addGuild(String guildID, String ownerID){
@@ -164,6 +164,30 @@ public class SQLHandler {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+    }
+
+    public Integer insertAssignableRole(Long guildID, String command, Long roleID){
+        try{
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("INSERT INTO AssignableRoles (ChildGuildID, RoleCommand, RoleID) VALUES (%d, \"%s\", %d)",guildID,command,roleID));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
+    }
+
+    public Integer removeAssignableRole(Long guildID, String command){
+        try{
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("DELETE FROM AssignableRoles WHERE (ChildGuildID = %d) AND (RoleCommand = \"%s\")",guildID,command));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
     }
 
     /*
