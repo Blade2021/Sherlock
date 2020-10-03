@@ -1,9 +1,6 @@
 package rsystems.commands;
 
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -26,32 +23,30 @@ public class AssignableRoles extends ListenerAdapter {
         USER REQUESTING ROLE TO BE ADDED/REMOVED
          */
         if (SherlockBot.guildMap.get(event.getGuild().getId()).assignableRoleMap.containsKey(checkString)) {
-            toggleRole(event.getGuild(), event.getMember(), event.getChannel(), SherlockBot.guildMap.get(event.getGuild().getId()).assignableRoleMap.get(checkString));
-        }
+            Long roleID = SherlockBot.guildMap.get(event.getGuild().getId()).assignableRoleMap.get(checkString);
 
-    }
-
-    /*
-    METHOD TO ADD/REMOVE ROLE FROM USER
-
-    Segregated into method call for future additions.
-     */
-    private void toggleRole(Guild guild, Member member, TextChannel channel, Long roleID) {
-        List<Role> roles = member.getRoles();
-        try {
-            //Member already has role, Remove it
-            if (roles.contains(guild.getRoleById(roleID))) {
-                guild.removeRoleFromMember(member, guild.getRoleById(roleID)).reason("Requested by user").queue();
-            } else {
-            //Member does not have role, Add it
-                guild.addRoleToMember(member, guild.getRoleById(roleID)).reason("Requested by user").queue();
+            List<Role> roles = event.getMember().getRoles();
+            try {
+                //Member already has role, Remove it
+                if (roles.contains(event.getGuild().getRoleById(roleID))) {
+                    event.getGuild().removeRoleFromMember(event.getMember(), event.getGuild().getRoleById(roleID)).reason("Requested by user").queue(success -> {
+                        event.getMessage().addReaction("✅").queue();
+                    });
+                } else {
+                    //Member does not have role, Add it
+                    event.getGuild().addRoleToMember(event.getMember(), event.getGuild().getRoleById(roleID)).reason("Requested by user").queue(success -> {
+                        event.getMessage().addReaction("✅").queue();
+                    });
+                }
+            } catch (NullPointerException | IllegalArgumentException e) {
+                event.getChannel().sendMessage(event.getMember().getAsMention() + " I could not find the role associated with that command.").queue();
+                event.getMessage().addReaction("⚠").queue();
+                //todo log error
+            } catch (PermissionException e) {
+                event.getChannel().sendMessage("Missing Permission:" + e.getPermission().toString());
+                event.getMessage().addReaction("⚠").queue();
+                //todo log error
             }
-        } catch (NullPointerException e) {
-            channel.sendMessage("Could not get role").queue();
-            //todo log error
-        } catch (PermissionException e) {
-            channel.sendMessage("Missing Permission:" + e.getPermission().toString());
-            //todo log error
         }
     }
 }

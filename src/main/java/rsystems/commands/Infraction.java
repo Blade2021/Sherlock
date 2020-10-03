@@ -19,18 +19,20 @@ public class Infraction extends ListenerAdapter {
             //Ignore message.  BOT LAW #2 - DO NOT LISTEN TO OTHER BOTS
         }
 
-        String[] args = event.getMessage().getContentRaw().split("\\s+");
+        if(event.isFromGuild()) {
+            String[] args = event.getMessage().getContentRaw().split("\\s+");
 
-        // WRITE INFRACTION COMMAND
-        if (SherlockBot.commands.get(1).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
-            //Get a list of members
-            List<Member> MentionedMembers = event.getMessage().getMentionedMembers();
-            MentionedMembers.forEach(member -> {
-                database.insertInfraction(event.getGuild().getId(),member.getIdLong(),args[1],event.getMember().getIdLong());
-            });
+            // WRITE INFRACTION COMMAND
+            if (SherlockBot.commands.get(1).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
+                //Get a list of members
+                List<Member> MentionedMembers = event.getMessage().getMentionedMembers();
+                MentionedMembers.forEach(member -> {
+                    database.insertInfraction(event.getGuild().getId(), member.getIdLong(), args[1], event.getMember().getIdLong());
+                });
 
-            LogChannel logChannel = new LogChannel();
-            logChannel.logAction(event.getGuild(),"Infraction Violation",MentionedMembers,event.getMember());
+                LogChannel logChannel = new LogChannel();
+                logChannel.logAction(event.getGuild(), "Infraction Violation", MentionedMembers, event.getMember());
+            }
         }
     }
 

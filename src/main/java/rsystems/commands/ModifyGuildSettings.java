@@ -32,7 +32,6 @@ public class ModifyGuildSettings extends ListenerAdapter {
         //CHANGE LOG CHANNEL ID
         if (SherlockBot.commands.get(5).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
             try {
-                //SherlockBot.guildMap.get(event.getGuild().getId()).logChannel.setLogChannel(args[1]);
                 event.getMessage().addReaction("✅").queue();
             } catch (IndexOutOfBoundsException | NullPointerException e) {
                 try {
@@ -102,7 +101,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                 } else {
                     // Unsuccessful (0 rows updated)
                     event.getMessage().addReaction("\uD83D\uDC4E").queue();
-                    //todo log to main server or database
+                    database.logError(event.getGuild().getId(),"Failed to add assignable role");
                 }
             } else if (args.length < 3) {
                 event.getChannel().sendMessage("Not enough arguments supplied.").queue();
@@ -126,7 +125,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     } else {
                     // Unsuccessful (0 rows updated)
                         event.getMessage().addReaction("\uD83D\uDC4E").queue();
-                        //todo log to main server or database
+                        database.logError(event.getGuild().getId(),"Failed to remove assignable role");
                     }
                 }
             }

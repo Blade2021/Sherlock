@@ -1,9 +1,11 @@
 package rsystems.handlers;
 
 import rsystems.SherlockBot;
+import rsystems.objects.AssignableRole;
 import rsystems.objects.InfractionObject;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class SQLHandler {
@@ -22,14 +24,14 @@ public class SQLHandler {
 
     /*
 
-            GENERALIZED METHODS FOR SQL INTERACTION
+                    GENERALIZED METHODS FOR SQL INTERACTION
 
      */
     public void connect() {
         try {
-            connection = DriverManager.getConnection(DatabaseURL,DatabaseUser,DatabaseUserPass);
+            connection = DriverManager.getConnection(DatabaseURL, DatabaseUser, DatabaseUserPass);
 
-            if(connection.isValid(30)){
+            if (connection.isValid(30)) {
                 System.out.println("Database connected");
             }
         } catch (SQLException throwables) {
@@ -39,14 +41,14 @@ public class SQLHandler {
 
     }
 
-    public ArrayList<String> getStringList(String table, String columnName){
+    public ArrayList<String> getStringList(String table, String columnName) {
         ArrayList<String> output = new ArrayList<>();
 
-        try{
+        try {
             Statement st = connection.createStatement();
 
             ResultSet rs = st.executeQuery("SELECT " + columnName + " FROM " + table);
-            while(rs.next()){
+            while (rs.next()) {
                 output.add(rs.getString(columnName));
             }
 
@@ -57,7 +59,7 @@ public class SQLHandler {
         return output;
     }
 
-    public String getString(String table, String columnID, Integer rowID){
+    public String getString(String table, String columnID, Integer rowID) {
         String output = "";
 
         try {
@@ -68,7 +70,7 @@ public class SQLHandler {
                 output = rs.getString(columnID.toUpperCase());
             }
 
-        } catch(SQLException throwables){
+        } catch (SQLException throwables) {
             System.out.println(throwables.getMessage());
         } finally {
             // do nothing at the moment
@@ -77,7 +79,7 @@ public class SQLHandler {
         return output;
     }
 
-    public String getString(String table, String columnID, String identfierColumn, Long identfier){
+    public String getString(String table, String columnID, String identfierColumn, Long identfier) {
         String output = "";
 
         try {
@@ -88,7 +90,7 @@ public class SQLHandler {
                 output = rs.getString(columnID.toUpperCase());
             }
 
-        } catch(SQLException throwables){
+        } catch (SQLException throwables) {
             System.out.println(throwables.getMessage());
         } finally {
             // do nothing at the moment
@@ -97,17 +99,17 @@ public class SQLHandler {
         return output;
     }
 
-    public void updateLong(String tableName, String columnName, String identifierColumn, Long identifier, Long value){
-        try{
+    public void updateLong(String tableName, String columnName, String identifierColumn, Long identifier, Long value) {
+        try {
             Statement st = connection.createStatement();
-            st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d",tableName,columnName,value,identifierColumn,identifier));
+            st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
-    public void putString(String tableName, Long GuildID, String event, Long senderColumn, Long receiverColumn){
-        try{
+    public void putString(String tableName, Long GuildID, String event, Long senderColumn, Long receiverColumn) {
+        try {
             Statement st = connection.createStatement();
             st.execute(String.format("INSERT INTO %s (ChildGuildID, Event, ReceivingUserID, SendingUserID) VALUES (%d %s, %d, %d)"));
         } catch (SQLException throwables) {
@@ -117,11 +119,11 @@ public class SQLHandler {
 
     /*
 
-            GUILD RELATED INTERACTIONS
+                    GUILD RELATED INTERACTIONS
 
      */
-    public boolean addGuild(String guildID, String ownerID){
-        try{
+    public boolean addGuild(String guildID, String ownerID) {
+        try {
             Statement st = connection.createStatement();
             st.execute("INSERT INTO GuildTable (GuildID, OwnerID) VALUES (" + Long.valueOf(guildID) + ", " + Long.valueOf(ownerID) + ")");
             return true;
@@ -131,8 +133,8 @@ public class SQLHandler {
         }
     }
 
-    public boolean removeGuild(String guildID){
-        try{
+    public boolean removeGuild(String guildID) {
+        try {
             Statement st = connection.createStatement();
             st.execute("DELETE FROM GuildTable WHERE GuildID = " + Long.valueOf(guildID));
             return true;
@@ -142,16 +144,19 @@ public class SQLHandler {
         }
     }
 
-    public void loadGuildData(String guildID){
+    public void loadGuildData(String guildID) {
         String prefix = "!";
         String logChannelID = null;
         String muteRoleID = null;
 
-        try{
+        try {
+            /*
+                    GRAB GUILD SETTINGS FROM DATABASE
+             */
             Statement st = connection.createStatement();
 
             ResultSet rs = st.executeQuery("SELECT Prefix, LogChannelID, MuteRoleID FROM GuildTable WHERE GuildID = " + Long.valueOf(guildID));
-            while(rs.next()){
+            while (rs.next()) {
                 prefix = rs.getString("Prefix");
                 logChannelID = String.valueOf(rs.getLong("LogChannelID"));
                 muteRoleID = String.valueOf(rs.getLong("MuteRoleID"));
@@ -161,16 +166,26 @@ public class SQLHandler {
             SherlockBot.guildMap.get(guildID).setMuteRoleID(muteRoleID);
             SherlockBot.guildMap.get(guildID).setLogChannelID(String.valueOf(logChannelID));
 
+            /*
+                    GRAB ASSIGNABLE ROLES FROM DATABASE
+             */
+            ArrayList<AssignableRole> assignableRoles = new ArrayList<>();
+            assignableRoles = getAssignableRoles(Long.valueOf(guildID));
+            for (AssignableRole role : assignableRoles) {
+                SherlockBot.guildMap.get(guildID).assignableRoleMap.put(role.command, role.RoleID);
+            }
+
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
-    public Integer insertAssignableRole(Long guildID, String command, Long roleID){
-        try{
+    // Add an assignable role to the database
+    public Integer insertAssignableRole(Long guildID, String command, Long roleID) {
+        try {
             Statement st = connection.createStatement();
 
-            st.execute(String.format("INSERT INTO AssignableRoles (ChildGuildID, RoleCommand, RoleID) VALUES (%d, \"%s\", %d)",guildID,command,roleID));
+            st.execute(String.format("INSERT INTO AssignableRoles (ChildGuildID, RoleCommand, RoleID) VALUES (%d, \"%s\", %d)", guildID, command, roleID));
             return st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -178,16 +193,53 @@ public class SQLHandler {
         return 0;
     }
 
-    public Integer removeAssignableRole(Long guildID, String command){
-        try{
+    // Remove an assignable role to the database
+    public Integer removeAssignableRole(Long guildID, String command) {
+        try {
             Statement st = connection.createStatement();
 
-            st.execute(String.format("DELETE FROM AssignableRoles WHERE (ChildGuildID = %d) AND (RoleCommand = \"%s\")",guildID,command));
+            st.execute(String.format("DELETE FROM AssignableRoles WHERE (ChildGuildID = %d) AND (RoleCommand = \"%s\")", guildID, command));
             return st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
         return 0;
+    }
+
+    //Get Assignable Roles - Called by GuildLoader
+    public ArrayList<AssignableRole> getAssignableRoles(Long guildID) {
+        ArrayList<AssignableRole> output = new ArrayList<>();
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT RoleCommand, RoleID FROM AssignableRoles WHERE ChildGuildID = " + guildID);
+
+            while (rs.next()) {
+                output.add(new AssignableRole(guildID, rs.getString("RoleCommand"), rs.getLong("RoleID")));
+            }
+
+            return output;
+
+        } catch (SQLException throwables) {
+            System.out.println(throwables.getMessage());
+        } finally {
+            // do nothing at the moment
+        }
+        return null;
+    }
+
+    public boolean insertTimedEvent(Long GuildID, Long UserID, int EventType, LocalDateTime startDatetime, LocalDateTime endDateTime){
+
+        try {
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("INSERT INTO TimedEvents (ChildGuildID, UserID, EventType, StartDate, EndDate) VALUES (%d, %d, %d, \"%s\", \"%s\")", GuildID, UserID, EventType, startDatetime.toString(), endDateTime.toString()));
+            return true;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            throwables.getErrorCode();
+        }
+
+        return false;
     }
 
     /*
@@ -196,8 +248,26 @@ public class SQLHandler {
 
      */
 
-    public boolean insertInfraction(String guildID, Long violatorID, String violation, Long submitter){
-        try{
+    public void logError(String guildID, String event){
+        try {
+            Statement st = connection.createStatement();
+            st.execute("INSERT INTO FaultTable (ChildGuildID, Event) VALUES (" + Long.valueOf(guildID) + ", \"" + event + "\")");
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public void logError(String guildID, String event, Long relateable){
+        try {
+            Statement st = connection.createStatement();
+            st.execute("INSERT INTO FaultTable (ChildGuildID, Event, Relateables) VALUES (" + Long.valueOf(guildID) + ", \"" + event + "\", " + relateable + ")");
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public boolean insertInfraction(String guildID, Long violatorID, String violation, Long submitter) {
+        try {
             Statement st = connection.createStatement();
             st.execute("INSERT INTO InfractionTable (ChildGuildID, ViolatorID, Violation, Submitter) VALUES (" + Long.valueOf(guildID) + ", " + violatorID + ", \"" + violation + "\", " + submitter + ")");
             return true;
@@ -207,15 +277,15 @@ public class SQLHandler {
         }
     }
 
-    public ArrayList<InfractionObject> infractions(String guildID, String violatorID){
+    public ArrayList<InfractionObject> infractions(String guildID, String violatorID) {
         ArrayList<InfractionObject> infractionObjects = new ArrayList<>();
 
-        try{
+        try {
             Statement st = connection.createStatement();
 
             ResultSet rs = st.executeQuery("SELECT Violation, UserNote, DateSubmitted, Submitter FROM InfractionTable WHERE ChildGuildID = " + Long.valueOf(guildID) + " AND ViolatorID = " + Long.valueOf(violatorID));
-            while(rs.next()){
-                infractionObjects.add(new InfractionObject(rs.getString("Violation"),rs.getString("UserNote"),rs.getDate("DateSubmitted"),rs.getLong("Submitter")));
+            while (rs.next()) {
+                infractionObjects.add(new InfractionObject(rs.getString("Violation"), rs.getString("UserNote"), rs.getDate("DateSubmitted"), rs.getLong("Submitter")));
             }
 
         } catch (SQLException throwables) {

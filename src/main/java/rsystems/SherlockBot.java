@@ -11,6 +11,7 @@ import rsystems.commands.*;
 import rsystems.events.JoinGuild;
 import rsystems.events.LeaveGuild;
 import rsystems.events.LocalChannelManager;
+import rsystems.events.PrivateMessageReceived;
 import rsystems.handlers.SQLHandler;
 import rsystems.objects.Command;
 import rsystems.objects.GuildSettings;
@@ -42,6 +43,7 @@ public class SherlockBot {
         api.addEventListener(new Mute());
         api.addEventListener(new AssignableRoles());
         api.addEventListener(new ModifyGuildSettings());
+        api.addEventListener(new PrivateMessageReceived());
 
         try{
             api.awaitReady();

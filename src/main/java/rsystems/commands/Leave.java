@@ -1,13 +1,13 @@
 package rsystems.commands;
 
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
 
 public class Leave extends ListenerAdapter {
 
-    public void onMessageReceived(MessageReceivedEvent event) {
+    public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 
         if (event.getAuthor().isBot()) {
             //Ignore message.  BOT LAW #2 - DO NOT LISTEN TO OTHER BOTS
