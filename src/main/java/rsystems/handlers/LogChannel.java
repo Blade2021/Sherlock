@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.exceptions.PermissionException;
 import rsystems.SherlockBot;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class LogChannel {
@@ -185,13 +186,46 @@ public class LogChannel {
         }
     }
 
+    public void logInfraction(Guild guild, String reason, ArrayList<Member> violators, Member submitter){
+        String channelLogID = SherlockBot.guildMap.get(guild.getId()).getLogChannelID();
+        if(channelLogID != null){
+
+            StringBuilder violatorName = new StringBuilder();
+            StringBuilder violatorTag = new StringBuilder();
+            StringBuilder violatorID = new StringBuilder();
+
+            for(Member m: violators){
+                violatorName.append(m.getEffectiveName()).append("\n");
+                violatorTag.append(m.getUser().getAsTag()).append("\n");
+                violatorID.append(m.getId()).append("\n");
+            }
+
+            EmbedBuilder embedBuilder = new EmbedBuilder()
+                    .setTitle("Muted User")
+                    .addField("Reason:",reason,false)
+                    .addField("Violator Name:",violatorName.toString(),true)
+                    .addField("Violator Tag",violatorTag.toString(), true)
+                    .addField("Violator ID",violatorID.toString(),true)
+                    .setFooter("Submitted by: " + submitter.getUser().getAsTag());
+            embedBuilder.setColor(getColor(3));
+
+            try{
+                guild.getTextChannelById(channelLogID).sendMessage(embedBuilder.build()).queue();
+            } catch(NullPointerException | PermissionException e){
+
+            }
+        }
+    }
+
     public void logMuteAction(Guild guild, String reason, User violator, Member submitter){
         String channelLogID = SherlockBot.guildMap.get(guild.getId()).getLogChannelID();
         if(channelLogID != null){
 
             EmbedBuilder embedBuilder = new EmbedBuilder()
                     .setTitle("Muted User")
-                    .addField("Violators:",violator.getAsTag(),false);
+                    .addField("Reason:",reason, false)
+                    .addField("Violators:",violator.getAsTag(),false)
+                    .setFooter("Submitted by: " + submitter.getUser().getAsTag());
             embedBuilder.setColor(getColor(3));
 
             try{
@@ -208,8 +242,10 @@ public class LogChannel {
 
             EmbedBuilder embedBuilder = new EmbedBuilder()
                     .setTitle("Muted User")
+                    .addField("Reason:",reason,false)
                     .addField("Violators:",violator.getAsTag(),true)
-                    .addField("Time:", timeValue + " " + timeType, true);
+                    .addField("Time:", timeValue + " " + timeType, true)
+                    .setFooter("Submitted by: " + submitter.getUser().getAsTag());
             embedBuilder.setColor(getColor(3));
 
             try{

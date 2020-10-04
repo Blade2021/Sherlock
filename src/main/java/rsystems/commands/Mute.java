@@ -47,7 +47,6 @@ public class Mute extends ListenerAdapter {
                 if (MentionedMembers.size() > 0) {
                     for (Member m : MentionedMembers) {
                         if (muteUser(event.getGuild(), m, event.getChannel(), event.getMember())) {
-                            event.getMessage().addReaction("✅").queue();
                             mutedUsers.add(m);
                         }
                     }
@@ -57,7 +56,6 @@ public class Mute extends ListenerAdapter {
                     try {
                         if ((args.length > 1) && (event.getGuild().getSelfMember().canInteract(Objects.requireNonNull(event.getGuild().getMemberById(args[1]))))) {
                             if (muteUser(event.getGuild(), event.getGuild().getMemberById(args[1]), event.getChannel(), event.getMember())) {
-                                event.getMessage().addReaction("✅").queue();
                                 mutedUsers.add(event.getGuild().getMemberById(args[1]));
                             }
                         }
@@ -94,6 +92,8 @@ public class Mute extends ListenerAdapter {
                     for (Character c : timeArgument.toCharArray()) {
                         if (isDigit(c)) {
                             numberString.append(c);
+                        } else if(c == ' '){
+                            // do nothing (skip spaces)
                         } else {
                             chronoUnit = c;
                             break;
@@ -145,6 +145,11 @@ public class Mute extends ListenerAdapter {
                         reason = event.getMessage().getContentDisplay().substring(reasonParamLoc + 3);
                     }
 
+                    if(reason.length() > 60){
+                        event.getChannel().sendMessage(event.getAuthor().getAsMention() + " Reason length is too long").queue();
+                        event.getMessage().addReaction("❌").queue();
+                        return;
+                    }
 
                 }
 
@@ -158,7 +163,7 @@ public class Mute extends ListenerAdapter {
                                 logChannel.logMuteAction(event.getGuild(),reason,m.getUser(),event.getMember(),number,chronoType);
                             }
                         } else {
-                            logChannel.logMuteAction(event.getGuild(), reason, event.getMember().getUser(), event.getMember());
+                            logChannel.logMuteAction(event.getGuild(), reason, m.getUser(), event.getMember());
                         }
 
                         try {

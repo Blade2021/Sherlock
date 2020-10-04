@@ -1,12 +1,17 @@
 package rsystems.commands;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
+import rsystems.objects.AssignableRole;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static rsystems.SherlockBot.database;
 
 public class AssignableRoles extends ListenerAdapter {
 
@@ -47,6 +52,39 @@ public class AssignableRoles extends ListenerAdapter {
                 event.getMessage().addReaction("⚠").queue();
                 //todo log error
             }
+        }
+
+
+        /*
+        GET A LIST OF ASSIGNABLE ROLES
+         */
+        if (SherlockBot.commands.get(9).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            StringBuilder roleCommands = new StringBuilder();
+            StringBuilder rolesString = new StringBuilder();
+            StringBuilder roleIDString = new StringBuilder();
+
+            ArrayList<AssignableRole> roles = new ArrayList<>();
+            roles.addAll(database.getAssignableRoles(event.getGuild().getIdLong()));
+
+            for(AssignableRole r: roles){
+                roleCommands.append(r.command).append("\n");
+                roleIDString.append(r.RoleID).append("\n");
+                try{
+                    rolesString.append(event.getGuild().getRoleById(r.RoleID).getName()).append("\n");
+                } catch(NullPointerException e){
+                    rolesString.append("ERROR").append("\n");
+                }
+
+            }
+
+            embedBuilder.setTitle("Assignable Roles")
+                    .addField("Role Command",roleCommands.toString(),true)
+                    .addField("Role Name",rolesString.toString(),true)
+                    .addField("Role ID",roleIDString.toString(),true);
+            event.getChannel().sendMessage(embedBuilder.build()).queue();
+            event.getMessage().delete().reason("Cleaning up after bot trigger").queue();
+            embedBuilder.clear();
         }
     }
 }

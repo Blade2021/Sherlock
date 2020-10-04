@@ -17,8 +17,9 @@ public class ModifyGuildSettings extends ListenerAdapter {
         String[] args = event.getMessage().getContentRaw().split("\\s+");
 
         //CHANGE PREFIX
-        if (SherlockBot.commands.get(20).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
+        if (SherlockBot.commands.get(8).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
             try {
+                database.putValue("GuildTable","Prefix","GuildID",event.getGuild().getIdLong(),args[1]);
                 SherlockBot.guildMap.get(event.getGuild().getId()).setPrefix(args[1]);
                 event.getMessage().addReaction("✅").queue();
             } catch (IndexOutOfBoundsException | NullPointerException e) {
@@ -35,6 +36,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
             try {
                 if(event.getGuild().getTextChannelById(args[1]).getId() != null){
                     database.putValue("GuildTable","LogChannelID","GuildID",event.getGuild().getIdLong(),Long.valueOf(args[1]));
+                    SherlockBot.guildMap.get(event.getGuild().getId()).setLogChannelID(args[1]);
                     event.getMessage().addReaction("✅").queue();
                 } else {
                     event.getMessage().addReaction("⚠").queue();

@@ -15,7 +15,7 @@ public class ModCommands extends ListenerAdapter {
 
 
         //Add Mod Role
-        if (SherlockBot.commands.get(2).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
+        if (SherlockBot.commands.get(20).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
             if (SherlockBot.guildMap.get(event.getGuild().getId()).addModRole(args[1])) {
                 event.getMessage().addReaction("✅").queue();
             } else {
@@ -25,7 +25,7 @@ public class ModCommands extends ListenerAdapter {
 
 
         //Remove Mod Role
-        if (SherlockBot.commands.get(3).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
+        if (SherlockBot.commands.get(20).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
             if (SherlockBot.guildMap.get(event.getGuild().getId()).removeModRole(args[1])) {
                 event.getMessage().addReaction("✅").queue();
             } else {
