@@ -72,7 +72,7 @@ public class JoinGuild extends ListenerAdapter {
 
             //Write the roleID to settings for later use.
             SherlockBot.guildMap.get(guild.getId()).setMuteRoleID(success.getId());
-            database.updateLong("GuildTable","MuteRoleID","GuildID",guild.getIdLong(),success.getIdLong());
+            database.putValue("GuildTable","MuteRoleID","GuildID",guild.getIdLong(),success.getIdLong());
         });
     }
 }

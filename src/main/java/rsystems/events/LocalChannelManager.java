@@ -28,7 +28,7 @@ public class LocalChannelManager extends ListenerAdapter {
             try {
                 assert muteRole != null;
                 event.getChannel().createPermissionOverride(muteRole).setDeny(mutePerms).queue();
-            } catch(NullPointerException e){
+            } catch(NullPointerException | IllegalStateException e){
             }
         } catch(NullPointerException e){
         }

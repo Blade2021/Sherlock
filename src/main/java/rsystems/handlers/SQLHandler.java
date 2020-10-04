@@ -99,10 +99,28 @@ public class SQLHandler {
         return output;
     }
 
-    public void updateLong(String tableName, String columnName, String identifierColumn, Long identifier, Long value) {
+    public void putValue(String tableName, String columnName, String identifierColumn, Long identifier, Long value) {
         try {
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public void putValue(String tableName, String columnName, String identifierColumn, Long identifier, int value) {
+        try {
+            Statement st = connection.createStatement();
+            st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public void putValue(String tableName, String columnName, String identifierColumn, Long identifier, String value) {
+        try {
+            Statement st = connection.createStatement();
+            st.execute(String.format("UPDATE %s SET %s = \"%s\" WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -227,12 +245,44 @@ public class SQLHandler {
         return null;
     }
 
-    public boolean insertTimedEvent(Long GuildID, Long UserID, int EventType, LocalDateTime startDatetime, LocalDateTime endDateTime){
+    public boolean insertTimedEvent(Long GuildID, Long UserID, int EventType, String reason, LocalDateTime startDatetime, LocalDateTime endDateTime){
 
         try {
             Statement st = connection.createStatement();
 
-            st.execute(String.format("INSERT INTO TimedEvents (ChildGuildID, UserID, EventType, StartDate, EndDate) VALUES (%d, %d, %d, \"%s\", \"%s\")", GuildID, UserID, EventType, startDatetime.toString(), endDateTime.toString()));
+            st.execute(String.format("INSERT INTO TimedEvents (ChildGuildID, UserID, EventType, Reason, StartDate, EndDate) VALUES (%d, %d, %d, \"%s\", \"%s\", \"%s\")", GuildID, UserID, EventType, reason, startDatetime.toString(), endDateTime.toString()));
+            return true;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            throwables.getErrorCode();
+        }
+
+        return false;
+    }
+
+    public int getTimedEventsQuantity(Long GuildID, Long UserID){
+
+        try {
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("SELECT EventType FROM TimedEvents WHERE (ChildGuildID = %d) and (UserID = %d) and (EndDate < NOW())", GuildID, UserID));
+            int rowCount = 0;
+            while(rs.next()){
+                rowCount++;
+            }
+            return rowCount;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            throwables.getErrorCode();
+        }
+        return 0;
+    }
+    public boolean expireTimedEvent(Long GuildID, Long UserID){
+
+        try {
+            Statement st = connection.createStatement();
+
+            st.executeQuery(String.format("UPDATE TimedEvents set Expired = 1 WHERE (ChildGuildID = %d) and (UserID = %d) and (EndDate > NOW())", GuildID, UserID));
             return true;
         } catch (SQLException throwables) {
             throwables.printStackTrace();

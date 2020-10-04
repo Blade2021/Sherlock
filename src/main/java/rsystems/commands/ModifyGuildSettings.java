@@ -1,6 +1,7 @@
 package rsystems.commands;
 
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
 
@@ -16,7 +17,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         String[] args = event.getMessage().getContentRaw().split("\\s+");
 
         //CHANGE PREFIX
-        if (SherlockBot.commands.get(6).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
+        if (SherlockBot.commands.get(20).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
             try {
                 SherlockBot.guildMap.get(event.getGuild().getId()).setPrefix(args[1]);
                 event.getMessage().addReaction("✅").queue();
@@ -30,9 +31,14 @@ public class ModifyGuildSettings extends ListenerAdapter {
         }
 
         //CHANGE LOG CHANNEL ID
-        if (SherlockBot.commands.get(5).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
+        if (SherlockBot.commands.get(7).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
             try {
-                event.getMessage().addReaction("✅").queue();
+                if(event.getGuild().getTextChannelById(args[1]).getId() != null){
+                    database.putValue("GuildTable","LogChannelID","GuildID",event.getGuild().getIdLong(),Long.valueOf(args[1]));
+                    event.getMessage().addReaction("✅").queue();
+                } else {
+                    event.getMessage().addReaction("⚠").queue();
+                }
             } catch (IndexOutOfBoundsException | NullPointerException e) {
                 try {
                     event.getMessage().addReaction("⚠").queue();
@@ -43,7 +49,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         }
 
         //CHANGE Embed filter level
-        if (SherlockBot.commands.get(6).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
+        if (SherlockBot.commands.get(20).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
             try {
                 SherlockBot.guildMap.get(event.getGuild().getId()).setEmbedFilter(Integer.parseInt(args[1]));
                 event.getMessage().addReaction("✅").queue();
@@ -58,6 +64,13 @@ public class ModifyGuildSettings extends ListenerAdapter {
 
         //GET LOG CHANNEL ID
         if (SherlockBot.commands.get(6).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
+            try{
+                System.out.println("command called");
+                event.getChannel().sendMessage("LogChannelID: " + SherlockBot.guildMap.get(event.getGuild().getId()).getLogChannelID());
+            } catch(PermissionException e){
+
+            }
+
             /*EmbedBuilder embedBuilder = new EmbedBuilder();
             try {
                 TextChannel localLogChannel = SherlockBot.guildMap.get(event.getGuild().getId()).logChannel.getLogChannel();

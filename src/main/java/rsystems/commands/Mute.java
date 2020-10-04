@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
+import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
 import rsystems.handlers.LogChannel;
@@ -32,19 +33,21 @@ public class Mute extends ListenerAdapter {
         if (event.isFromGuild()) {
             String[] args = event.getMessage().getContentRaw().split("\\s+");
 
-            // MUTE COMMAND
+            /*
+                            MUTE USER COMMAND
+             */
             if (SherlockBot.commands.get(2).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
                 LogChannel logChannel = new LogChannel();
-
                 ArrayList<Member> mutedUsers = new ArrayList<>();
 
-                //Get a list of members
+                /*
+                GET A LIST OF MEMBERS
+                 */
                 List<Member> MentionedMembers = event.getMessage().getMentionedMembers();
                 if (MentionedMembers.size() > 0) {
                     for (Member m : MentionedMembers) {
                         if (muteUser(event.getGuild(), m, event.getChannel(), event.getMember())) {
                             event.getMessage().addReaction("✅").queue();
-                            logChannel.logAction(event.getGuild(), "Muted User", MentionedMembers, event.getMember());
                             mutedUsers.add(m);
                         }
                     }
@@ -56,7 +59,6 @@ public class Mute extends ListenerAdapter {
                             if (muteUser(event.getGuild(), event.getGuild().getMemberById(args[1]), event.getChannel(), event.getMember())) {
                                 event.getMessage().addReaction("✅").queue();
                                 mutedUsers.add(event.getGuild().getMemberById(args[1]));
-                                logChannel.logAction(event.getGuild(), "Muted User", event.getGuild().getMemberById(args[1]).getUser());
                             }
                         }
                     } catch (NullPointerException e) {
@@ -68,112 +70,177 @@ public class Mute extends ListenerAdapter {
                     }
                 }
 
-
+                /*
+                Start initiating variables for output to logger & notification call
+                 */
                 boolean timedEvent = false;
+                // Grab the first date
+                LocalDateTime currentDateTime = LocalDateTime.now();
+                // Initiate the new date variable
+                LocalDateTime newDateTime = null;
+                StringBuilder numberString = new StringBuilder();
+                //Parse the numberString into a integer
+                int number = 0;
+                String chronoType = "";
 
-                if (event.getMessage().getContentDisplay().contains("-t")) {
+
+                if (event.getMessage().getContentDisplay().contains("-t ")) {
                     //Grab the string AFTER -t, excluding the first 3 characters (Length of -t )
-                    String timeArgument = event.getMessage().getContentDisplay().substring(event.getMessage().getContentDisplay().indexOf("-t") + 3);
+                    String timeArgument = event.getMessage().getContentDisplay().substring(event.getMessage().getContentDisplay().indexOf("-t ") + 3);
+                    char chronoUnit = 0;
 
-                    //Initiate the string builder to store the number of integers found.
-                    StringBuilder numberString = new StringBuilder();
-                    int timeValue = 0; //Store the type of time scale
 
-                    // Parse through the string character by character until a digit is not found, then check the char for what timescale to use
+                    // Parse through the string character by character until a digit is not found, then move the char for processing
                     for (Character c : timeArgument.toCharArray()) {
                         if (isDigit(c)) {
                             numberString.append(c);
                         } else {
-                            if (c.toString().equalsIgnoreCase("m")) {
-                                timeValue = 1;
-                            } else if (c.toString().equalsIgnoreCase("h")) {
-                                timeValue = 2;
-                            } else if (c.toString().equalsIgnoreCase("d")) {
-                                timeValue = 3;
-                            } else {
-                                event.getChannel().sendMessage("Incorrect command formatting used").queue();
-                            }
+                            chronoUnit = c;
+                            break;
                         }
                     }
-                    //Parse the numberString into a integer
-                    int finalNumber = Integer.parseInt(numberString.toString());
+                    //Parse the numberString into a integer for incrementing the date
+                    number = Integer.parseInt(numberString.toString());
 
-                    // Grab the first date
-                    LocalDateTime currentDateTime = LocalDateTime.now();
-                    // Initiate the new date variable
-                    LocalDateTime newDateTime;
-                    switch (timeValue) {
-                        case 1:
-                            newDateTime = currentDateTime.plus(finalNumber, ChronoUnit.MINUTES);
+                    //See what type of unit to use
+                    switch (chronoUnit) {
+                        case 'm':
+                        case 'M':
+                            newDateTime = currentDateTime.plus(number, ChronoUnit.MINUTES);
                             timedEvent = true;
+                            chronoType = "Minutes";
                             break;
-                        case 2:
-                            newDateTime = currentDateTime.plus(finalNumber, ChronoUnit.HOURS);
+                        case 'h':
+                        case 'H':
+                            newDateTime = currentDateTime.plus(number, ChronoUnit.HOURS);
                             timedEvent = true;
+                            chronoType = "Hours";
                             break;
-                        case 3:
-                            newDateTime = currentDateTime.plus(finalNumber, ChronoUnit.DAYS);
+                        case 'd':
+                        case 'D':
+                            newDateTime = currentDateTime.plus(number, ChronoUnit.DAYS);
                             timedEvent = true;
+                            chronoType = "Days";
                             break;
                         default:
-                            throw new IllegalStateException("Unexpected value: " + timeValue);
-                    }
-
-                    //Add all members to database if mute is timed
-                    for (Member m : mutedUsers) {
-                        if(database.insertTimedEvent(event.getGuild().getIdLong(), m.getIdLong(), 1, currentDateTime, newDateTime)){
-                            event.getMessage().addReaction("\uD83D\uDD50").queue();
-                        }
+                            event.getChannel().sendMessage("Incorrect command formatting used").queue();
+                            return;
                     }
                 }
 
-                //todo Reformat code to allow proper looping
-                //todo Change notification method to support timed values if applicable
+                /*
+                Get a reason if applicable.
+                 */
+                String reason = "No reason given";
+                if (event.getMessage().getContentDisplay().contains("-r ")) {
+
+                    int timeParamLoc = 0;
+                    if (event.getMessage().getContentDisplay().contains("-t ")) {
+                        timeParamLoc = event.getMessage().getContentDisplay().indexOf("-t ");
+                    }
+                    int reasonParamLoc = event.getMessage().getContentDisplay().indexOf("-r ");
+                    if(reasonParamLoc < timeParamLoc){
+                        reason = event.getMessage().getContentDisplay().substring(reasonParamLoc + 3,timeParamLoc);
+                    } else {
+                        reason = event.getMessage().getContentDisplay().substring(reasonParamLoc + 3);
+                    }
+
+
+                }
 
                 //Add all members to database if mute is timed
                 for (Member m : mutedUsers) {
                     if(event.getGuild().getSelfMember().canInteract(m)){
+
+                        if(timedEvent){
+                            if(database.insertTimedEvent(event.getGuild().getIdLong(), m.getIdLong(), 1, reason, currentDateTime, newDateTime)){
+                                event.getMessage().addReaction("\uD83D\uDD50").queue();
+                                logChannel.logMuteAction(event.getGuild(),reason,m.getUser(),event.getMember(),number,chronoType);
+                            }
+                        } else {
+                            logChannel.logMuteAction(event.getGuild(), reason, event.getMember().getUser(), event.getMember());
+                        }
+
                         try {
-                            m.getUser().openPrivateChannel().queue(channel -> {
+                            final boolean finalTimedEvent = timedEvent;
+                            final int finalNumber = number;
+                            final String finalChronoType = chronoType;
+                            final String finalReason = reason;
+                            m.getUser().openPrivateChannel().queue((channel) -> {
                                 EmbedBuilder embedBuilder = new EmbedBuilder();
                                 embedBuilder.setTitle("Notification")
-                                        .setDescription("You have been muted in a guild server")
                                         .setColor(Color.RED)
                                         .addField("Guild",event.getGuild().getName(),false)
+                                        .addField("Reason",finalReason,false)
                                         .addField("Moderator",event.getMember().getEffectiveName(),true)
                                         .addField("Moderator ID",event.getMember().getId(),true);
-                                channel.sendMessage(embedBuilder.build()).queue();
+
+                                if(finalTimedEvent){
+                                    embedBuilder.setDescription(String.format("You have been muted in a guild server for %d %s", finalNumber, finalChronoType));
+                                } else {
+                                    embedBuilder.setDescription("You have been muted in a guild server.");
+                                }
+                                channel.sendMessage(embedBuilder.build()).queue(null,failure -> {
+                                    logChannel.logAction(event.getGuild(),"Direct Message Failed", "Attempted to send direct message to user but failed due to Privacy Settings", m,1);
+                                });
                                 embedBuilder.clear();
                             });
                         } catch (NullPointerException e){
 
                         } catch (ErrorResponseException e){
                             if(e.getErrorCode() == 50007){
-                                //todo log error to channel
+                                logChannel.logAction(event.getGuild(), "Direct Message Failed", "Attempted to send direct message to user but failed due to Privacy Settings", m,1);
                             }
                         }
                     }
                 }
             }
 
-            // UNMUTE COMMAND
+
+            /*
+                            UN-MUTE COMMAND
+             */
             if (SherlockBot.commands.get(3).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
-                //Get a list of members
-
-                List<Member> MentionedMembers = event.getMessage().getMentionedMembers();
-                try {
-                    //Add role to be removed to collection
-                    MentionedMembers.forEach(member -> {
-                        //Remove Mute Role
-                        event.getGuild().removeRoleFromMember(member, Objects.requireNonNull(event.getGuild().getRoleById(SherlockBot.guildMap.get(event.getGuild().getId()).getMuteRoleID()))).reason("Called by: " + event.getAuthor().getAsTag()).queue();
-                    });
-                } catch (NullPointerException e) {
-
-                }
 
                 LogChannel logChannel = new LogChannel();
-                logChannel.logAction(event.getGuild(), "Unmuted User", MentionedMembers, event.getMember());
+                ArrayList<Member> qualifiedMembers = new ArrayList<>();
 
+                //Get a list of members
+                if(event.getMessage().getMentionedMembers().size() > 0){
+                    qualifiedMembers.addAll(event.getMessage().getMentionedMembers());
+                } else {
+
+                    try {
+                        if ((args.length > 1) && (event.getGuild().getSelfMember().canInteract(Objects.requireNonNull(event.getGuild().getMemberById(args[1]))))) {
+                            if (muteUser(event.getGuild(), event.getGuild().getMemberById(args[1]), event.getChannel(), event.getMember())) {
+                                event.getMessage().addReaction("✅").queue();
+                                qualifiedMembers.add(event.getGuild().getMemberById(args[1]));
+                            }
+                        }
+                    } catch (NullPointerException e) {
+                        System.out.println("Could not find user to mute");
+                        event.getMessage().addReaction("⚠").queue();
+                    } catch (NumberFormatException e) {
+                        event.getChannel().sendMessage("What in tarnation is that>?").queue();
+                        event.getMessage().addReaction("⚠").queue();
+                    }
+                }
+
+                for(Member m: qualifiedMembers){
+                    if(database.getTimedEventsQuantity(event.getGuild().getIdLong(),m.getIdLong()) > 0){
+                        database.expireTimedEvent(event.getGuild().getIdLong(),m.getIdLong());
+                    }
+
+                    try{
+                        event.getGuild().removeRoleFromMember(m,event.getGuild().getRoleById(SherlockBot.guildMap.get(event.getGuild().getId()).getMuteRoleID())).reason("Called by: " + event.getAuthor().getAsTag()).queue();
+                        event.getMessage().addReaction("✅").queue();
+                    } catch(PermissionException e){
+                        logChannel.logAction(event.getGuild(),"Missing Permissions","Unable to remove mute role from user",m);
+                        event.getMessage().addReaction("⚠").queue();
+                    } catch(NullPointerException e){
+                        event.getMessage().addReaction("⚠").queue();
+                    }
+                }
             }
         }
     }
