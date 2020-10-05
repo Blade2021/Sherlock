@@ -2,6 +2,8 @@ package rsystems.objects;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import rsystems.SherlockBot;
 
 import java.util.ArrayList;
 
@@ -74,7 +76,9 @@ public class Command {
         this.alias.clear();
     }
 
-    public boolean checkCommand(String message, String prefix) {
+    public boolean checkCommand(String message, String guildID) {
+        String prefix = SherlockBot.guildMap.get(guildID).getPrefix();
+
         String formattedMessage = message.toLowerCase();
         if(formattedMessage.startsWith(prefix + this.command.toLowerCase())){
             return true;
@@ -90,21 +94,58 @@ public class Command {
     }
 
     //Check if message had command, alias, AND correct auth level
-    public boolean checkCommand(String message, String prefix, Member member) {
+    public int checkCommandMod(String message, String guildID, Member member) {
+        String prefix = SherlockBot.guildMap.get(guildID).getPrefix();
         String formattedMessage = message.toLowerCase();
         if(formattedMessage.startsWith(prefix + this.command.toLowerCase())){
-            return member.hasPermission(Permission.ADMINISTRATOR);
+            if(member.hasPermission(Permission.ADMINISTRATOR)){
+                return 4;
+            }
         } else {
-            final Boolean[] returnValue = {false};
+            final int[] returnValue = {0};
             this.alias.forEach(alias -> {
                 if(formattedMessage.startsWith(prefix + alias.toLowerCase())){
                     if(member.hasPermission(Permission.ADMINISTRATOR)) {
-                        returnValue[0] = true;
+                        returnValue[0] = 4;
                     }
                 }
             });
             return returnValue[0];
         }
+        return 0;
+    }
+
+    //Check if message had command, alias, AND correct auth level
+    public boolean checkCommandMod(Message message) {
+        String prefix = SherlockBot.guildMap.get(message.getGuild().getId()).getPrefix();
+        String formattedMessage = message.getContentDisplay().toLowerCase();
+        final Boolean[] authorized = {false};
+
+        if(formattedMessage.startsWith(prefix + this.command.toLowerCase())){
+            if(message.getMember().hasPermission(Permission.ADMINISTRATOR)){
+                return true;
+            } else {
+                if(!authorized[0]){
+                    message.getChannel().sendMessage(message.getAuthor().getAsMention() + " You are not authorized to use that command").queue();
+                }
+            }
+        } else {
+            final boolean[] returnValue = {false};
+            this.alias.forEach(alias -> {
+                if(formattedMessage.startsWith(prefix + alias.toLowerCase())){
+                    if(message.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                        authorized[0] = true;
+                        returnValue[0] = true;
+                    } else {
+                        if(!authorized[0]){
+                            message.getChannel().sendMessage(message.getAuthor().getAsMention() + " You are not authorized to use that command").queue();
+                        }
+                    }
+                }
+            });
+            return returnValue[0];
+        }
+        return false;
     }
 
     public boolean helpCheck(String command){

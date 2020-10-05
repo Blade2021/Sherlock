@@ -11,12 +11,13 @@ public class Leave extends ListenerAdapter {
 
         if (event.getAuthor().isBot()) {
             //Ignore message.  BOT LAW #2 - DO NOT LISTEN TO OTHER BOTS
+            return;
         }
 
         String[] args = event.getMessage().getContentRaw().split("\\s+");
 
         // LEAVE GUILD COMMAND
-        if (SherlockBot.commands.get(0).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
+        if (SherlockBot.commands.get(0).checkCommandMod(event.getMessage())) {
             try{
 
                 // Delete mute role added by BoT

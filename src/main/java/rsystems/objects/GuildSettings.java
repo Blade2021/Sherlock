@@ -12,6 +12,7 @@ public class GuildSettings {
     public String logChannelID;
     public int embedFilter = 0;
     public Map<String, Long> assignableRoleMap = new HashMap<>();
+    private ArrayList<String> badWords = new ArrayList<>();
 
     //Guild IDs
     private String muteRoleID;
@@ -90,5 +91,21 @@ public class GuildSettings {
 
     public void removeAssignableRole(String roleCommand){
         assignableRoleMap.remove(roleCommand);
+    }
+
+    public ArrayList<String> getBadWords() {
+        return badWords;
+    }
+
+    public void setBadWords(ArrayList<String> badWords) {
+        this.badWords = badWords;
+    }
+
+    public void addBadWord(String word){
+        this.badWords.add(word);
+    }
+
+    public void removeBadWord(String word){
+        this.badWords.remove(word);
     }
 }

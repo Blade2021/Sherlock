@@ -21,37 +21,38 @@ public class Infraction extends ListenerAdapter {
 
         if (event.getAuthor().isBot()) {
             //Ignore message.  BOT LAW #2 - DO NOT LISTEN TO OTHER BOTS
+            return;
         }
 
         if (event.isFromGuild()) {
             String[] args = event.getMessage().getContentRaw().split("\\s+");
 
             // WRITE INFRACTION COMMAND
-            if (SherlockBot.commands.get(1).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
+            if (SherlockBot.commands.get(1).checkCommandMod(event.getMessage())) {
 
-                if(args.length >= 2) {
+                if (args.length >= 2) {
                     ArrayList<Member> qualifiedMembers = new ArrayList<>();
-                    qualifiedMembers.addAll(getMentionables(event.getGuild(),event.getMessage()));
+                    qualifiedMembers.addAll(getMentionables(event.getGuild(), event.getMessage()));
 
                     String infractionReason = null;
-                    if(qualifiedMembers.size() == 1) {
+                    if (qualifiedMembers.size() == 1) {
                         infractionReason = event.getMessage().getContentDisplay().substring(event.getMessage().getContentDisplay().indexOf(args[2]));
                     } else {
-                        String lastMember = qualifiedMembers.get(qualifiedMembers.size()-1).getEffectiveName();
-                        infractionReason = event.getMessage().getContentDisplay().substring(event.getMessage().getContentDisplay().lastIndexOf(lastMember)+lastMember.length()+1);
+                        String lastMember = qualifiedMembers.get(qualifiedMembers.size() - 1).getEffectiveName();
+                        infractionReason = event.getMessage().getContentDisplay().substring(event.getMessage().getContentDisplay().lastIndexOf(lastMember) + lastMember.length() + 1);
                     }
 
-                    if(infractionReason.length() > 90){
+                    if (infractionReason.length() > 90) {
                         event.getChannel().sendMessage("Reason too long").queue();
                         return;
                     }
 
-                    for(Member m:qualifiedMembers){
+                    for (Member m : qualifiedMembers) {
                         database.insertInfraction(event.getGuild().getId(), m.getIdLong(), infractionReason, event.getMember().getIdLong());
                     }
-
+                    event.getMessage().addReaction("\uD83D\uDEA8 ").queue();
                     LogChannel logChannel = new LogChannel();
-                    logChannel.logInfraction(event.getGuild(),infractionReason,qualifiedMembers,event.getMember());
+                    logChannel.logInfraction(event.getGuild(), infractionReason, qualifiedMembers, event.getMember());
                 }
             }
         }

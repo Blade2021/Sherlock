@@ -28,6 +28,7 @@ public class Mute extends ListenerAdapter {
 
         if (event.getAuthor().isBot()) {
             //Ignore message.  BOT LAW #2 - DO NOT LISTEN TO OTHER BOTS
+            return;
         }
 
         if (event.isFromGuild()) {
@@ -36,7 +37,7 @@ public class Mute extends ListenerAdapter {
             /*
                             MUTE USER COMMAND
              */
-            if (SherlockBot.commands.get(2).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
+            if (SherlockBot.commands.get(2).checkCommandMod(event.getMessage())) {
                 LogChannel logChannel = new LogChannel();
                 ArrayList<Member> mutedUsers = new ArrayList<>();
 
@@ -205,7 +206,7 @@ public class Mute extends ListenerAdapter {
             /*
                             UN-MUTE COMMAND
              */
-            if (SherlockBot.commands.get(3).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
+            if (SherlockBot.commands.get(3).checkCommandMod(event.getMessage())) {
 
                 LogChannel logChannel = new LogChannel();
                 ArrayList<Member> qualifiedMembers = new ArrayList<>();

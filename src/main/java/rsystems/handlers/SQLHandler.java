@@ -193,6 +193,9 @@ public class SQLHandler {
                 SherlockBot.guildMap.get(guildID).assignableRoleMap.put(role.command, role.RoleID);
             }
 
+            SherlockBot.guildMap.get(guildID).setBadWords(getBadWords(Long.valueOf(guildID)));
+
+            System.out.println("Guild data loaded | GuildID" + guildID);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -343,6 +346,24 @@ public class SQLHandler {
         }
 
         return infractionObjects;
+    }
+
+    public ArrayList<String> getBadWords(Long guildID) {
+        ArrayList<String> badWordsList = new ArrayList<>();
+
+        try {
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery("SELECT Word FROM LanguageFilter WHERE ChildGuildID = " + guildID);
+            while (rs.next()) {
+                badWordsList.add(rs.getString("Word"));
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return badWordsList;
     }
 
 }

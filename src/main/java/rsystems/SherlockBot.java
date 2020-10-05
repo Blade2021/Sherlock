@@ -8,10 +8,8 @@ import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import rsystems.commands.*;
-import rsystems.events.JoinGuild;
-import rsystems.events.LeaveGuild;
-import rsystems.events.LocalChannelManager;
-import rsystems.events.PrivateMessageReceived;
+import rsystems.events.*;
+import rsystems.handlers.LanguageFilter;
 import rsystems.handlers.SQLHandler;
 import rsystems.objects.Command;
 import rsystems.objects.GuildSettings;
@@ -44,6 +42,9 @@ public class SherlockBot {
         api.addEventListener(new AssignableRoles());
         api.addEventListener(new ModifyGuildSettings());
         api.addEventListener(new PrivateMessageReceived());
+        api.addEventListener(new GuildRoleDeleted());
+        api.addEventListener(new LanguageFilter());
+        api.addEventListener(new EmbedMessageListener());
 
         try{
             api.awaitReady();

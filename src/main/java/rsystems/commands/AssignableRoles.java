@@ -58,7 +58,7 @@ public class AssignableRoles extends ListenerAdapter {
         /*
         GET A LIST OF ASSIGNABLE ROLES
          */
-        if (SherlockBot.commands.get(9).checkCommand(event.getMessage().getContentRaw(), SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
+        if (SherlockBot.commands.get(9).checkCommand(event.getMessage().getContentRaw(), event.getGuild().getId())) {
             EmbedBuilder embedBuilder = new EmbedBuilder();
             StringBuilder roleCommands = new StringBuilder();
             StringBuilder rolesString = new StringBuilder();

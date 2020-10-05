@@ -3,6 +3,7 @@ package rsystems.handlers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import rsystems.SherlockBot;
@@ -201,7 +202,7 @@ public class LogChannel {
             }
 
             EmbedBuilder embedBuilder = new EmbedBuilder()
-                    .setTitle("Muted User")
+                    .setTitle("Infraction Submitted")
                     .addField("Reason:",reason,false)
                     .addField("Violator Name:",violatorName.toString(),true)
                     .addField("Violator Tag",violatorTag.toString(), true)
@@ -247,6 +248,26 @@ public class LogChannel {
                     .addField("Time:", timeValue + " " + timeType, true)
                     .setFooter("Submitted by: " + submitter.getUser().getAsTag());
             embedBuilder.setColor(getColor(3));
+
+            try{
+                guild.getTextChannelById(channelLogID).sendMessage(embedBuilder.build()).queue();
+            } catch(NullPointerException | PermissionException e){
+
+            }
+        }
+    }
+
+    public void logLanguageFilterAction(Guild guild, Message message, String triggerWord, Member violator){
+        String channelLogID = SherlockBot.guildMap.get(guild.getId()).getLogChannelID();
+        if(channelLogID != null){
+
+            EmbedBuilder embedBuilder = new EmbedBuilder()
+                    .setTitle("Language filter infraction")
+                    .setDescription("Inappropriate language was detected on this message: [Message Link]("+message.getJumpUrl() + ")")
+                    .addField("User:",violator.getEffectiveName(),true)
+                    .addField("User ID:",violator.getId(),true)
+                    .addField("Trigger Word:",triggerWord,true);
+            embedBuilder.setColor(getColor(1));
 
             try{
                 guild.getTextChannelById(channelLogID).sendMessage(embedBuilder.build()).queue();
