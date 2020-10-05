@@ -11,3 +11,6 @@ I fully welcome all new ideas and feature requests however for this bot, I am tr
 - Autonomous
 - Usable for any server
 
+## Getting Sherlock
+[Authorize Link](https://discord.com/api/oauth2/authorize?client_id=758855978853859340&permissions=8&scope=bot)
+
