@@ -25,11 +25,13 @@ public class Infraction extends ListenerAdapter {
         }
 
         if (event.isFromGuild()) {
-            String[] args = event.getMessage().getContentRaw().split("\\s+");
 
             // WRITE INFRACTION COMMAND
             if (SherlockBot.commands.get(1).checkCommandMod(event.getMessage())) {
 
+                // Moved inside the condition to remove unnecessary work
+                String[] args = event.getMessage().getContentRaw().split("\\s+");
+                
                 if (args.length >= 2) {
                     ArrayList<Member> qualifiedMembers = new ArrayList<>();
                     qualifiedMembers.addAll(getMentionables(event.getGuild(), event.getMessage()));
