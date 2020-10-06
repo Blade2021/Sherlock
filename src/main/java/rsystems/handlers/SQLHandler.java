@@ -166,6 +166,7 @@ public class SQLHandler {
         String prefix = "!";
         String logChannelID = null;
         String muteRoleID = null;
+        int embedFilter = 0;
 
         try {
             /*
@@ -173,11 +174,13 @@ public class SQLHandler {
              */
             Statement st = connection.createStatement();
 
-            ResultSet rs = st.executeQuery("SELECT Prefix, LogChannelID, MuteRoleID FROM GuildTable WHERE GuildID = " + Long.valueOf(guildID));
+            ResultSet rs = st.executeQuery("SELECT Prefix, LogChannelID, MuteRoleID, EmbedFilter FROM GuildTable WHERE GuildID = " + Long.valueOf(guildID));
             while (rs.next()) {
                 prefix = rs.getString("Prefix");
                 logChannelID = String.valueOf(rs.getLong("LogChannelID"));
                 muteRoleID = String.valueOf(rs.getLong("MuteRoleID"));
+                embedFilter = rs.getInt("EmbedFilter");
+
             }
 
             SherlockBot.guildMap.get(guildID).setPrefix(prefix);
@@ -194,6 +197,7 @@ public class SQLHandler {
             }
 
             SherlockBot.guildMap.get(guildID).setBadWords(getBadWords(Long.valueOf(guildID)));
+            SherlockBot.guildMap.get(guildID).setEmbedFilter(embedFilter);
 
             System.out.println("Guild data loaded | GuildID" + guildID);
         } catch (SQLException throwables) {
@@ -365,5 +369,32 @@ public class SQLHandler {
 
         return badWordsList;
     }
+
+    // INSERT A BADWORD INTO THE DATABASE
+    public Integer insertBadWord(Long guildID, String badWord) {
+        try {
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("INSERT INTO LanguageFilter (ChildGuildID, Word) VALUES (%d, \"%s\")", guildID, badWord));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
+    }
+
+    // REMOVE A BADWORD FROM THE DATABASE
+    public Integer removeBadWord(Long guildID, String badWord) {
+        try {
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("DELETE FROM LanguageFilter WHERE (ChildGuildID = %d) AND (Word = \"%s\")", guildID, badWord));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
+    }
+
 
 }

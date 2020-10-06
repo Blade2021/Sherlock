@@ -18,7 +18,7 @@ public class PrivateMessageReceived extends ListenerAdapter {
             }
         }
 
-        event.getChannel().sendMessage("Sorry " + event.getAuthor().getAsMention() + " I don't currently accept messages via Direct Message.  Please type your commands in the guild").queue();
+        //event.getChannel().sendMessage("Sorry " + event.getAuthor().getAsMention() + " I don't currently accept messages via Direct Message.  Please type your commands in the guild").queue();
     }
 
 }

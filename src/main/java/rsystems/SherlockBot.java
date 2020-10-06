@@ -75,9 +75,9 @@ public class SherlockBot {
         commands.add(new Command("setLogChannelID")); // 7
         commands.add(new Command("setPrefix")); // 8
         commands.add(new Command("getAroles")); // 9
-        commands.add(new Command("placeholder")); // 10
-        commands.add(new Command("placeholder")); // 11
-        commands.add(new Command("placeholder")); // 12
+        commands.add(new Command("lfadd")); // 10
+        commands.add(new Command("lfremove")); // 11
+        commands.add(new Command("lflist")); // 12
         commands.add(new Command("placeholder")); // 13
         commands.add(new Command("placeholder")); // 14
         commands.add(new Command("placeholder")); // 15
