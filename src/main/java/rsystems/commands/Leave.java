@@ -14,10 +14,12 @@ public class Leave extends ListenerAdapter {
             return;
         }
 
-        String[] args = event.getMessage().getContentRaw().split("\\s+");
 
         // LEAVE GUILD COMMAND
         if (SherlockBot.commands.get(0).checkCommandMod(event.getMessage())) {
+
+            // Moved inside the conditional to reduce effort if not required
+            String[] args = event.getMessage().getContentRaw().split("\\s+");
             try{
 
                 // Delete mute role added by BoT
