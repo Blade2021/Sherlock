@@ -45,6 +45,7 @@ public class SherlockBot {
         api.addEventListener(new GuildRoleDeleted());
         api.addEventListener(new LanguageFilter());
         api.addEventListener(new EmbedMessageListener());
+        api.addEventListener(new ChannelCooldown());
 
         try{
             api.awaitReady();
@@ -78,8 +79,8 @@ public class SherlockBot {
         commands.add(new Command("lfadd")); // 10
         commands.add(new Command("lfremove")); // 11
         commands.add(new Command("lflist")); // 12
-        commands.add(new Command("placeholder")); // 13
-        commands.add(new Command("placeholder")); // 14
+        commands.add(new Command("cooldown")); // 13
+        commands.add(new Command("resetCoolDown")); // 14
         commands.add(new Command("placeholder")); // 15
         commands.add(new Command("placeholder")); // 16
         commands.add(new Command("placeholder")); // 17

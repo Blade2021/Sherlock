@@ -7,6 +7,7 @@ import rsystems.objects.InfractionObject;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class SQLHandler {
 
@@ -257,7 +258,22 @@ public class SQLHandler {
         try {
             Statement st = connection.createStatement();
 
-            st.execute(String.format("INSERT INTO TimedEvents (ChildGuildID, UserID, EventType, Reason, StartDate, EndDate) VALUES (%d, %d, %d, \"%s\", \"%s\", \"%s\")", GuildID, UserID, EventType, reason, startDatetime.toString(), endDateTime.toString()));
+            st.execute(String.format("INSERT INTO TimedEvents (ChildGuildID, EventID, EventType, Reason, StartDate, EndDate) VALUES (%d, %d, %d, \"%s\", \"%s\", \"%s\")", GuildID, UserID, EventType, reason, startDatetime.toString(), endDateTime.toString()));
+            return true;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            throwables.getErrorCode();
+        }
+
+        return false;
+    }
+
+    public boolean insertTimedEvent(Long GuildID, Long UserID, int EventType, String reason, Long EventKey, int EventValue, LocalDateTime startDatetime, LocalDateTime endDateTime){
+
+        try {
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("INSERT INTO TimedEvents (ChildGuildID, EventID, EventType, Reason, Event_SubKey, Event_SubValue, StartDate, EndDate) VALUES (%d, %d, %d, \"%s\", %d, %d, \"%s\", \"%s\")", GuildID, UserID, EventType, reason, EventKey, EventValue, startDatetime.toString(), endDateTime.toString()));
             return true;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -272,7 +288,7 @@ public class SQLHandler {
         try {
             Statement st = connection.createStatement();
 
-            ResultSet rs = st.executeQuery(String.format("SELECT EventType FROM TimedEvents WHERE (ChildGuildID = %d) and (UserID = %d) and (EndDate < NOW())", GuildID, UserID));
+            ResultSet rs = st.executeQuery(String.format("SELECT EventType FROM TimedEvents WHERE (ChildGuildID = %d) and (EventID = %d) and (EndDate < NOW())", GuildID, UserID));
             int rowCount = 0;
             while(rs.next()){
                 rowCount++;
@@ -289,7 +305,7 @@ public class SQLHandler {
         try {
             Statement st = connection.createStatement();
 
-            st.executeQuery(String.format("UPDATE TimedEvents set Expired = 1 WHERE (ChildGuildID = %d) and (UserID = %d) and (EndDate > NOW())", GuildID, UserID));
+            st.executeQuery(String.format("UPDATE TimedEvents set Expired = 1 WHERE (ChildGuildID = %d) and (EventID = %d) and (EndDate > NOW())", GuildID, UserID));
             return true;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -297,6 +313,28 @@ public class SQLHandler {
         }
 
         return false;
+    }
+
+    public HashMap<Long,Integer> removeCooldown(Long GuildID, Long EventID){
+        HashMap<Long,Integer> output = new HashMap<>();
+
+        try {
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("SELECT Event_SubKey, Event_SubValue FROM TimedEvents WHERE (ChildGuildID = %d) and (EventID = %d) and (Expired=0)", GuildID, EventID));
+            while(rs.next()){
+                output.put(rs.getLong("Event_SubKey"),rs.getInt("Event_SubValue"));
+            }
+
+            st.executeUpdate(String.format("DELETE FROM TimedEvents WHERE (ChildGuildID = %d) AND (EventID = %d)",GuildID,EventID));
+
+            return output;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            throwables.getErrorCode();
+        }
+
+        return null;
     }
 
     /*
