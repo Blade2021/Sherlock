@@ -102,6 +102,10 @@ public class SQLHandler {
 
     public void putValue(String tableName, String columnName, String identifierColumn, Long identifier, Long value) {
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
         } catch (SQLException throwables) {
@@ -111,6 +115,10 @@ public class SQLHandler {
 
     public void putValue(String tableName, String columnName, String identifierColumn, Long identifier, int value) {
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
         } catch (SQLException throwables) {
@@ -120,6 +128,10 @@ public class SQLHandler {
 
     public void putValue(String tableName, String columnName, String identifierColumn, Long identifier, String value) {
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = \"%s\" WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
         } catch (SQLException throwables) {
@@ -129,6 +141,10 @@ public class SQLHandler {
 
     public void putString(String tableName, Long GuildID, String event, Long senderColumn, Long receiverColumn) {
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
             st.execute(String.format("INSERT INTO %s (ChildGuildID, Event, ReceivingUserID, SendingUserID) VALUES (%d %s, %d, %d)"));
         } catch (SQLException throwables) {
@@ -143,6 +159,10 @@ public class SQLHandler {
      */
     public boolean addGuild(String guildID, String ownerID) {
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
             st.execute("INSERT INTO GuildTable (GuildID, OwnerID) VALUES (" + Long.valueOf(guildID) + ", " + Long.valueOf(ownerID) + ")");
             return true;
@@ -154,6 +174,10 @@ public class SQLHandler {
 
     public boolean removeGuild(String guildID) {
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
             st.execute("DELETE FROM GuildTable WHERE GuildID = " + Long.valueOf(guildID));
             return true;
@@ -173,6 +197,10 @@ public class SQLHandler {
             /*
                     GRAB GUILD SETTINGS FROM DATABASE
              */
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
 
             ResultSet rs = st.executeQuery("SELECT Prefix, LogChannelID, MuteRoleID, EmbedFilter FROM GuildTable WHERE GuildID = " + Long.valueOf(guildID));
@@ -209,6 +237,10 @@ public class SQLHandler {
     // Add an assignable role to the database
     public Integer insertAssignableRole(Long guildID, String command, Long roleID) {
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
 
             st.execute(String.format("INSERT INTO AssignableRoles (ChildGuildID, RoleCommand, RoleID) VALUES (%d, \"%s\", %d)", guildID, command, roleID));
@@ -222,6 +254,10 @@ public class SQLHandler {
     // Remove an assignable role to the database
     public Integer removeAssignableRole(Long guildID, String command) {
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
 
             st.execute(String.format("DELETE FROM AssignableRoles WHERE (ChildGuildID = %d) AND (RoleCommand = \"%s\")", guildID, command));
@@ -236,6 +272,10 @@ public class SQLHandler {
     public ArrayList<AssignableRole> getAssignableRoles(Long guildID) {
         ArrayList<AssignableRole> output = new ArrayList<>();
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery("SELECT RoleCommand, RoleID FROM AssignableRoles WHERE ChildGuildID = " + guildID);
 
@@ -256,6 +296,10 @@ public class SQLHandler {
     public boolean insertTimedEvent(Long GuildID, Long UserID, int EventType, String reason, LocalDateTime startDatetime, LocalDateTime endDateTime){
 
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
 
             st.execute(String.format("INSERT INTO TimedEvents (ChildGuildID, EventID, EventType, Reason, StartDate, EndDate) VALUES (%d, %d, %d, \"%s\", \"%s\", \"%s\")", GuildID, UserID, EventType, reason, startDatetime.toString(), endDateTime.toString()));
@@ -271,6 +315,10 @@ public class SQLHandler {
     public boolean insertTimedEvent(Long GuildID, Long UserID, int EventType, String reason, Long EventKey, int EventValue, LocalDateTime startDatetime, LocalDateTime endDateTime){
 
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
 
             st.execute(String.format("INSERT INTO TimedEvents (ChildGuildID, EventID, EventType, Reason, Event_SubKey, Event_SubValue, StartDate, EndDate) VALUES (%d, %d, %d, \"%s\", %d, %d, \"%s\", \"%s\")", GuildID, UserID, EventType, reason, EventKey, EventValue, startDatetime.toString(), endDateTime.toString()));
@@ -286,6 +334,10 @@ public class SQLHandler {
     public int getTimedEventsQuantity(Long GuildID, Long UserID){
 
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
 
             ResultSet rs = st.executeQuery(String.format("SELECT EventType FROM TimedEvents WHERE (ChildGuildID = %d) and (EventID = %d) and (EndDate < NOW())", GuildID, UserID));
@@ -303,6 +355,10 @@ public class SQLHandler {
     public boolean expireTimedEvent(Long GuildID, Long UserID){
 
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
 
             st.executeQuery(String.format("UPDATE TimedEvents set Expired = 1 WHERE (ChildGuildID = %d) and (EventID = %d) and (EndDate > NOW())", GuildID, UserID));
@@ -319,6 +375,10 @@ public class SQLHandler {
         HashMap<Long,Integer> output = new HashMap<>();
 
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
 
             ResultSet rs = st.executeQuery(String.format("SELECT Event_SubKey, Event_SubValue FROM TimedEvents WHERE (ChildGuildID = %d) and (EventID = %d) and (Expired=0)", GuildID, EventID));
@@ -345,6 +405,10 @@ public class SQLHandler {
 
     public void logError(String guildID, String event){
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
             st.execute("INSERT INTO FaultTable (ChildGuildID, Event) VALUES (" + Long.valueOf(guildID) + ", \"" + event + "\")");
         } catch (SQLException throwables) {
@@ -354,6 +418,10 @@ public class SQLHandler {
 
     public void logError(String guildID, String event, Long relateable){
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
             st.execute("INSERT INTO FaultTable (ChildGuildID, Event, Relateables) VALUES (" + Long.valueOf(guildID) + ", \"" + event + "\", " + relateable + ")");
         } catch (SQLException throwables) {
@@ -363,6 +431,10 @@ public class SQLHandler {
 
     public boolean insertInfraction(String guildID, Long violatorID, String violation, Long submitter) {
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
             st.execute("INSERT INTO InfractionTable (ChildGuildID, ViolatorID, Violation, Submitter) VALUES (" + Long.valueOf(guildID) + ", " + violatorID + ", \"" + violation + "\", " + submitter + ")");
             return true;
@@ -376,6 +448,10 @@ public class SQLHandler {
         ArrayList<InfractionObject> infractionObjects = new ArrayList<>();
 
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
 
             ResultSet rs = st.executeQuery("SELECT Violation, UserNote, DateSubmitted, Submitter FROM InfractionTable WHERE ChildGuildID = " + Long.valueOf(guildID) + " AND ViolatorID = " + Long.valueOf(violatorID));
@@ -394,6 +470,10 @@ public class SQLHandler {
         ArrayList<String> badWordsList = new ArrayList<>();
 
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
 
             ResultSet rs = st.executeQuery("SELECT Word FROM LanguageFilter WHERE ChildGuildID = " + guildID);
@@ -411,6 +491,10 @@ public class SQLHandler {
     // INSERT A BADWORD INTO THE DATABASE
     public Integer insertBadWord(Long guildID, String badWord) {
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
 
             st.execute(String.format("INSERT INTO LanguageFilter (ChildGuildID, Word) VALUES (%d, \"%s\")", guildID, badWord));
@@ -424,6 +508,10 @@ public class SQLHandler {
     // REMOVE A BADWORD FROM THE DATABASE
     public Integer removeBadWord(Long guildID, String badWord) {
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
 
             st.execute(String.format("DELETE FROM LanguageFilter WHERE (ChildGuildID = %d) AND (Word = \"%s\")", guildID, badWord));
