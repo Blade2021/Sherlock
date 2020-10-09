@@ -24,6 +24,7 @@ public class SherlockBot {
     public static Map<String,GuildSettings> guildMap = new HashMap<>();
     public static SQLHandler database = new SQLHandler(Config.get("Database_Host"),Config.get("Database_User"),Config.get("Database_Pass"));
     public static User bot = null;
+    public static String version = "0.0.3";
 
     public static void main(String[] args) throws LoginException {
         JDA api = JDABuilder.createDefault(Config.get("token"))
@@ -46,6 +47,7 @@ public class SherlockBot {
         api.addEventListener(new LanguageFilter());
         api.addEventListener(new EmbedMessageListener());
         api.addEventListener(new ChannelCooldown());
+        api.addEventListener(new Generics());
 
         try{
             api.awaitReady();
@@ -73,7 +75,7 @@ public class SherlockBot {
         commands.add(new Command("resign")); // 4
         commands.add(new Command("assign")); // 5
         commands.add(new Command("logChannel")); // 6
-        commands.add(new Command("SPARE")); // 7
+        commands.add(new Command("commands")); // 7
         commands.add(new Command("setPrefix")); // 8
         commands.add(new Command("getAroles")); // 9
         commands.add(new Command("lfadd")); // 10
@@ -81,8 +83,8 @@ public class SherlockBot {
         commands.add(new Command("lflist")); // 12
         commands.add(new Command("cooldown")); // 13
         commands.add(new Command("embedFilter")); // 14
-        commands.add(new Command("placeholder")); // 15
-        commands.add(new Command("placeholder")); // 16
+        commands.add(new Command("info")); // 15
+        commands.add(new Command("ginfo")); // 16
         commands.add(new Command("placeholder")); // 17
         commands.add(new Command("placeholder")); // 18
         commands.add(new Command("placeholder")); // 19
