@@ -43,9 +43,32 @@ public class ModifyGuildSettings extends ListenerAdapter {
         // GET/SET LOG CHANNEL ID
         if (SherlockBot.commands.get(6).checkCommandMod(event.getMessage())) {
             try {
-                if ((args.length > 1) && (event.getGuild().getTextChannelById(args[1]).getId() != null)) {
-                    database.putValue("GuildTable", "LogChannelID", "GuildID", event.getGuild().getIdLong(), Long.valueOf(args[1]));
-                    SherlockBot.guildMap.get(event.getGuild().getId()).setLogChannelID(args[1]);
+                if (args.length > 1) {
+                    String newID = ""; // Initialize a variable for storing ID
+
+                    //If a text channel is mentioned
+                    if(event.getMessage().getMentionedChannels().size() > 0){
+                            if(event.getMessage().getMentionedChannels().get(0) != null){
+                                newID = event.getMessage().getMentionedChannels().get(0).getId();
+                            }
+
+                    } else {
+                        // No channel was mentioned, try using the ID call
+                        try {
+                            if (event.getGuild().getTextChannelById(args[1]).getId() != null) {
+                                newID = args[1];
+                            } else {
+                                event.getMessage().addReaction("⚠").queue();
+                                return;
+                            }
+                        }catch(NumberFormatException e){
+                            event.getMessage().addReaction("⚠").queue();
+                            return;
+                        }
+                    }
+
+                    database.putValue("GuildTable", "LogChannelID", "GuildID", event.getGuild().getIdLong(), Long.valueOf(newID));
+                    SherlockBot.guildMap.get(event.getGuild().getId()).setLogChannelID(newID);
                     event.getMessage().addReaction("✅").queue();
                 } else {
                     String logChannelID = SherlockBot.guildMap.get(event.getGuild().getId()).getLogChannelID();
