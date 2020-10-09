@@ -14,7 +14,7 @@ I fully welcome all new ideas and feature requests however for this bot, I am tr
 ## Current Features  
 
 - **User Muting** - Remove a user's ability to write messages in all channels.  
-- **Channel Cooldown** (Coming Soon) - Mute a channel for a certain length of time.
+- **Channel Cooldown** - Mute a channel for a certain length of time.
 - **Language Filtering** - Custom triggers to warn/delete messages containing explicit content.
 - **Timed Events (Muting/Ban)** - Automatic unban/unmute after time expiration.
 - **Infraction System** - Log mod/admin notes against a user.
