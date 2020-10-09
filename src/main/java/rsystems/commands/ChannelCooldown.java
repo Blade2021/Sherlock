@@ -23,19 +23,25 @@ public class ChannelCooldown extends ListenerAdapter {
 
         if (SherlockBot.commands.get(13).checkCommandMod(event.getMessage())) {
 
-            event.getChannel().sendMessage("This channel is being put on a temporary cooldown.  Please use other channels.").queue();
-            startChannelCooldown(event.getGuild(), event.getChannel(), 1, 'h');
+            String[] args = event.getMessage().getContentRaw().split("\\s+");
 
-            event.getChannel().getManager().setName(event.getChannel().getName() + "\uD83E\uDD76").queueAfter(10, TimeUnit.SECONDS);
+            if((args.length > 1) && (args[1].equalsIgnoreCase("reset"))){
+                endChannelCooldown(event.getGuild(), event.getChannel());
 
-        }
+                if (event.getChannel().getName().contains("\uD83E\uDD76")) {
+                    int lastFlakeLocation = event.getChannel().getName().lastIndexOf("\uD83E\uDD76");
+                    event.getChannel().getManager().setName(event.getChannel().getName().substring(0, lastFlakeLocation)).queueAfter(10,TimeUnit.SECONDS);
+                }
 
-        if (SherlockBot.commands.get(14).checkCommandMod(event.getMessage())) {
-            endChannelCooldown(event.getGuild(), event.getChannel());
+                event.getMessage().addReaction("\uD83D\uDE07").queue();
 
-            if (event.getChannel().getName().contains("\uD83E\uDD76")) {
-                int lastFlakeLocation = event.getChannel().getName().lastIndexOf("\uD83E\uDD76");
-                event.getChannel().getManager().setName(event.getChannel().getName().substring(0, lastFlakeLocation)).queueAfter(10,TimeUnit.SECONDS);
+                return;
+            } else {
+
+                event.getChannel().sendMessage("This channel is being put on a temporary cooldown.  Please use other channels.").queue();
+                startChannelCooldown(event.getGuild(), event.getChannel(), 1, 'h');
+
+                event.getChannel().getManager().setName(event.getChannel().getName() + "\uD83E\uDD76").queueAfter(10, TimeUnit.SECONDS);
             }
 
         }
@@ -46,6 +52,11 @@ public class ChannelCooldown extends ListenerAdapter {
 
         LocalDateTime currentDateTime = LocalDateTime.now();
         LocalDateTime expireDateTime = currentDateTime.plusHours(1);
+
+        if(!channel.getPermissionOverrides().contains(guild.getPublicRole())){
+            channel.createPermissionOverride(guild.getPublicRole()).setDeny(Permission.MESSAGE_WRITE).queue();
+            database.insertTimedEvent(guild.getIdLong(), channel.getIdLong(), 2, "Channel Cooldown", guild.getPublicRole().getIdLong(), 0, currentDateTime, expireDateTime);
+        }
 
         for (PermissionOverride permissionOverride : channel.getPermissionOverrides()) {
             if (permissionOverride.isRoleOverride()) {

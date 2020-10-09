@@ -46,6 +46,10 @@ public class SQLHandler {
         ArrayList<String> output = new ArrayList<>();
 
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement st = connection.createStatement();
 
             ResultSet rs = st.executeQuery("SELECT " + columnName + " FROM " + table);
@@ -64,6 +68,10 @@ public class SQLHandler {
         String output = "";
 
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery("SELECT " + columnID.toUpperCase() + " FROM " + table.toUpperCase() + " WHERE ID = " + rowID);
 
@@ -84,6 +92,10 @@ public class SQLHandler {
         String output = "";
 
         try {
+            if(connection.isClosed()){
+                connect();
+            }
+
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(String.format("SELECT"));
 

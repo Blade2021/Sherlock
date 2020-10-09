@@ -72,15 +72,15 @@ public class SherlockBot {
         commands.add(new Command("unmute")); // 3
         commands.add(new Command("resign")); // 4
         commands.add(new Command("assign")); // 5
-        commands.add(new Command("getLogChannelID")); // 6
-        commands.add(new Command("setLogChannelID")); // 7
+        commands.add(new Command("logChannel")); // 6
+        commands.add(new Command("SPARE")); // 7
         commands.add(new Command("setPrefix")); // 8
         commands.add(new Command("getAroles")); // 9
         commands.add(new Command("lfadd")); // 10
         commands.add(new Command("lfremove")); // 11
         commands.add(new Command("lflist")); // 12
         commands.add(new Command("cooldown")); // 13
-        commands.add(new Command("resetCoolDown")); // 14
+        commands.add(new Command("embedFilter")); // 14
         commands.add(new Command("placeholder")); // 15
         commands.add(new Command("placeholder")); // 16
         commands.add(new Command("placeholder")); // 17
