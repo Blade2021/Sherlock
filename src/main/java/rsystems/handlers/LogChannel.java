@@ -139,7 +139,7 @@ public class LogChannel {
             EmbedBuilder embedBuilder = new EmbedBuilder()
                     .setTitle(title)
                     .setDescription(description)
-                    .addField("Violators:",violator.getUser().getAsTag(),false)
+                    .addField("Member:",violator.getUser().getAsTag(),false)
                     .setFooter("Submitted via BOT");
 
             embedBuilder.setColor(getColor(colorLevel));

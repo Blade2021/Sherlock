@@ -18,7 +18,7 @@ public class WelcomeSettings extends ListenerAdapter {
         /*
         GET/SET WELCOME MESSAGE METHOD
          */
-        if (SherlockBot.commands.get(20).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commands.get(21).checkCommandMod(event.getMessage())) {
             // GET CURRENT METHOD
             if(args.length <= 1){
                 event.getChannel().sendMessage(event.getAuthor().getAsMention() + SherlockBot.guildMap.get(event.getGuild().getId()).getWelcomeMethod()).queue();
@@ -30,7 +30,9 @@ public class WelcomeSettings extends ListenerAdapter {
                     int newWelcomeMethod = Integer.parseInt(args[1]);
 
                     SherlockBot.guildMap.get(event.getGuild().getId()).setWelcomeMethod(newWelcomeMethod);
-                    database.putValue("WelcomeTable","WelcomeMethod","ChildGuildID",event.getGuild().getIdLong(),newWelcomeMethod);
+                    if(database.putValue("WelcomeTable","WelcomeMethod","ChildGuildID",event.getGuild().getIdLong(),newWelcomeMethod) >= 1){
+                        event.getMessage().addReaction("✅").queue();
+                    }
 
                 } catch(NumberFormatException e){
                     //todo Write error
@@ -41,7 +43,7 @@ public class WelcomeSettings extends ListenerAdapter {
         /*
         GET/SET WELCOME CHANNEL ID
          */
-        if (SherlockBot.commands.get(20).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commands.get(22).checkCommandMod(event.getMessage())) {
             // GET CURRENT METHOD
             if(args.length <= 1){
                 event.getChannel().sendMessage(event.getAuthor().getAsMention() + SherlockBot.guildMap.get(event.getGuild().getId()).getWelcomeChannelID()).queue();
@@ -51,7 +53,9 @@ public class WelcomeSettings extends ListenerAdapter {
             if(args.length > 1){
                 try{
                     SherlockBot.guildMap.get(event.getGuild().getId()).setWelcomeChannelID(Long.valueOf(args[1]));
-                    database.putValue("WelcomeTable","WelcomeChannelID","ChildGuildID",event.getGuild().getIdLong(),Long.valueOf(args[1]));
+                    if(database.putValue("WelcomeTable","WelcomeChannelID","ChildGuildID",event.getGuild().getIdLong(),Long.valueOf(args[1])) >= 1){
+                        event.getMessage().addReaction("✅").queue();
+                    }
 
                 } catch(NumberFormatException e){
                     //todo Write error
@@ -62,7 +66,7 @@ public class WelcomeSettings extends ListenerAdapter {
         /*
         GET/SET WELCOME MESSAGE
          */
-        if (SherlockBot.commands.get(20).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commands.get(23).checkCommandMod(event.getMessage())) {
             // GET CURRENT METHOD
             if(args.length <= 1){
                 event.getChannel().sendMessage(event.getAuthor().getAsMention() + SherlockBot.guildMap.get(event.getGuild().getId()).getWelcomeMessage()).queue();
@@ -72,11 +76,34 @@ public class WelcomeSettings extends ListenerAdapter {
             if(args.length > 1){
                 String welcomeMessage = event.getMessage().getContentDisplay().substring(args[0].length() + 1);
 
-
                     SherlockBot.guildMap.get(event.getGuild().getId()).setWelcomeMessage(welcomeMessage);
-                    database.putValue("WelcomeTable","WelcomeChannelID","ChildGuildID",event.getGuild().getIdLong(),welcomeMessage);
+                    if(database.putValue("WelcomeTable","WelcomeMessage","ChildGuildID",event.getGuild().getIdLong(),welcomeMessage) >= 1){
+                        event.getMessage().addReaction("✅").queue();
+                    }
 
+            }
+        }
 
+        /*
+        GET/SET WELCOME MESSAGE TIMEOUT
+         */
+        if (SherlockBot.commands.get(24).checkCommandMod(event.getMessage())) {
+
+            // GET CURRENT METHOD
+            if(args.length <= 1){
+                event.getChannel().sendMessage(event.getAuthor().getAsMention() + SherlockBot.guildMap.get(event.getGuild().getId()).getWelcomeMessageTimeout()).queue();
+            }
+
+            // SET WELCOME METHOD
+            if(args.length > 1){
+                try {
+                    SherlockBot.guildMap.get(event.getGuild().getId()).setWelcomeMessageTimeout(Integer.parseInt(args[1]));
+                    if(database.putValue("WelcomeTable", "MessageTimeout", "ChildGuildID", event.getGuild().getIdLong(), Integer.parseInt(args[1])) >= 1){
+                        event.getMessage().addReaction("✅").queue();
+                    }
+                }catch (NumberFormatException e){
+                    e.printStackTrace();
+                }
             }
         }
     }

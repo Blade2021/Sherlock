@@ -138,7 +138,8 @@ public class SQLHandler {
     }
 
 
-    public void putValue(String tableName, String columnName, String identifierColumn, Long identifier, Long value) {
+    public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, Long value) {
+        int output = 0;
         try {
             if ((connection == null) || (connection.isClosed())) {
                 connect();
@@ -146,12 +147,16 @@ public class SQLHandler {
 
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
+            output = st.getUpdateCount();
+
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+        return output;
     }
 
-    public void putValue(String tableName, String columnName, String identifierColumn, Long identifier, int value) {
+    public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, int value) {
+        int output = 0;
         try {
             if ((connection == null) || (connection.isClosed())) {
                 connect();
@@ -159,12 +164,16 @@ public class SQLHandler {
 
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
+
+            output = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+        return output;
     }
 
-    public void putValue(String tableName, String columnName, String identifierColumn, Long identifier, String value) {
+    public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, String value) {
+        int output = 0;
         try {
             if ((connection == null) || (connection.isClosed())) {
                 connect();
@@ -172,9 +181,12 @@ public class SQLHandler {
 
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = \"%s\" WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
+            output = st.getUpdateCount();
+
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+        return output;
     }
 
     public void putString(String tableName, Long GuildID, String event, Long senderColumn, Long receiverColumn) {
@@ -203,6 +215,7 @@ public class SQLHandler {
 
             Statement st = connection.createStatement();
             st.execute("INSERT INTO GuildTable (GuildID, OwnerID) VALUES (" + Long.valueOf(guildID) + ", " + Long.valueOf(ownerID) + ")");
+            st.execute("INSERT INTO WelcomeTable (ChildGuildID) VALUES (" + Long.valueOf(guildID) + ")");
             return true;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -273,7 +286,7 @@ public class SQLHandler {
             int welcomeMethod = 0;
             int welcomeMessageTimeout = 30;
 
-            rs = st.executeQuery("SELECT WelcomeChannelID, WelcomeMessage, WelcomeMethod, MessageTimeout FROM WelcomeTable WHERE GuildID = " + Long.valueOf(guildID));
+            rs = st.executeQuery("SELECT WelcomeChannelID, WelcomeMessage, WelcomeMethod, MessageTimeout FROM WelcomeTable WHERE ChildGuildID = " + Long.valueOf(guildID));
             while (rs.next()) {
                 welcomeChannelID = rs.getLong("WelcomeChannelID");
                 welcomeMessage = rs.getString("WelcomeMessage");
