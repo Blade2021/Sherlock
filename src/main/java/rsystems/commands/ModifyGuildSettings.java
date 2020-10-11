@@ -73,10 +73,10 @@ public class ModifyGuildSettings extends ListenerAdapter {
                 } else {
                     String logChannelID = SherlockBot.guildMap.get(event.getGuild().getId()).getLogChannelID();
                     System.out.println(logChannelID);
-                    if((logChannelID == null) || (logChannelID.equalsIgnoreCase("0"))){
-                        event.getChannel().sendMessage(event.getAuthor().getAsMention() + " No log channel has been set  \uD83E\uDDD0").queue();
+                    if((logChannelID != null) && !(logChannelID.equalsIgnoreCase("0")) && (event.getGuild().getTextChannelById(logChannelID).canTalk())){
+                        event.getChannel().sendMessage(event.getGuild().getTextChannelById(logChannelID).getAsMention() + "\nLogChannelID: " + logChannelID).queue();
                     } else {
-                        event.getChannel().sendMessage("LogChannelID: " + logChannelID).queue();
+                        event.getChannel().sendMessage(event.getAuthor().getAsMention() + " No log channel has been set  \uD83E\uDDD0").queue();
                     }
                 }
             } catch (IndexOutOfBoundsException | NullPointerException e) {
@@ -128,20 +128,28 @@ public class ModifyGuildSettings extends ListenerAdapter {
                 if ((args.length == 3) && (event.getGuild().getRoleById(args[2]) != null)) {
                     // Add role to assignable roles of guildmap
                     SherlockBot.guildMap.get(event.getGuild().getId()).addAssignableRole(args[1], Long.valueOf(args[2]));
+                    int databaseStatusCode = database.insertAssignableRole(event.getGuild().getIdLong(), args[1], Long.valueOf(args[2]));
 
-                    int rowUpdateCount = database.insertAssignableRole(event.getGuild().getIdLong(), args[1], Long.valueOf(args[2]));
-
-                    if (rowUpdateCount > 0) {
+                    if (databaseStatusCode == 200) {
                         // Success (1+ updated)
-                        event.getMessage().addReaction("\uD83D\uDC4D").queue();
+                        event.getMessage().addReaction("✅").queue();
                     } else {
+                        switch(databaseStatusCode){
+                            case 201:
+                                event.getChannel().sendMessage(event.getAuthor().getAsMention() + " ERROR 201: You have hit the maximum number of assignable roles.  Please try to remove some before continuing.").queue();
+                                break;
+                            case 400:
+                                event.getChannel().sendMessage(event.getAuthor().getAsMention() + " ERROR 400: Database had an unknown error.  This event has been logged.").queue();
+                        }
                         // Unsuccessful (0 rows updated)
-                        event.getMessage().addReaction("\uD83D\uDC4E").queue();
-                        database.logError(event.getGuild().getId(), "Failed to add assignable role");
+                        database.logError(event.getGuild().getId(), "Failed to add assignable role",databaseStatusCode);
                     }
                 } else if (args.length < 3) {
                     event.getChannel().sendMessage("Not enough arguments supplied.").queue();
+                } else if(event.getGuild().getRoleById(args[2]) == null){
+                    event.getChannel().sendMessage(event.getAuthor().getAsMention() + " I could not find a role associated with that ID.").queue();
                 }
+                event.getMessage().addReaction("❌").queue();
             } catch (NullPointerException e) {
                 event.getMessage().addReaction("⚠").queue();
             } catch (NumberFormatException e) {
@@ -167,7 +175,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     } else {
                         // Unsuccessful (0 rows updated)
                         event.getMessage().addReaction("\uD83D\uDC4E").queue();
-                        database.logError(event.getGuild().getId(), "Failed to remove assignable role");
+                        database.logError(event.getGuild().getId(), "Failed to remove assignable role", 400);
                     }
                 }
             }

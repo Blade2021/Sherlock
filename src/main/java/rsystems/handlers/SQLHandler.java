@@ -1,5 +1,6 @@
 package rsystems.handlers;
 
+import rsystems.Config;
 import rsystems.SherlockBot;
 import rsystems.objects.AssignableRole;
 import rsystems.objects.InfractionObject;
@@ -46,7 +47,7 @@ public class SQLHandler {
         ArrayList<String> output = new ArrayList<>();
 
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -68,7 +69,7 @@ public class SQLHandler {
         String output = "";
 
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -92,7 +93,7 @@ public class SQLHandler {
         String output = "";
 
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -114,7 +115,7 @@ public class SQLHandler {
 
     public void putValue(String tableName, String columnName, String identifierColumn, Long identifier, Long value) {
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -127,7 +128,7 @@ public class SQLHandler {
 
     public void putValue(String tableName, String columnName, String identifierColumn, Long identifier, int value) {
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -140,7 +141,7 @@ public class SQLHandler {
 
     public void putValue(String tableName, String columnName, String identifierColumn, Long identifier, String value) {
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -153,7 +154,7 @@ public class SQLHandler {
 
     public void putString(String tableName, Long GuildID, String event, Long senderColumn, Long receiverColumn) {
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -171,7 +172,7 @@ public class SQLHandler {
      */
     public boolean addGuild(String guildID, String ownerID) {
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -186,7 +187,7 @@ public class SQLHandler {
 
     public boolean removeGuild(String guildID) {
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -209,7 +210,7 @@ public class SQLHandler {
             /*
                     GRAB GUILD SETTINGS FROM DATABASE
              */
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -248,17 +249,23 @@ public class SQLHandler {
 
     // Add an assignable role to the database
     public Integer insertAssignableRole(Long guildID, String command, Long roleID) {
-        try {
-            if(connection.isClosed()){
-                connect();
+
+        if(checkSize(guildID,"AssignableRoles")) {
+
+            try {
+                if ((connection == null) || (connection.isClosed())) {
+                    connect();
+                }
+
+                Statement st = connection.createStatement();
+
+                st.execute(String.format("INSERT INTO AssignableRoles (ChildGuildID, RoleCommand, RoleID) VALUES (%d, \"%s\", %d)", guildID, command, roleID));
+                return 200;
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
             }
-
-            Statement st = connection.createStatement();
-
-            st.execute(String.format("INSERT INTO AssignableRoles (ChildGuildID, RoleCommand, RoleID) VALUES (%d, \"%s\", %d)", guildID, command, roleID));
-            return st.getUpdateCount();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } else {
+            return 201;
         }
         return 0;
     }
@@ -266,7 +273,7 @@ public class SQLHandler {
     // Remove an assignable role to the database
     public Integer removeAssignableRole(Long guildID, String command) {
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -284,7 +291,7 @@ public class SQLHandler {
     public ArrayList<AssignableRole> getAssignableRoles(Long guildID) {
         ArrayList<AssignableRole> output = new ArrayList<>();
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -308,7 +315,7 @@ public class SQLHandler {
     public boolean insertTimedEvent(Long GuildID, Long UserID, int EventType, String reason, LocalDateTime startDatetime, LocalDateTime endDateTime){
 
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -327,7 +334,7 @@ public class SQLHandler {
     public boolean insertTimedEvent(Long GuildID, Long UserID, int EventType, String reason, Long EventKey, int EventValue, LocalDateTime startDatetime, LocalDateTime endDateTime){
 
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -346,7 +353,7 @@ public class SQLHandler {
     public int getTimedEventsQuantity(Long GuildID, Long UserID){
 
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -367,7 +374,7 @@ public class SQLHandler {
     public boolean expireTimedEvent(Long GuildID, Long UserID){
 
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -387,7 +394,7 @@ public class SQLHandler {
         HashMap<Long,Integer> output = new HashMap<>();
 
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -417,7 +424,7 @@ public class SQLHandler {
 
     public void logError(String guildID, String event){
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -428,9 +435,22 @@ public class SQLHandler {
         }
     }
 
+    public void logError(String guildID, String event, int errorCode){
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+            st.execute(String.format("INSERT INTO FaultTable (ChildGuildID, Event, ErrorCode) VALUES (%d, \"%s\", %d)",Long.valueOf(guildID),event,errorCode));
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
     public void logError(String guildID, String event, Long relateable){
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -443,7 +463,7 @@ public class SQLHandler {
 
     public boolean insertInfraction(String guildID, Long violatorID, String violation, Long submitter) {
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -460,7 +480,7 @@ public class SQLHandler {
         ArrayList<InfractionObject> infractionObjects = new ArrayList<>();
 
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -482,7 +502,7 @@ public class SQLHandler {
         ArrayList<String> badWordsList = new ArrayList<>();
 
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -503,7 +523,7 @@ public class SQLHandler {
     // INSERT A BADWORD INTO THE DATABASE
     public Integer insertBadWord(Long guildID, String badWord) {
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -520,7 +540,7 @@ public class SQLHandler {
     // REMOVE A BADWORD FROM THE DATABASE
     public Integer removeBadWord(Long guildID, String badWord) {
         try {
-            if(connection.isClosed()){
+            if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
@@ -534,5 +554,29 @@ public class SQLHandler {
         return 0;
     }
 
+    private boolean checkSize(Long guildID, String tableName){
+        int rowCount = 0;
 
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("SELECT Count(ChildGuildID) from %s where ChildGuildID = %d", tableName, guildID));
+            while(rs.next()){
+                rowCount = rs.getInt(1);
+            }
+
+            if(rowCount < Integer.parseInt(Config.get("max_row_count"))){
+                return true;
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return false;
+    }
 }
