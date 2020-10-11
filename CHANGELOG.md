@@ -1,3 +1,12 @@
+## 0.0.4
+Welcome message automations and settings.
+
+**New Commands:**  
+!welcomeMessage - Get/Set your welcome message to send to users.  (Supports REGEX)  
+!welcomeMethod - How the message will be sent or disabled entirely.  
+!welcomeChannel - Get/Set a custom welcome channel instead of the default channel.  (Default channel is set by your server settings)  
+!welcomeTimeout - Set the message to automatic deletion after x amount of seconds
+
 ## 0.0.3
 Channel cooldown features.  SQL Bug fixes.  Generic commands added.  
 

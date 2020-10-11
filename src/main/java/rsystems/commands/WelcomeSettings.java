@@ -51,14 +51,19 @@ public class WelcomeSettings extends ListenerAdapter {
 
             // SET WELCOME METHOD
             if(args.length > 1){
-                try{
-                    SherlockBot.guildMap.get(event.getGuild().getId()).setWelcomeChannelID(Long.valueOf(args[1]));
-                    if(database.putValue("WelcomeTable","WelcomeChannelID","ChildGuildID",event.getGuild().getIdLong(),Long.valueOf(args[1])) >= 1){
-                        event.getMessage().addReaction("✅").queue();
-                    }
+                if(event.getMessage().getMentionedChannels().size() > 0){
+                    SherlockBot.guildMap.get(event.getGuild().getId()).setWelcomeChannelID(event.getMessage().getMentionedChannels().get(0).getIdLong());
+                } else {
 
-                } catch(NumberFormatException e){
-                    //todo Write error
+                    try {
+                        SherlockBot.guildMap.get(event.getGuild().getId()).setWelcomeChannelID(Long.valueOf(args[1]));
+                        if (database.putValue("WelcomeTable", "WelcomeChannelID", "ChildGuildID", event.getGuild().getIdLong(), Long.valueOf(args[1])) >= 1) {
+                            event.getMessage().addReaction("✅").queue();
+                        }
+
+                    } catch (NumberFormatException e) {
+                        //todo Write error
+                    }
                 }
             }
         }

@@ -238,6 +238,21 @@ public class SQLHandler {
         }
     }
 
+    public boolean addWelcomeRow(String guildID) {
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+            st.execute("INSERT INTO WelcomeTable (ChildGuildID) VALUES (" + Long.valueOf(guildID) + ")");
+            return true;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return false;
+        }
+    }
+
     public void loadGuildData(String guildID) {
         String prefix = "!";
         String logChannelID = null;
@@ -285,6 +300,19 @@ public class SQLHandler {
             String welcomeMessage = null;
             int welcomeMethod = 0;
             int welcomeMessageTimeout = 30;
+
+            //Check to make sure row exists, if not insert one.
+            rs = st.executeQuery(String.format("SELECT ChildGuildID FROM WelcomeTable where ChildGuildID = %d",Long.valueOf(guildID)));
+            int rowsFound = 0;
+            while(rs.next()){
+                rowsFound++;
+                System.out.println(rowsFound);
+            }
+
+            if(rowsFound == 0){
+                addWelcomeRow(guildID);
+            }
+
 
             rs = st.executeQuery("SELECT WelcomeChannelID, WelcomeMessage, WelcomeMethod, MessageTimeout FROM WelcomeTable WHERE ChildGuildID = " + Long.valueOf(guildID));
             while (rs.next()) {

@@ -25,10 +25,10 @@ I fully welcome all new ideas and feature requests however for this bot, I am tr
 - **Infraction System** - Log mod/admin notes against a user.
 - **Assignable Roles** - Allows users to self assign themselves roles that are determined by you.
 - **Embed Filtering** - Suppresses embed messages if too many embeds are detected within a certain amount of time/messages.
+- **Welcome Messages** - Give members who join your server a nice hearty welcome!
 
 ## Upcoming Features
 
-- Custom welcome message
 - Raid control - Force users to accept an agreement to enter the server.
 - Reporting - Allow users to report others anonmously.
 - Custom message triggers

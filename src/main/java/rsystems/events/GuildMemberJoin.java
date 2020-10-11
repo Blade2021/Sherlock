@@ -9,6 +9,8 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
 import rsystems.handlers.LogChannel;
 
+import java.util.concurrent.TimeUnit;
+
 public class GuildMemberJoin extends ListenerAdapter {
 
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
@@ -18,8 +20,9 @@ public class GuildMemberJoin extends ListenerAdapter {
             // Guild Welcome Channel
             if (welcomeMethod == 1) {
                 Long channelID = SherlockBot.guildMap.get(event.getGuild().getId()).getWelcomeChannelID();
-
                 TextChannel welcomeChannel = null;
+
+                // GET THE CHANNEL ID FOR THE MESSAGE
                 if ((channelID == null) || (channelID == 0)) {
                     welcomeChannel = event.getGuild().getDefaultChannel();
                 } else {
@@ -28,14 +31,22 @@ public class GuildMemberJoin extends ListenerAdapter {
                     }
                 }
 
+                //SEND THE WELCOME MESSAGE
                 try {
-                    welcomeChannel.sendMessage(formattedWelcomeMSG(event.getGuild(), event.getMember())).queue();
+                    welcomeChannel.sendMessage(formattedWelcomeMSG(event.getGuild(), event.getMember())).queue(success -> {
+                        if(SherlockBot.guildMap.get(event.getGuild().getId()).getWelcomeMessageTimeout() > 0){
+                            success.delete().queueAfter(SherlockBot.guildMap.get(event.getGuild().getId()).getWelcomeMessageTimeout(), TimeUnit.SECONDS);
+                        }
+                    });
                 } catch (NullPointerException e){
 
                 } catch( PermissionException e) {
                     LogChannel logChannel = new LogChannel();
                     logChannel.logAction(event.getGuild(),"Private Message Failed","Tried to send a member a welcome message in welcome channel but failed due to permission.\n\nPermission: " + e.getPermission(),event.getMember(),2);
                 }
+
+
+
             }
 
             // Guild Welcome Channel
