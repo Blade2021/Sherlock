@@ -3,8 +3,8 @@ package rsystems.handlers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import rsystems.SherlockBot;
 
@@ -257,20 +257,21 @@ public class LogChannel {
         }
     }
 
-    public void logLanguageFilterAction(Guild guild, Message message, String triggerWord, Member violator){
-        String channelLogID = SherlockBot.guildMap.get(guild.getId()).getLogChannelID();
+    public void logLanguageFilterAction(GuildMessageReceivedEvent event, String triggerWord){
+        String channelLogID = SherlockBot.guildMap.get(event.getGuild().getId()).getLogChannelID();
         if(channelLogID != null){
 
             EmbedBuilder embedBuilder = new EmbedBuilder()
                     .setTitle("Language filter infraction")
-                    .setDescription("Inappropriate language was detected on this message: [Message Link]("+message.getJumpUrl() + ")")
-                    .addField("User:",violator.getEffectiveName(),true)
-                    .addField("User ID:",violator.getId(),true)
-                    .addField("Trigger Word:",triggerWord,true);
+                    .setDescription("Inappropriate language was detected on this message: [Message Link]("+event.getMessage().getJumpUrl() + ")")
+                    .addField("User:",event.getMessage().getMember().getEffectiveName(),true)
+                    .addField("Channel:", event.getChannel().getAsMention(),true)
+                    .addField("Trigger Word:",triggerWord,true)
+                    .setFooter("User ID: " + event.getMessage().getMember().getId());
             embedBuilder.setColor(getColor(1));
 
             try{
-                guild.getTextChannelById(channelLogID).sendMessage(embedBuilder.build()).queue();
+                event.getGuild().getTextChannelById(channelLogID).sendMessage(embedBuilder.build()).queue();
             } catch(NullPointerException | PermissionException e){
 
             }

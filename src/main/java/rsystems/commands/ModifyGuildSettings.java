@@ -133,6 +133,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     if (databaseStatusCode == 200) {
                         // Success (1+ updated)
                         event.getMessage().addReaction("✅").queue();
+                        return;
                     } else {
                         switch(databaseStatusCode){
                             case 201:
@@ -144,12 +145,16 @@ public class ModifyGuildSettings extends ListenerAdapter {
                         // Unsuccessful (0 rows updated)
                         database.logError(event.getGuild().getId(), "Failed to add assignable role",databaseStatusCode);
                     }
-                } else if (args.length < 3) {
-                    event.getChannel().sendMessage("Not enough arguments supplied.").queue();
-                } else if(event.getGuild().getRoleById(args[2]) == null){
-                    event.getChannel().sendMessage(event.getAuthor().getAsMention() + " I could not find a role associated with that ID.").queue();
+                } else {
+                    // Request failed internal checks
+                    if (args.length < 3) {
+                        event.getChannel().sendMessage("Not enough arguments supplied.").queue();
+                    } else if(event.getGuild().getRoleById(args[2]) == null){
+                        // Cannot find role associated with ID provided
+                        event.getChannel().sendMessage(event.getAuthor().getAsMention() + " I could not find a role associated with that ID.").queue();
+                    }
+                    event.getMessage().addReaction("⚠").queue();
                 }
-                event.getMessage().addReaction("❌").queue();
             } catch (NullPointerException e) {
                 event.getMessage().addReaction("⚠").queue();
             } catch (NumberFormatException e) {
@@ -171,10 +176,10 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     // Success (1+ updated)
                     if (rowUpdateCount > 0) {
                         System.out.println(String.format("Guild: %s | Role CMD: %s | Count: %d", event.getGuild().getId(), args[1], rowUpdateCount));
-                        event.getMessage().addReaction("\uD83D\uDC4D").queue();
+                        event.getMessage().addReaction("✅").queue();
                     } else {
                         // Unsuccessful (0 rows updated)
-                        event.getMessage().addReaction("\uD83D\uDC4E").queue();
+                        event.getMessage().addReaction("❌").queue();
                         database.logError(event.getGuild().getId(), "Failed to remove assignable role", 400);
                     }
                 }
@@ -242,7 +247,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                             .setColor(Color.RED)
                             .addField("Guild:", event.getGuild().getName(), true)
                             .addField("Guild ID:", event.getGuild().getId(), true)
-                            .addField("Bad Words:", SherlockBot.guildMap.get(event.getGuild().getId()).getBadWords().toString(), false);
+                            .addField("Bad Words:", SherlockBot.guildMap.get(event.getGuild().getId()).getBlacklistedWords().toString(), false);
 
                     channel.sendMessage(embedBuilder.build()).queue(success -> {
                         try {
@@ -280,7 +285,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     channelGuildMap.remove(event.getAuthor().getId());
                     event.getChannel().sendMessage("Transmission ended").queue();
                 } else {
-                    if (!SherlockBot.guildMap.get(channelGuildMap.get(event.getAuthor().getId())).getBadWords().contains(event.getMessage().getContentDisplay())) {
+                    if (!SherlockBot.guildMap.get(channelGuildMap.get(event.getAuthor().getId())).getBlacklistedWords().contains(event.getMessage().getContentDisplay())) {
                         SherlockBot.guildMap.get(channelGuildMap.get(event.getAuthor().getId())).addBadWord(event.getMessage().getContentDisplay());
                         if (database.insertBadWord(Long.valueOf(channelGuildMap.get(event.getAuthor().getId())), event.getMessage().getContentDisplay()) >= 1) {
                             event.getMessage().addReaction("✅").queue();
@@ -295,7 +300,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     channelGuildMap.remove(event.getAuthor().getId());
                     event.getChannel().sendMessage("Transmission ended").queue();
                 } else {
-                    if (SherlockBot.guildMap.get(channelGuildMap.get(event.getAuthor().getId())).getBadWords().contains(event.getMessage().getContentDisplay())) {
+                    if (SherlockBot.guildMap.get(channelGuildMap.get(event.getAuthor().getId())).getBlacklistedWords().contains(event.getMessage().getContentDisplay())) {
                         SherlockBot.guildMap.get(channelGuildMap.get(event.getAuthor().getId())).removeBadWord(event.getMessage().getContentDisplay());
                         if (database.removeBadWord(Long.valueOf(channelGuildMap.get(event.getAuthor().getId())), event.getMessage().getContentDisplay()) >= 1) {
                             event.getMessage().addReaction("✅").queue();

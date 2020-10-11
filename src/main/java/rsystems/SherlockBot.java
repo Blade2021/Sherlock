@@ -85,7 +85,7 @@ public class SherlockBot {
         commands.add(new Command("embedFilter")); // 14
         commands.add(new Command("info")); // 15
         commands.add(new Command("ginfo")); // 16
-        commands.add(new Command("placeholder")); // 17
+        commands.add(new Command("settings")); // 17
         commands.add(new Command("placeholder")); // 18
         commands.add(new Command("placeholder")); // 19
         commands.add(new Command("placeholder")); // 20

@@ -16,7 +16,7 @@ import static rsystems.SherlockBot.database;
 
 public class LanguageFilter extends ListenerAdapter {
 
-    String badMessage = " Your message has been flagged due to inappropriate content [Vulgar Language].  Please edit or delete your message immediately or risk the message being deleted.  This action has been logged.";
+    String badMessage = " Your message has been flagged due to inappropriate content [Blacklisted Word(s)].  Please edit or delete your message immediately or risk the message being deleted.  This action has been logged.";
     private Map<String, Future<?>> futures = new HashMap<>();
 
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
@@ -24,8 +24,8 @@ public class LanguageFilter extends ListenerAdapter {
             return;
         }
 
-        String badWord = getBadWord(event.getGuild().getId(),event.getMessage().getContentDisplay());
-        if(badWord != null){
+        String triggerWord = getBadWord(event.getGuild().getId(),event.getMessage().getContentDisplay());
+        if(triggerWord != null){
 
             //Bad word was detected!
             System.out.println("Bad word detected");
@@ -38,7 +38,7 @@ public class LanguageFilter extends ListenerAdapter {
                 database.insertInfraction(event.getGuild().getId(),event.getMember().getIdLong(),"Language Violation",event.getJDA().getSelfUser().getIdLong());
 
                 LogChannel logChannel = new LogChannel();
-                logChannel.logLanguageFilterAction(event.getGuild(),event.getMessage(),badWord,event.getMember());
+                logChannel.logLanguageFilterAction(event,triggerWord);
 
             } catch (NullPointerException | PermissionException e) {
 
@@ -97,7 +97,7 @@ public class LanguageFilter extends ListenerAdapter {
     }
 
     public boolean languageCheck(String guildID, String message) {
-        for (String word : SherlockBot.guildMap.get(guildID).getBadWords()) {
+        for (String word : SherlockBot.guildMap.get(guildID).getBlacklistedWords()) {
             if (message.toLowerCase().contains(word.toLowerCase())) {
                 return true;
             }
@@ -106,7 +106,7 @@ public class LanguageFilter extends ListenerAdapter {
     }
 
     private String getBadWord(String guildID, String message) {
-        for (String word : SherlockBot.guildMap.get(guildID).getBadWords()) {
+        for (String word : SherlockBot.guildMap.get(guildID).getBlacklistedWords()) {
             if (message.toLowerCase().contains(word.toLowerCase())) {
                 return word;
             }

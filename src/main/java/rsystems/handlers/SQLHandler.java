@@ -113,6 +113,31 @@ public class SQLHandler {
         return output;
     }
 
+    public Integer getInt(String table, String columnName, String identifierColumn, Long identifier) {
+        int output = 0;
+
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s where %s = %d",columnName,table,identifierColumn,identifier));
+
+            while (rs.next()) {
+                output = rs.getInt(columnName);
+            }
+
+        } catch (SQLException throwables) {
+            System.out.println(throwables.getMessage());
+        } finally {
+            // do nothing at the moment
+        }
+
+        return output;
+    }
+
+
     public void putValue(String tableName, String columnName, String identifierColumn, Long identifier, Long value) {
         try {
             if ((connection == null) || (connection.isClosed())) {
@@ -222,7 +247,6 @@ public class SQLHandler {
                 logChannelID = String.valueOf(rs.getLong("LogChannelID"));
                 muteRoleID = String.valueOf(rs.getLong("MuteRoleID"));
                 embedFilter = rs.getInt("EmbedFilter");
-
             }
 
             SherlockBot.guildMap.get(guildID).setPrefix(prefix);
@@ -238,8 +262,28 @@ public class SQLHandler {
                 SherlockBot.guildMap.get(guildID).assignableRoleMap.put(role.command, role.RoleID);
             }
 
-            SherlockBot.guildMap.get(guildID).setBadWords(getBadWords(Long.valueOf(guildID)));
+            SherlockBot.guildMap.get(guildID).setBlacklistedWords(getBadWords(Long.valueOf(guildID)));
             SherlockBot.guildMap.get(guildID).setEmbedFilter(embedFilter);
+
+            /*
+            WELCOME MESSAGE VARIABLES
+             */
+            Long welcomeChannelID = null;
+            String welcomeMessage = null;
+            int welcomeMethod = 0;
+            int welcomeMessageTimeout = 30;
+
+            rs = st.executeQuery("SELECT WelcomeChannelID, WelcomeMessage, WelcomeMethod, MessageTimeout FROM WelcomeTable WHERE GuildID = " + Long.valueOf(guildID));
+            while (rs.next()) {
+                welcomeChannelID = rs.getLong("WelcomeChannelID");
+                welcomeMessage = rs.getString("WelcomeMessage");
+                welcomeMethod = rs.getInt("WelcomeMethod");
+                welcomeMessageTimeout = rs.getInt("MessageTimeout");
+            }
+            SherlockBot.guildMap.get(guildID).setWelcomeChannelID(welcomeChannelID);
+            SherlockBot.guildMap.get(guildID).setWelcomeMessage(welcomeMessage);
+            SherlockBot.guildMap.get(guildID).setWelcomeMethod(welcomeMethod);
+            SherlockBot.guildMap.get(guildID).setWelcomeMessageTimeout(welcomeMessageTimeout);
 
             System.out.println("Guild data loaded | GuildID" + guildID);
         } catch (SQLException throwables) {
@@ -537,7 +581,7 @@ public class SQLHandler {
         return 0;
     }
 
-    // REMOVE A BADWORD FROM THE DATABASE
+    // REMOVE A BLACKLISTED WORD FROM THE DATABASE
     public Integer removeBadWord(Long guildID, String badWord) {
         try {
             if ((connection == null) || (connection.isClosed())) {
@@ -553,6 +597,7 @@ public class SQLHandler {
         }
         return 0;
     }
+
 
     private boolean checkSize(Long guildID, String tableName){
         int rowCount = 0;

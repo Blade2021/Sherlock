@@ -73,5 +73,23 @@ public class Generics extends ListenerAdapter {
 
             embedBuilder.clear();
         }
+
+        /*
+        GUILD INFO COMMAND
+         */
+        if (SherlockBot.commands.get(17).checkCommand(event.getMessage().getContentDisplay(),event.getGuild().getId())){
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            embedBuilder.setTitle("BoT Information")
+                    .setColor(Color.cyan)
+                    .setThumbnail(event.getJDA().getSelfUser().getEffectiveAvatarUrl())
+                    .setDescription("Hello!  I'm Sherlock!  Please follow the setup and configuration instructions [here](https://github.com/Blade2021/Sherlock/wiki/Setup-and-Configuration).")
+                    .setFooter("Called by: " + event.getMember().getEffectiveName(),event.getMember().getUser().getEffectiveAvatarUrl());
+
+            if(event.getChannel().canTalk()) {
+                event.getChannel().sendMessage(embedBuilder.build()).queue();
+            }
+
+            embedBuilder.clear();
+        }
     }
 }

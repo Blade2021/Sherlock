@@ -5,14 +5,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GuildSettings {
-    //Guild Uniques
-    //private final Guild guild;
     private String prefix;
     private ArrayList<String> modRoles = new ArrayList<>();
     public String logChannelID;
     public int embedFilter = 0;
     public Map<String, Long> assignableRoleMap = new HashMap<>();
-    private ArrayList<String> badWords = new ArrayList<>();
+    private ArrayList<String> blacklistedWords = new ArrayList<>();
+
+    private Long welcomeChannelID;
+    private String welcomeMessage;
+    private int welcomeMethod;
+    private int welcomeMessageTimeout;
 
     //Guild IDs
     private String muteRoleID;
@@ -20,8 +23,6 @@ public class GuildSettings {
     // CONSTRUCTOR
     public GuildSettings(String prefix) {
         this.prefix = prefix;
-        //this.logChannel = new LogChannel(guild);
-        //this.guild = guild;
     }
 
     public String getLogChannelID() {
@@ -93,19 +94,51 @@ public class GuildSettings {
         assignableRoleMap.remove(roleCommand);
     }
 
-    public ArrayList<String> getBadWords() {
-        return badWords;
+    public ArrayList<String> getBlacklistedWords() {
+        return blacklistedWords;
     }
 
-    public void setBadWords(ArrayList<String> badWords) {
-        this.badWords = badWords;
+    public void setBlacklistedWords(ArrayList<String> blacklistedWords) {
+        this.blacklistedWords = blacklistedWords;
     }
 
     public void addBadWord(String word){
-        this.badWords.add(word);
+        this.blacklistedWords.add(word);
     }
 
     public void removeBadWord(String word){
-        this.badWords.remove(word);
+        this.blacklistedWords.remove(word);
+    }
+
+    public Long getWelcomeChannelID() {
+        return welcomeChannelID;
+    }
+
+    public void setWelcomeChannelID(Long welcomeChannelID) {
+        this.welcomeChannelID = welcomeChannelID;
+    }
+
+    public String getWelcomeMessage() {
+        return welcomeMessage;
+    }
+
+    public void setWelcomeMessage(String welcomeMessage) {
+        this.welcomeMessage = welcomeMessage;
+    }
+
+    public int getWelcomeMethod() {
+        return welcomeMethod;
+    }
+
+    public void setWelcomeMethod(int welcomeMethod) {
+        this.welcomeMethod = welcomeMethod;
+    }
+
+    public int getWelcomeMessageTimeout() {
+        return welcomeMessageTimeout;
+    }
+
+    public void setWelcomeMessageTimeout(int welcomeMessageTimeout) {
+        this.welcomeMessageTimeout = welcomeMessageTimeout;
     }
 }
