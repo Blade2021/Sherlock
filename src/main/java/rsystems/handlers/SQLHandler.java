@@ -561,7 +561,7 @@ public class SQLHandler {
         }
     }
 
-    public ArrayList<InfractionObject> infractions(String guildID, String violatorID) {
+    public ArrayList<InfractionObject> getInfractionList(String guildID, String violatorID) {
         ArrayList<InfractionObject> infractionObjects = new ArrayList<>();
 
         try {

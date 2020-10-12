@@ -129,7 +129,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     // Add role to assignable roles of guildmap
                     SherlockBot.guildMap.get(event.getGuild().getId()).addAssignableRole(args[1], Long.valueOf(args[2]));
                     int databaseStatusCode = database.insertAssignableRole(event.getGuild().getIdLong(), args[1], Long.valueOf(args[2]));
-
+                    System.out.println("Database Status Code: " + databaseStatusCode);
                     if (databaseStatusCode == 200) {
                         // Success (1+ updated)
                         event.getMessage().addReaction("✅").queue();
