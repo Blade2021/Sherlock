@@ -1,6 +1,7 @@
 package rsystems.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -264,6 +265,163 @@ public class ModifyGuildSettings extends ListenerAdapter {
                 System.out.println("Failed to initiate private channel with USER:" + event.getAuthor().getId());
             }
         }
+
+        /*
+        ADD MOD ROLE
+         */
+        if (SherlockBot.commands.get(25).checkCommandMod(event.getMessage())) {
+            if(args.length < 3){
+                return;
+            }
+
+            try{
+                if(event.getGuild().getRoleById(args[1]) == null){
+                    return;
+                }
+
+                SherlockBot.guildMap.get(event.getGuild().getId()).addModRole(args[1],Integer.parseInt(args[2]));
+                database.insertModRole(event.getGuild().getIdLong(),Long.valueOf(args[1]),Integer.parseInt(args[2]));
+
+            } catch (NumberFormatException e){
+                return;
+            }
+        }
+
+        /*
+        REMOVE MOD ROLE
+         */
+        if (SherlockBot.commands.get(26).checkCommandMod(event.getMessage())) {
+            if(args.length < 2){
+                return;
+            }
+
+            try{
+                if(event.getGuild().getRoleById(args[1]) == null){
+                    return;
+                }
+
+                SherlockBot.guildMap.get(event.getGuild().getId()).removeModRole(args[1]);
+                database.removeModRole(event.getGuild().getIdLong(),Long.valueOf(args[1]));
+
+            } catch (NumberFormatException e){
+                return;
+            }
+        }
+
+        /*
+        UPDATE MOD PERMISSIONS
+         */
+        if (SherlockBot.commands.get(27).checkCommandMod(event.getMessage())) {
+            if(args.length < 3){
+                return;
+            }
+
+            try{
+                if(event.getGuild().getRoleById(args[1]) == null){
+                    return;
+                }
+
+                int newValue = Integer.parseInt(args[2]);
+                Long identifier = Long.valueOf(args[1]);
+
+                if(SherlockBot.guildMap.get(event.getGuild().getId()).putModPermissionLevel(args[1],newValue)){
+                    if(database.putValue("ModRoleTable","Permissions","ModRoleID",identifier,newValue) >= 1){
+                        event.getMessage().addReaction("✅").queue();
+                    } else {
+                        // Unsuccessful (0 rows updated)
+                        event.getMessage().addReaction("❌").queue();
+                    }
+                } else {
+                    // Unsuccessful (0 rows updated)
+                    event.getMessage().addReaction("❌").queue();
+                }
+
+            } catch (NumberFormatException e){
+                return;
+            }
+        }
+
+        /*
+        GET MOD ROLES
+         */
+        if (SherlockBot.commands.get(28).checkCommandMod(event.getMessage())) {
+
+                EmbedBuilder embedBuilder = new EmbedBuilder();
+                StringBuilder roleNameString = new StringBuilder();
+                StringBuilder roleIDString = new StringBuilder();
+                StringBuilder rolePermissions = new StringBuilder();
+
+                for(Map.Entry<String,Integer> entry:SherlockBot.guildMap.get(event.getGuild().getId()).modRoleMap.entrySet()){
+                    try{
+                        String roleName = event.getGuild().getRoleById(entry.getKey()).getName();
+                        roleNameString.append(roleName).append("\n");
+
+                        roleIDString.append(entry.getKey()).append("\n");
+                        rolePermissions.append(entry.getValue()).append("\n");
+                    }catch(NullPointerException e){
+                        continue;
+                    }
+                }
+
+                embedBuilder.setTitle("Mod Role Table")
+                        .addField("Role Name:",roleNameString.toString(),true)
+                        .addField("Role ID:",roleIDString.toString(),true)
+                        .addField("Role Permissions",rolePermissions.toString(),true)
+                        .setFooter("Called by: " + event.getMember().getEffectiveName(),event.getAuthor().getEffectiveAvatarUrl())
+                        .setColor(Color.CYAN);
+
+                event.getChannel().sendMessage(embedBuilder.build()).queue();
+                embedBuilder.clear();
+        }
+
+        /*
+        CHECK AUTHORIZED
+         */
+        if (SherlockBot.commands.get(19).checkCommand(event.getMessage().getContentDisplay(),event.getGuild().getId())) {
+            Boolean authorized = false;
+            int index = Integer.parseInt(args[1]);
+
+            int modRoleValue = 0;
+            String binaryString = "";
+            char indexChar = '0';
+
+            if(args.length < 3) {
+                for (Role r : event.getMember().getRoles()) {
+                    if (SherlockBot.guildMap.get(event.getGuild().getId()).modRoleMap.containsKey(r.getId())) {
+
+                        modRoleValue = SherlockBot.guildMap.get(event.getGuild().getId()).modRoleMap.get(r.getId());
+                        binaryString = Integer.toBinaryString(modRoleValue);
+                        String reverseString = new StringBuilder(binaryString).reverse().toString();
+                        try{
+                            indexChar = reverseString.charAt(index);
+                        }catch(IndexOutOfBoundsException e){
+                        }
+
+                    }
+                }
+            } else {
+                if(SherlockBot.guildMap.get(event.getGuild().getId()).modRoleMap.containsKey(args[2])) {
+                    modRoleValue = SherlockBot.guildMap.get(event.getGuild().getId()).modRoleMap.get(args[2]);
+                    binaryString = Integer.toBinaryString(modRoleValue);
+                    String reverseString = new StringBuilder(binaryString).reverse().toString();
+                    try{
+                        indexChar = reverseString.charAt(index);
+                    }catch(IndexOutOfBoundsException e){
+                    }
+                } else {
+                    indexChar = '0';
+                }
+            }
+
+            if(indexChar == '1'){
+                event.getMessage().addReaction("\uD83D\uDC4D").queue();
+            } else {
+                event.getMessage().addReaction("\uD83D\uDC4E").queue();
+                System.out.println(String.format("Role Integer: %d\nBinary String:%s\nChar at Index:%s",modRoleValue,binaryString,indexChar));
+            }
+        }
+
+
     }
 
 

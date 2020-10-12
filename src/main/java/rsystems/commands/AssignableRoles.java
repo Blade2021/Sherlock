@@ -22,35 +22,38 @@ public class AssignableRoles extends ListenerAdapter {
 
         String[] args = event.getMessage().getContentRaw().split("\\s+");
 
-        String checkString = args[0].replaceFirst(SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix(), "");
+        if(event.getMessage().getContentDisplay().startsWith(SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix())) {
 
-        /*
-        USER REQUESTING ROLE TO BE ADDED/REMOVED
-         */
-        if (SherlockBot.guildMap.get(event.getGuild().getId()).assignableRoleMap.containsKey(checkString)) {
-            Long roleID = SherlockBot.guildMap.get(event.getGuild().getId()).assignableRoleMap.get(checkString);
+            String checkString = args[0].replaceFirst(SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix(), "");
 
-            List<Role> roles = event.getMember().getRoles();
-            try {
-                //Member already has role, Remove it
-                if (roles.contains(event.getGuild().getRoleById(roleID))) {
-                    event.getGuild().removeRoleFromMember(event.getMember(), event.getGuild().getRoleById(roleID)).reason("Requested by user").queue(success -> {
-                        event.getMessage().addReaction("✅").queue();
-                    });
-                } else {
-                    //Member does not have role, Add it
-                    event.getGuild().addRoleToMember(event.getMember(), event.getGuild().getRoleById(roleID)).reason("Requested by user").queue(success -> {
-                        event.getMessage().addReaction("✅").queue();
-                    });
+            /*
+            USER REQUESTING ROLE TO BE ADDED/REMOVED
+             */
+            if (SherlockBot.guildMap.get(event.getGuild().getId()).assignableRoleMap.containsKey(checkString)) {
+                Long roleID = SherlockBot.guildMap.get(event.getGuild().getId()).assignableRoleMap.get(checkString);
+
+                List<Role> roles = event.getMember().getRoles();
+                try {
+                    //Member already has role, Remove it
+                    if (roles.contains(event.getGuild().getRoleById(roleID))) {
+                        event.getGuild().removeRoleFromMember(event.getMember(), event.getGuild().getRoleById(roleID)).reason("Requested by user").queue(success -> {
+                            event.getMessage().addReaction("✅").queue();
+                        });
+                    } else {
+                        //Member does not have role, Add it
+                        event.getGuild().addRoleToMember(event.getMember(), event.getGuild().getRoleById(roleID)).reason("Requested by user").queue(success -> {
+                            event.getMessage().addReaction("✅").queue();
+                        });
+                    }
+                } catch (NullPointerException | IllegalArgumentException e) {
+                    event.getChannel().sendMessage(event.getMember().getAsMention() + " I could not find the role associated with that command.").queue();
+                    event.getMessage().addReaction("⚠").queue();
+                    //todo log error
+                } catch (PermissionException e) {
+                    event.getChannel().sendMessage("Missing Permission:" + e.getPermission().toString());
+                    event.getMessage().addReaction("⚠").queue();
+                    //todo log error
                 }
-            } catch (NullPointerException | IllegalArgumentException e) {
-                event.getChannel().sendMessage(event.getMember().getAsMention() + " I could not find the role associated with that command.").queue();
-                event.getMessage().addReaction("⚠").queue();
-                //todo log error
-            } catch (PermissionException e) {
-                event.getChannel().sendMessage("Missing Permission:" + e.getPermission().toString());
-                event.getMessage().addReaction("⚠").queue();
-                //todo log error
             }
         }
 

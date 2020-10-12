@@ -326,6 +326,12 @@ public class SQLHandler {
             SherlockBot.guildMap.get(guildID).setWelcomeMethod(welcomeMethod);
             SherlockBot.guildMap.get(guildID).setWelcomeMessageTimeout(welcomeMessageTimeout);
 
+
+            rs = st.executeQuery("SELECT ModRoleID, Permissions FROM ModRoleTable WHERE ChildGuildID = " + Long.valueOf(guildID));
+            while(rs.next()){
+                SherlockBot.guildMap.get(guildID).addModRole(String.valueOf(rs.getLong("ModRoleID")),rs.getInt("Permissions"));
+            }
+
             System.out.println("Guild data loaded | GuildID" + guildID);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -632,6 +638,40 @@ public class SQLHandler {
             Statement st = connection.createStatement();
 
             st.execute(String.format("DELETE FROM LanguageFilter WHERE (ChildGuildID = %d) AND (Word = \"%s\")", guildID, badWord));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
+    }
+
+    // INSERT A BADWORD INTO THE DATABASE
+    public Integer insertModRole(Long guildID, Long roleID, int permissionLevel) {
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("INSERT INTO ModRoleTable (ChildGuildID, ModRoleID, Permissions) VALUES (%d, %d, %d)", guildID, roleID, permissionLevel));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
+    }
+
+    // REMOVE MOD ROLE
+    public Integer removeModRole(Long guildID, Long roleID) {
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("DELETE FROM ModRoleTable WHERE (ChildGuildID = %d) AND (ModRoleID = %d)", guildID, roleID));
             return st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();

@@ -21,7 +21,7 @@ public class ChannelCooldown extends ListenerAdapter {
             return;
         }
 
-        if (SherlockBot.commands.get(13).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commands.get(13).checkCommandMod(event.getMessage(),2)) {
 
             String[] args = event.getMessage().getContentRaw().split("\\s+");
 

@@ -6,10 +6,11 @@ import java.util.Map;
 
 public class GuildSettings {
     private String prefix;
-    private ArrayList<String> modRoles = new ArrayList<>();
+    //private ArrayList<String> modRoles = new ArrayList<>();
     public String logChannelID;
     public int embedFilter = 0;
     public Map<String, Long> assignableRoleMap = new HashMap<>();
+    public Map<String, Integer> modRoleMap = new HashMap<>();
     private ArrayList<String> blacklistedWords = new ArrayList<>();
 
     private Long welcomeChannelID;
@@ -57,34 +58,6 @@ public class GuildSettings {
         this.embedFilter = embedFilter;
     }
 
-    public ArrayList<String> getModRoles() {
-        return modRoles;
-    }
-
-    public void setModRoles(ArrayList<String> modRoles) {
-        this.modRoles = modRoles;
-    }
-
-    public boolean addModRole(String roleID){
-        try{
-            //Role roleCheck = leById(roleID);
-            this.modRoles.add(roleID);
-            return true;
-        } catch(NullPointerException e){
-            // do nothing...
-        }
-        return false;
-    }
-
-    public boolean removeModRole(String roleID){
-        for(String modID:this.modRoles){
-            if(modID.equalsIgnoreCase(roleID)){
-               //todo complete this
-                return true;
-            }
-        }
-        return false;
-    }
 
     public void addAssignableRole(String roleCommand, Long roleID){
         assignableRoleMap.putIfAbsent(roleCommand,roleID);
@@ -92,6 +65,26 @@ public class GuildSettings {
 
     public void removeAssignableRole(String roleCommand){
         assignableRoleMap.remove(roleCommand);
+    }
+
+    public void addModRole(String modRoleID, int permissionLevel){
+        modRoleMap.putIfAbsent(modRoleID,permissionLevel);
+    }
+
+    public void removeModRole(String roleCommand){
+        assignableRoleMap.remove(roleCommand);
+    }
+
+    public int getModPermissionLevel(String modRoleID){
+        return modRoleMap.get(modRoleID);
+    }
+
+    public boolean putModPermissionLevel(String modRoleID, int value){
+        if(this.modRoleMap.containsKey(modRoleID)){
+            this.modRoleMap.put(modRoleID,value);
+            return true;
+        }
+        return false;
     }
 
     public ArrayList<String> getBlacklistedWords() {

@@ -89,16 +89,16 @@ public class SherlockBot {
         commands.add(new Command("ginfo")); // 16
         commands.add(new Command("settings")); // 17
         commands.add(new Command("lookup")); // 18
-        commands.add(new Command("placeholder")); // 19
+        commands.add(new Command("check")); // 19
         commands.add(new Command("placeholder")); // 20
         commands.add(new Command("welcomeMethod")); // 21
         commands.add(new Command("welcomeChannelID")); // 22
         commands.add(new Command("welcomeMessage")); // 23
         commands.add(new Command("welcomeTimeout")); // 24
-        commands.add(new Command("placeholder")); // 25
-        commands.add(new Command("placeholder")); // 26
-        commands.add(new Command("placeholder")); // 27
-        commands.add(new Command("placeholder")); // 28
+        commands.add(new Command("addModRole")); // 25
+        commands.add(new Command("removeModRole")); // 26
+        commands.add(new Command("updateModRole")); // 27
+        commands.add(new Command("getModRoles")); // 28
         commands.add(new Command("placeholder")); // 29
         commands.add(new Command("placeholder")); // 30
 
