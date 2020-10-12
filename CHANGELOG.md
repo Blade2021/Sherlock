@@ -1,3 +1,12 @@
+## 0.0.5
+Introducing mod roles!
+
+**New Commands:**  
+!addModRole - Designate a new role as a mod role with permissions.  
+!removeModRole - Remove a mod role.  
+!updateModRole - Update an existing mod role.  
+!getModRoles - Get a list of current mod roles.  
+
 ## 0.0.4
 Welcome message automations and settings.
 
