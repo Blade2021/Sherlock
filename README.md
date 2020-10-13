@@ -26,11 +26,12 @@ I fully welcome all new ideas and feature requests however for this bot, I am tr
 - **Assignable Roles** - Allows users to self assign themselves roles that are determined by you.
 - **Embed Filtering** - Suppresses embed messages if too many embeds are detected within a certain amount of time/messages.
 - **Welcome Messages** - Give members who join your server a nice hearty welcome!
+- **Customizable Moderator Roles** - Give your moderators access to the commands that YOU designate.  
 
 ## Upcoming Features
 
 - Raid control - Force users to accept an agreement to enter the server.
-- Reporting - Allow users to report others anonmously.
+- Reporting - Allow users to report others anonymously.
 - Custom message triggers
 
 ## Getting Sherlock
