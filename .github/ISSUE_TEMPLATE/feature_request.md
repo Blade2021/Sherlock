@@ -3,7 +3,7 @@ name: Feature request
 about: Suggest an idea for this project
 title: "[FR] "
 labels: feature-request
-assignees: Blade2021
+assignees: ''
 
 ---
 
