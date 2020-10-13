@@ -1,7 +1,6 @@
 package rsystems.objects;
 
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.exceptions.PermissionException;
@@ -17,6 +16,7 @@ public class Command {
     protected String description;
     protected String syntax;
     protected int rank;
+    protected boolean deleteTrigger;
 
     public Command(String command) {
         this.command = command;
@@ -82,6 +82,14 @@ public class Command {
         this.alias.clear();
     }
 
+    public boolean isDeleteTrigger() {
+        return deleteTrigger;
+    }
+
+    public void setDeleteTrigger(boolean deleteTrigger) {
+        this.deleteTrigger = deleteTrigger;
+    }
+
     public boolean checkCommand(String message, String guildID) {
         String prefix = SherlockBot.guildMap.get(guildID).getPrefix();
 
@@ -97,28 +105,6 @@ public class Command {
             });
             return returnValue[0];
         }
-    }
-
-    //Check if message had command, alias, AND correct auth level
-    public int checkCommandMod(String message, String guildID, Member member) {
-        String prefix = SherlockBot.guildMap.get(guildID).getPrefix();
-        String formattedMessage = message.toLowerCase();
-        if (formattedMessage.startsWith(prefix + this.command.toLowerCase())) {
-            if (member.hasPermission(Permission.ADMINISTRATOR)) {
-                return 4;
-            }
-        } else {
-            final int[] returnValue = {0};
-            this.alias.forEach(alias -> {
-                if (formattedMessage.startsWith(prefix + alias.toLowerCase())) {
-                    if (member.hasPermission(Permission.ADMINISTRATOR)) {
-                        returnValue[0] = 4;
-                    }
-                }
-            });
-            return returnValue[0];
-        }
-        return 0;
     }
 
     //Check if message had command, alias, AND correct auth level

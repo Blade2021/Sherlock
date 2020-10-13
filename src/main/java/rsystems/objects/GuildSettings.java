@@ -9,8 +9,9 @@ public class GuildSettings {
     //private ArrayList<String> modRoles = new ArrayList<>();
     public String logChannelID;
     public int embedFilter = 0;
-    public Map<String, Long> assignableRoleMap = new HashMap<>();
+    public Map<String, Long> selfRoleMap = new HashMap<>();
     public Map<String, Integer> modRoleMap = new HashMap<>();
+    public Map<String, Integer> exceptionMap = new HashMap<>();
     private ArrayList<String> blacklistedWords = new ArrayList<>();
 
     private Long welcomeChannelID;
@@ -59,12 +60,12 @@ public class GuildSettings {
     }
 
 
-    public void addAssignableRole(String roleCommand, Long roleID){
-        assignableRoleMap.putIfAbsent(roleCommand,roleID);
+    public void addSelfRole(String roleCommand, Long roleID){
+        selfRoleMap.putIfAbsent(roleCommand,roleID);
     }
 
-    public void removeAssignableRole(String roleCommand){
-        assignableRoleMap.remove(roleCommand);
+    public void removeSelfRole(String roleCommand){
+        selfRoleMap.remove(roleCommand);
     }
 
     public void addModRole(String modRoleID, int permissionLevel){
@@ -72,7 +73,7 @@ public class GuildSettings {
     }
 
     public void removeModRole(String roleCommand){
-        assignableRoleMap.remove(roleCommand);
+        modRoleMap.remove(roleCommand);
     }
 
     public int getModPermissionLevel(String modRoleID){
@@ -82,10 +83,24 @@ public class GuildSettings {
     public boolean putModPermissionLevel(String modRoleID, int value){
         if(this.modRoleMap.containsKey(modRoleID)){
             this.modRoleMap.put(modRoleID,value);
-            return true;
+        } else {
+            modRoleMap.putIfAbsent(modRoleID,value);
         }
-        return false;
+        return true;
     }
+
+    public void addChannelException(String channelID, int exceptionValue){
+        exceptionMap.putIfAbsent(channelID,exceptionValue);
+    }
+
+    public void removeChannelException(String channelID){
+        exceptionMap.remove(channelID);
+    }
+
+    public int getChannelException(String channelID){
+        return exceptionMap.get(channelID);
+    }
+
 
     public ArrayList<String> getBlacklistedWords() {
         return blacklistedWords;

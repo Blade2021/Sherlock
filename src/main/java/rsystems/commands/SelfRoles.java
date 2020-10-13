@@ -6,14 +6,14 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
-import rsystems.objects.AssignableRole;
+import rsystems.objects.SelfRole;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static rsystems.SherlockBot.database;
 
-public class AssignableRoles extends ListenerAdapter {
+public class SelfRoles extends ListenerAdapter {
 
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
         if (event.getAuthor().isBot()) {
@@ -29,8 +29,8 @@ public class AssignableRoles extends ListenerAdapter {
             /*
             USER REQUESTING ROLE TO BE ADDED/REMOVED
              */
-            if (SherlockBot.guildMap.get(event.getGuild().getId()).assignableRoleMap.containsKey(checkString)) {
-                Long roleID = SherlockBot.guildMap.get(event.getGuild().getId()).assignableRoleMap.get(checkString);
+            if (SherlockBot.guildMap.get(event.getGuild().getId()).selfRoleMap.containsKey(checkString)) {
+                Long roleID = SherlockBot.guildMap.get(event.getGuild().getId()).selfRoleMap.get(checkString);
 
                 List<Role> roles = event.getMember().getRoles();
                 try {
@@ -67,10 +67,10 @@ public class AssignableRoles extends ListenerAdapter {
             StringBuilder rolesString = new StringBuilder();
             StringBuilder roleIDString = new StringBuilder();
 
-            ArrayList<AssignableRole> roles = new ArrayList<>();
-            roles.addAll(database.getAssignableRoles(event.getGuild().getIdLong()));
+            ArrayList<SelfRole> roles = new ArrayList<>();
+            roles.addAll(database.getSelfRoles(event.getGuild().getIdLong()));
 
-            for(AssignableRole r: roles){
+            for(SelfRole r: roles){
                 roleCommands.append(r.command).append("\n");
                 roleIDString.append(r.RoleID).append("\n");
                 try{

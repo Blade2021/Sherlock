@@ -48,10 +48,10 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     String newID = ""; // Initialize a variable for storing ID
 
                     //If a text channel is mentioned
-                    if(event.getMessage().getMentionedChannels().size() > 0){
-                            if(event.getMessage().getMentionedChannels().get(0) != null){
-                                newID = event.getMessage().getMentionedChannels().get(0).getId();
-                            }
+                    if (event.getMessage().getMentionedChannels().size() > 0) {
+                        if (event.getMessage().getMentionedChannels().get(0) != null) {
+                            newID = event.getMessage().getMentionedChannels().get(0).getId();
+                        }
 
                     } else {
                         // No channel was mentioned, try using the ID call
@@ -62,7 +62,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                                 event.getMessage().addReaction("⚠").queue();
                                 return;
                             }
-                        }catch(NumberFormatException e){
+                        } catch (NumberFormatException e) {
                             event.getMessage().addReaction("⚠").queue();
                             return;
                         }
@@ -74,7 +74,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                 } else {
                     String logChannelID = SherlockBot.guildMap.get(event.getGuild().getId()).getLogChannelID();
                     System.out.println(logChannelID);
-                    if((logChannelID != null) && !(logChannelID.equalsIgnoreCase("0")) && (event.getGuild().getTextChannelById(logChannelID).canTalk())){
+                    if ((logChannelID != null) && !(logChannelID.equalsIgnoreCase("0")) && (event.getGuild().getTextChannelById(logChannelID).canTalk())) {
                         event.getChannel().sendMessage(event.getGuild().getTextChannelById(logChannelID).getAsMention() + "\nLogChannelID: " + logChannelID).queue();
                     } else {
                         event.getChannel().sendMessage(event.getAuthor().getAsMention() + " No log channel has been set  \uD83E\uDDD0").queue();
@@ -101,7 +101,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                 } else {
                     try {
                         SherlockBot.guildMap.get(event.getGuild().getId()).setEmbedFilter(Integer.parseInt(args[1]));
-                        database.putValue("GuildTable","EmbedFilter","GuildID",event.getGuild().getIdLong(),Integer.parseInt(args[1]));
+                        database.putValue("GuildTable", "EmbedFilter", "GuildID", event.getGuild().getIdLong(), Integer.parseInt(args[1]));
                         event.getMessage().addReaction("✅").queue();
                         return;
                     } catch (NumberFormatException | NullPointerException e) {
@@ -118,39 +118,39 @@ public class ModifyGuildSettings extends ListenerAdapter {
         }
 
         /*
-                        ASSIGNABLE ROLES CONFIGURATION
+                        SELF ROLES CONFIGURATION
          */
 
         /*
-        ADD ROLE TO ASSIGNABLE ROLES OF GUILDMAP
+        ADD ROLE TO SELF ROLES OF GUILDMAP
          */
         if (SherlockBot.commands.get(5).checkCommandMod(event.getMessage())) {
             try {
                 if ((args.length == 3) && (event.getGuild().getRoleById(args[2]) != null)) {
-                    // Add role to assignable roles of guildmap
-                    SherlockBot.guildMap.get(event.getGuild().getId()).addAssignableRole(args[1], Long.valueOf(args[2]));
-                    int databaseStatusCode = database.insertAssignableRole(event.getGuild().getIdLong(), args[1], Long.valueOf(args[2]));
+                    // Add role to self roles of guildmap
+                    SherlockBot.guildMap.get(event.getGuild().getId()).addSelfRole(args[1], Long.valueOf(args[2]));
+                    int databaseStatusCode = database.insertSelfRole(event.getGuild().getIdLong(), args[1], Long.valueOf(args[2]));
                     System.out.println("Database Status Code: " + databaseStatusCode);
                     if (databaseStatusCode == 200) {
                         // Success (1+ updated)
                         event.getMessage().addReaction("✅").queue();
                         return;
                     } else {
-                        switch(databaseStatusCode){
+                        switch (databaseStatusCode) {
                             case 201:
-                                event.getChannel().sendMessage(event.getAuthor().getAsMention() + " ERROR 201: You have hit the maximum number of assignable roles.  Please try to remove some before continuing.").queue();
+                                event.getChannel().sendMessage(event.getAuthor().getAsMention() + " ERROR 201: You have hit the maximum number of self roles.  Please try to remove some before continuing.").queue();
                                 break;
                             case 400:
                                 event.getChannel().sendMessage(event.getAuthor().getAsMention() + " ERROR 400: Database had an unknown error.  This event has been logged.").queue();
                         }
                         // Unsuccessful (0 rows updated)
-                        database.logError(event.getGuild().getId(), "Failed to add assignable role",databaseStatusCode);
+                        database.logError(event.getGuild().getId(), "Failed to add self role", databaseStatusCode);
                     }
                 } else {
                     // Request failed internal checks
                     if (args.length < 3) {
                         event.getChannel().sendMessage("Not enough arguments supplied.").queue();
-                    } else if(event.getGuild().getRoleById(args[2]) == null){
+                    } else if (event.getGuild().getRoleById(args[2]) == null) {
                         // Cannot find role associated with ID provided
                         event.getChannel().sendMessage(event.getAuthor().getAsMention() + " I could not find a role associated with that ID.").queue();
                     }
@@ -165,14 +165,14 @@ public class ModifyGuildSettings extends ListenerAdapter {
         }
 
         /*
-        REMOVE ROLE FROM ASSIGNABLE ROLES OF GUILDMAP
+        REMOVE ROLE FROM SELF ROLES OF GUILDMAP
          */
         if (SherlockBot.commands.get(4).checkCommandMod(event.getMessage())) {
             if (args.length >= 1) {
-                if (SherlockBot.guildMap.get(event.getGuild().getId()).assignableRoleMap.containsKey(args[1])) {
-                    SherlockBot.guildMap.get(event.getGuild().getId()).removeAssignableRole(args[1]);
+                if (SherlockBot.guildMap.get(event.getGuild().getId()).selfRoleMap.containsKey(args[1])) {
+                    SherlockBot.guildMap.get(event.getGuild().getId()).removeSelfRole(args[1]);
 
-                    int rowUpdateCount = database.removeAssignableRole(event.getGuild().getIdLong(), args[1]);
+                    int rowUpdateCount = database.removeSelfRole(event.getGuild().getIdLong(), args[1]);
 
                     // Success (1+ updated)
                     if (rowUpdateCount > 0) {
@@ -181,7 +181,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     } else {
                         // Unsuccessful (0 rows updated)
                         event.getMessage().addReaction("❌").queue();
-                        database.logError(event.getGuild().getId(), "Failed to remove assignable role", 400);
+                        database.logError(event.getGuild().getId(), "Failed to remove self role", 400);
                     }
                 }
             }
@@ -270,24 +270,23 @@ public class ModifyGuildSettings extends ListenerAdapter {
         ADD MOD ROLE
          */
         if (SherlockBot.commands.get(25).checkCommandMod(event.getMessage())) {
-            if(args.length < 3){
-                return;
-            }
+            if (args.length >= 3) {
 
-            try{
-                if(event.getGuild().getRoleById(args[1]) == null){
+                try {
+                    if (event.getGuild().getRoleById(args[1]) == null) {
+                        return;
+                    }
+
+                    SherlockBot.guildMap.get(event.getGuild().getId()).addModRole(args[1], Integer.parseInt(args[2]));
+                    if (database.insertModRole(event.getGuild().getIdLong(), Long.valueOf(args[1]), Integer.parseInt(args[2])) >= 1) {
+                        event.getMessage().addReaction("✅").queue();
+                    } else {
+                        event.getMessage().addReaction("❌").queue();
+                    }
+
+                } catch (NumberFormatException e) {
                     return;
                 }
-
-                SherlockBot.guildMap.get(event.getGuild().getId()).addModRole(args[1],Integer.parseInt(args[2]));
-                if(database.insertModRole(event.getGuild().getIdLong(),Long.valueOf(args[1]),Integer.parseInt(args[2])) >= 1){
-                    event.getMessage().addReaction("✅").queue();
-                } else {
-                    event.getMessage().addReaction("❌").queue();
-                }
-
-            } catch (NumberFormatException e){
-                return;
             }
         }
 
@@ -295,24 +294,23 @@ public class ModifyGuildSettings extends ListenerAdapter {
         REMOVE MOD ROLE
          */
         if (SherlockBot.commands.get(26).checkCommandMod(event.getMessage())) {
-            if(args.length < 2){
-                return;
-            }
+            if (args.length >= 2) {
 
-            try{
-                if(event.getGuild().getRoleById(args[1]) == null){
+                try {
+                    if (event.getGuild().getRoleById(args[1]) == null) {
+                        return;
+                    }
+
+                    SherlockBot.guildMap.get(event.getGuild().getId()).removeModRole(args[1]);
+                    if (database.removeModRole(event.getGuild().getIdLong(), Long.valueOf(args[1])) >= 1) {
+                        event.getMessage().addReaction("✅").queue();
+                    } else {
+                        event.getMessage().addReaction("❌").queue();
+                    }
+
+                } catch (NumberFormatException e) {
                     return;
                 }
-
-                SherlockBot.guildMap.get(event.getGuild().getId()).removeModRole(args[1]);
-                if(database.removeModRole(event.getGuild().getIdLong(),Long.valueOf(args[1])) >= 1){
-                    event.getMessage().addReaction("✅").queue();
-                } else {
-                    event.getMessage().addReaction("❌").queue();
-                }
-
-            } catch (NumberFormatException e){
-                return;
             }
         }
 
@@ -320,32 +318,31 @@ public class ModifyGuildSettings extends ListenerAdapter {
         UPDATE MOD PERMISSIONS
          */
         if (SherlockBot.commands.get(27).checkCommandMod(event.getMessage())) {
-            if(args.length < 3){
-                return;
-            }
+            if (args.length >= 3) {
 
-            try{
-                if(event.getGuild().getRoleById(args[1]) == null){
-                    return;
-                }
+                try {
+                    if (event.getGuild().getRoleById(args[1]) == null) {
+                        return;
+                    }
 
-                int newValue = Integer.parseInt(args[2]);
-                Long identifier = Long.valueOf(args[1]);
+                    int newValue = Integer.parseInt(args[2]);
+                    Long identifier = Long.valueOf(args[1]);
 
-                if(SherlockBot.guildMap.get(event.getGuild().getId()).putModPermissionLevel(args[1],newValue)){
-                    if(database.putValue("ModRoleTable","Permissions","ModRoleID",identifier,newValue) >= 1){
-                        event.getMessage().addReaction("✅").queue();
+                    if (SherlockBot.guildMap.get(event.getGuild().getId()).putModPermissionLevel(args[1], newValue)) {
+                        if (database.putValue("ModRoleTable", "Permissions", "ModRoleID", identifier, newValue) >= 1) {
+                            event.getMessage().addReaction("✅").queue();
+                        } else {
+                            // Unsuccessful (0 rows updated)
+                            event.getMessage().addReaction("❌").queue();
+                        }
                     } else {
                         // Unsuccessful (0 rows updated)
                         event.getMessage().addReaction("❌").queue();
                     }
-                } else {
-                    // Unsuccessful (0 rows updated)
-                    event.getMessage().addReaction("❌").queue();
-                }
 
-            } catch (NumberFormatException e){
-                return;
+                } catch (NumberFormatException e) {
+                    return;
+                }
             }
         }
 
@@ -354,38 +351,116 @@ public class ModifyGuildSettings extends ListenerAdapter {
          */
         if (SherlockBot.commands.get(28).checkCommandMod(event.getMessage())) {
 
-                EmbedBuilder embedBuilder = new EmbedBuilder();
-                StringBuilder roleNameString = new StringBuilder();
-                StringBuilder roleIDString = new StringBuilder();
-                StringBuilder rolePermissions = new StringBuilder();
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            StringBuilder roleNameString = new StringBuilder();
+            StringBuilder roleIDString = new StringBuilder();
+            StringBuilder rolePermissions = new StringBuilder();
 
-                for(Map.Entry<String,Integer> entry:SherlockBot.guildMap.get(event.getGuild().getId()).modRoleMap.entrySet()){
-                    try{
-                        String roleName = event.getGuild().getRoleById(entry.getKey()).getName();
-                        roleNameString.append(roleName).append("\n");
+            for (Map.Entry<String, Integer> entry : SherlockBot.guildMap.get(event.getGuild().getId()).modRoleMap.entrySet()) {
+                try {
+                    String roleName = event.getGuild().getRoleById(entry.getKey()).getName();
+                    roleNameString.append(roleName).append("\n");
 
-                        roleIDString.append(entry.getKey()).append("\n");
-                        rolePermissions.append(entry.getValue()).append("\n");
-                    }catch(NullPointerException e){
-                        continue;
-                    }
+                    roleIDString.append(entry.getKey()).append("\n");
+                    rolePermissions.append(entry.getValue()).append("\n");
+                } catch (NullPointerException e) {
+                    continue;
                 }
+            }
 
-                embedBuilder.setTitle("Mod Role Table")
-                        .addField("Role Name:",roleNameString.toString(),true)
-                        .addField("Role ID:",roleIDString.toString(),true)
-                        .addField("Role Permissions",rolePermissions.toString(),true)
-                        .setFooter("Called by: " + event.getMember().getEffectiveName(),event.getAuthor().getEffectiveAvatarUrl())
-                        .setColor(Color.CYAN);
+            embedBuilder.setTitle("Mod Role Table")
+                    .addField("Role Name:", roleNameString.toString(), true)
+                    .addField("Role ID:", roleIDString.toString(), true)
+                    .addField("Role Permissions", rolePermissions.toString(), true)
+                    .setFooter("Called by: " + event.getMember().getEffectiveName(), event.getAuthor().getEffectiveAvatarUrl())
+                    .setColor(Color.CYAN);
 
-                event.getChannel().sendMessage(embedBuilder.build()).queue();
-                embedBuilder.clear();
+            event.getChannel().sendMessage(embedBuilder.build()).queue();
+            embedBuilder.clear();
         }
+
+        /*
+        ADD EXCEPTION
+         */
+
+        if (SherlockBot.commands.get(29).checkCommandMod(event.getMessage())) {
+            if (args.length >= 3) {
+
+                try {
+                    if (event.getGuild().getTextChannelById(args[1]) != null) {
+
+                        SherlockBot.guildMap.get(event.getGuild().getId()).addChannelException(args[1], Integer.parseInt(args[2]));
+                        if (database.insertException(event.getGuild().getIdLong(), Long.valueOf(args[1]), Integer.parseInt(args[2])) >= 1) {
+                            event.getMessage().addReaction("✅").queue();
+                        } else {
+                            event.getMessage().addReaction("❌").queue();
+                        }
+                    }
+
+                } catch (NumberFormatException e) {
+                    return;
+                }
+            }
+        }
+
+        /*
+        REMOVE MOD ROLE
+         */
+        if (SherlockBot.commands.get(30).checkCommandMod(event.getMessage())) {
+            if (args.length >= 2) {
+
+                try {
+                    SherlockBot.guildMap.get(event.getGuild().getId()).removeChannelException(args[1]);
+                    if (database.removeException(event.getGuild().getIdLong(), Long.valueOf(args[1])) >= 1) {
+                        event.getMessage().addReaction("✅").queue();
+                    } else {
+                        event.getMessage().addReaction("❌").queue();
+                    }
+
+                } catch (NumberFormatException e) {
+                    return;
+                }
+            }
+        }
+
+        /*
+        GET MOD ROLES
+         */
+        if (SherlockBot.commands.get(31).checkCommandMod(event.getMessage())) {
+
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            StringBuilder channelNameString = new StringBuilder();
+            StringBuilder channelIDString = new StringBuilder();
+            StringBuilder exceptionValueString = new StringBuilder();
+
+            for (Map.Entry<String, Integer> entry : SherlockBot.guildMap.get(event.getGuild().getId()).exceptionMap.entrySet()) {
+                try {
+                    String channelName = event.getGuild().getTextChannelById(entry.getKey()).getName();
+                    channelNameString.append(channelName).append("\n");
+
+                    channelIDString.append(entry.getKey()).append("\n");
+                    exceptionValueString.append(entry.getValue()).append("\n");
+                } catch (NullPointerException e) {
+                    continue;
+                }
+            }
+
+            embedBuilder.setTitle("Channel Exception List")
+                    .addField("Channel Name:", channelNameString.toString(), true)
+                    .addField("Channel ID:", channelIDString.toString(), true)
+                    .addField("Exception Value", exceptionValueString.toString(), true)
+                    .setFooter("Called by: " + event.getMember().getEffectiveName(), event.getAuthor().getEffectiveAvatarUrl())
+                    .setColor(Color.CYAN);
+
+            event.getChannel().sendMessage(embedBuilder.build()).queue();
+            embedBuilder.clear();
+        }
+
 
         /*
         CHECK AUTHORIZED
          */
-        if (SherlockBot.commands.get(19).checkCommand(event.getMessage().getContentDisplay(),event.getGuild().getId())) {
+        if (SherlockBot.commands.get(19).checkCommand(event.getMessage().getContentDisplay(), event.getGuild().getId())) {
             Boolean authorized = false;
             int index = Integer.parseInt(args[1]);
 
@@ -393,39 +468,39 @@ public class ModifyGuildSettings extends ListenerAdapter {
             String binaryString = "";
             char indexChar = '0';
 
-            if(args.length < 3) {
+            if (args.length < 3) {
                 for (Role r : event.getMember().getRoles()) {
                     if (SherlockBot.guildMap.get(event.getGuild().getId()).modRoleMap.containsKey(r.getId())) {
 
                         modRoleValue = SherlockBot.guildMap.get(event.getGuild().getId()).modRoleMap.get(r.getId());
                         binaryString = Integer.toBinaryString(modRoleValue);
                         String reverseString = new StringBuilder(binaryString).reverse().toString();
-                        try{
+                        try {
                             indexChar = reverseString.charAt(index);
-                        }catch(IndexOutOfBoundsException e){
+                        } catch (IndexOutOfBoundsException e) {
                         }
 
                     }
                 }
             } else {
-                if(SherlockBot.guildMap.get(event.getGuild().getId()).modRoleMap.containsKey(args[2])) {
+                if (SherlockBot.guildMap.get(event.getGuild().getId()).modRoleMap.containsKey(args[2])) {
                     modRoleValue = SherlockBot.guildMap.get(event.getGuild().getId()).modRoleMap.get(args[2]);
                     binaryString = Integer.toBinaryString(modRoleValue);
                     String reverseString = new StringBuilder(binaryString).reverse().toString();
-                    try{
+                    try {
                         indexChar = reverseString.charAt(index);
-                    }catch(IndexOutOfBoundsException e){
+                    } catch (IndexOutOfBoundsException e) {
                     }
                 } else {
                     indexChar = '0';
                 }
             }
 
-            if(indexChar == '1'){
+            if (indexChar == '1') {
                 event.getMessage().addReaction("\uD83D\uDC4D").queue();
             } else {
                 event.getMessage().addReaction("\uD83D\uDC4E").queue();
-                System.out.println(String.format("Role Integer: %d\nBinary String:%s\nChar at Index:%s",modRoleValue,binaryString,indexChar));
+                System.out.println(String.format("Role Integer: %d\nBinary String:%s\nChar at Index:%s", modRoleValue, binaryString, indexChar));
             }
         }
 

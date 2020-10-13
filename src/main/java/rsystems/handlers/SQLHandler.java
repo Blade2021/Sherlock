@@ -2,7 +2,7 @@ package rsystems.handlers;
 
 import rsystems.Config;
 import rsystems.SherlockBot;
-import rsystems.objects.AssignableRole;
+import rsystems.objects.SelfRole;
 import rsystems.objects.InfractionObject;
 
 import java.sql.*;
@@ -282,12 +282,12 @@ public class SQLHandler {
             SherlockBot.guildMap.get(guildID).setLogChannelID(String.valueOf(logChannelID));
 
             /*
-                    GRAB ASSIGNABLE ROLES FROM DATABASE
+                    GRAB SELF ROLES FROM DATABASE
              */
-            ArrayList<AssignableRole> assignableRoles = new ArrayList<>();
-            assignableRoles = getAssignableRoles(Long.valueOf(guildID));
-            for (AssignableRole role : assignableRoles) {
-                SherlockBot.guildMap.get(guildID).assignableRoleMap.put(role.command, role.RoleID);
+            ArrayList<SelfRole> selfRoles = new ArrayList<>();
+            selfRoles = getSelfRoles(Long.valueOf(guildID));
+            for (SelfRole role : selfRoles) {
+                SherlockBot.guildMap.get(guildID).selfRoleMap.put(role.command, role.RoleID);
             }
 
             SherlockBot.guildMap.get(guildID).setBlacklistedWords(getBadWords(Long.valueOf(guildID)));
@@ -332,16 +332,21 @@ public class SQLHandler {
                 SherlockBot.guildMap.get(guildID).addModRole(String.valueOf(rs.getLong("ModRoleID")),rs.getInt("Permissions"));
             }
 
+            rs = st.executeQuery("SELECT ChannelID, Type FROM ExceptionTable WHERE ChildGuildID = " + Long.valueOf(guildID));
+            while(rs.next()){
+                SherlockBot.guildMap.get(guildID).addChannelException(String.valueOf(rs.getLong("ChannelID")),rs.getInt("Type"));
+            }
+
             System.out.println("Guild data loaded | GuildID" + guildID);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
-    // Add an assignable role to the database
-    public Integer insertAssignableRole(Long guildID, String command, Long roleID) {
+    // Add an self role to the database
+    public Integer insertSelfRole(Long guildID, String command, Long roleID) {
 
-        if(checkSize(guildID,"AssignableRoles")) {
+        if(checkSize(guildID,"SelfRoles")) {
 
             try {
                 if ((connection == null) || (connection.isClosed())) {
@@ -350,7 +355,7 @@ public class SQLHandler {
 
                 Statement st = connection.createStatement();
 
-                st.execute(String.format("INSERT INTO AssignableRoles (ChildGuildID, RoleCommand, RoleID) VALUES (%d, \"%s\", %d)", guildID, command, roleID));
+                st.execute(String.format("INSERT INTO SelfRoles (ChildGuildID, RoleCommand, RoleID) VALUES (%d, \"%s\", %d)", guildID, command, roleID));
                 return 200;
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
@@ -361,8 +366,8 @@ public class SQLHandler {
         return 0;
     }
 
-    // Remove an assignable role to the database
-    public Integer removeAssignableRole(Long guildID, String command) {
+    // Remove an self role to the database
+    public Integer removeSelfRole(Long guildID, String command) {
         try {
             if ((connection == null) || (connection.isClosed())) {
                 connect();
@@ -370,7 +375,7 @@ public class SQLHandler {
 
             Statement st = connection.createStatement();
 
-            st.execute(String.format("DELETE FROM AssignableRoles WHERE (ChildGuildID = %d) AND (RoleCommand = \"%s\")", guildID, command));
+            st.execute(String.format("DELETE FROM SelfRoles WHERE (ChildGuildID = %d) AND (RoleCommand = \"%s\")", guildID, command));
             return st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -378,19 +383,19 @@ public class SQLHandler {
         return 0;
     }
 
-    //Get Assignable Roles - Called by GuildLoader
-    public ArrayList<AssignableRole> getAssignableRoles(Long guildID) {
-        ArrayList<AssignableRole> output = new ArrayList<>();
+    //Get self Roles - Called by GuildLoader
+    public ArrayList<SelfRole> getSelfRoles(Long guildID) {
+        ArrayList<SelfRole> output = new ArrayList<>();
         try {
             if ((connection == null) || (connection.isClosed())) {
                 connect();
             }
 
             Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT RoleCommand, RoleID FROM AssignableRoles WHERE ChildGuildID = " + guildID);
+            ResultSet rs = statement.executeQuery("SELECT RoleCommand, RoleID FROM SelfRoles WHERE ChildGuildID = " + guildID);
 
             while (rs.next()) {
-                output.add(new AssignableRole(guildID, rs.getString("RoleCommand"), rs.getLong("RoleID")));
+                output.add(new SelfRole(guildID, rs.getString("RoleCommand"), rs.getLong("RoleID")));
             }
 
             return output;
@@ -662,6 +667,7 @@ public class SQLHandler {
         return 0;
     }
 
+
     // REMOVE MOD ROLE
     public Integer removeModRole(Long guildID, Long roleID) {
         try {
@@ -672,6 +678,40 @@ public class SQLHandler {
             Statement st = connection.createStatement();
 
             st.execute(String.format("DELETE FROM ModRoleTable WHERE (ChildGuildID = %d) AND (ModRoleID = %d)", guildID, roleID));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
+    }
+
+    // INSERT A CHANNEL EXCEPTION INTO DATABASE
+    public Integer insertException(Long guildID, Long channelID, int type) {
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("INSERT INTO ExceptionTable (ChildGuildID, ChannelID, Type) VALUES (%d, %d, %d)", guildID, channelID, type));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
+    }
+
+    // REMOVE MOD ROLE
+    public Integer removeException(Long guildID, Long channelID) {
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("DELETE FROM ExceptionTable WHERE (ChildGuildID = %d) AND (ChannelID = %d)", guildID, channelID));
             return st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();

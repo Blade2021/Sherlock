@@ -24,7 +24,7 @@ public class SherlockBot {
     public static Map<String,GuildSettings> guildMap = new HashMap<>();
     public static SQLHandler database = new SQLHandler(Config.get("Database_Host"),Config.get("Database_User"),Config.get("Database_Pass"));
     public static User bot = null;
-    public static String version = "0.0.5";
+    public static String version = "0.1.7";
 
     public static void main(String[] args) throws LoginException {
         JDA api = JDABuilder.createDefault(Config.get("token"))
@@ -40,7 +40,7 @@ public class SherlockBot {
         api.addEventListener(new LeaveGuild());
         api.addEventListener(new Infraction());
         api.addEventListener(new Mute());
-        api.addEventListener(new AssignableRoles());
+        api.addEventListener(new SelfRoles());
         api.addEventListener(new ModifyGuildSettings());
         api.addEventListener(new PrivateMessageReceived());
         api.addEventListener(new GuildRoleDeleted());
@@ -74,8 +74,8 @@ public class SherlockBot {
         commands.add(new Command("infract")); // 1
         commands.add(new Command("mute")); // 2
         commands.add(new Command("unmute")); // 3
-        commands.add(new Command("resign")); // 4
-        commands.add(new Command("assign")); // 5
+        commands.add(new Command("removeSelfRole")); // 4
+        commands.add(new Command("addSelfRole")); // 5
         commands.add(new Command("logChannel")); // 6
         commands.add(new Command("commands")); // 7
         commands.add(new Command("setPrefix")); // 8
@@ -99,8 +99,16 @@ public class SherlockBot {
         commands.add(new Command("removeModRole")); // 26
         commands.add(new Command("updateModRole")); // 27
         commands.add(new Command("getModRoles")); // 28
-        commands.add(new Command("placeholder")); // 29
-        commands.add(new Command("placeholder")); // 30
+        commands.add(new Command("addException")); // 29
+        commands.add(new Command("removeException")); // 30
+        commands.add(new Command("getExceptions")); // 31
+        commands.add(new Command("placeholder")); // 32
+        commands.add(new Command("placeholder")); // 33
+        commands.add(new Command("placeholder")); // 34
+        commands.add(new Command("placeholder")); // 35
+        commands.add(new Command("placeholder")); // 36
+        commands.add(new Command("placeholder")); // 37
+
 
     }
 

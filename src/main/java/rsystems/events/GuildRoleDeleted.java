@@ -13,15 +13,15 @@ import static rsystems.SherlockBot.database;
 
 public class GuildRoleDeleted extends ListenerAdapter {
     public void onRoleDelete(RoleDeleteEvent event){
-        if(SherlockBot.guildMap.get(event.getGuild().getId()).assignableRoleMap.containsValue(event.getRole().getIdLong())){
+        if(SherlockBot.guildMap.get(event.getGuild().getId()).selfRoleMap.containsValue(event.getRole().getIdLong())){
 
             StringBuilder relatedCommands = new StringBuilder();
 
-            Iterator it = SherlockBot.guildMap.get(event.getGuild().getId()).assignableRoleMap.entrySet().iterator();
+            Iterator it = SherlockBot.guildMap.get(event.getGuild().getId()).selfRoleMap.entrySet().iterator();
             while(it.hasNext()) {
                 Map.Entry pair = (Map.Entry) it.next();
                 if (pair.getValue().toString().equalsIgnoreCase(event.getRole().getId())) {
-                    database.removeAssignableRole(event.getGuild().getIdLong(), String.valueOf(pair.getKey()));
+                    database.removeSelfRole(event.getGuild().getIdLong(), String.valueOf(pair.getKey()));
                     relatedCommands.append(pair.getKey()).append("\n");
                     it.remove();
                     System.out.println(String.format("Removing Assignable Role | Role CMD: %s | RoleID: %d",pair.getKey(),pair.getValue()));
