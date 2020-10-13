@@ -59,7 +59,7 @@ public class SelfRoles extends ListenerAdapter {
 
 
         /*
-        GET A LIST OF ASSIGNABLE ROLES
+        GET A LIST OF SELF ROLES
          */
         if (SherlockBot.commands.get(9).checkCommand(event.getMessage().getContentRaw(), event.getGuild().getId())) {
             EmbedBuilder embedBuilder = new EmbedBuilder();
@@ -81,7 +81,7 @@ public class SelfRoles extends ListenerAdapter {
 
             }
 
-            embedBuilder.setTitle("Assignable Roles")
+            embedBuilder.setTitle("SELF Roles")
                     .addField("Role Command",roleCommands.toString(),true)
                     .addField("Role Name",rolesString.toString(),true)
                     .addField("Role ID",roleIDString.toString(),true);

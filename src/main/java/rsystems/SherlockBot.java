@@ -79,7 +79,7 @@ public class SherlockBot {
         commands.add(new Command("logChannel")); // 6
         commands.add(new Command("commands")); // 7
         commands.add(new Command("setPrefix")); // 8
-        commands.add(new Command("getAroles")); // 9
+        commands.add(new Command("getSelfRoles")); // 9
         commands.add(new Command("lfadd")); // 10
         commands.add(new Command("lfremove")); // 11
         commands.add(new Command("lflist")); // 12

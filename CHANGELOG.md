@@ -5,11 +5,13 @@ In order to keep the terminology consistent as more releases are to come, We hav
 
     !assign - Add a role that can be self assigned with a trigger
     !resign - Remove a role that can be self assigned.
+    !getaRoles - Get a list of self assignable roles.
 
 **AFTER**  
 
     !addSelfRole - Add a role that can be self assigned with a trigger
     !removeSelfRole - Remove a role that can be self assigned.
+    !getSelfRoles - Get a list of self assignable roles.
 
 
 ## 0.1.6
