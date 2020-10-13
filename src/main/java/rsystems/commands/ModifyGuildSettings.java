@@ -280,7 +280,11 @@ public class ModifyGuildSettings extends ListenerAdapter {
                 }
 
                 SherlockBot.guildMap.get(event.getGuild().getId()).addModRole(args[1],Integer.parseInt(args[2]));
-                database.insertModRole(event.getGuild().getIdLong(),Long.valueOf(args[1]),Integer.parseInt(args[2]));
+                if(database.insertModRole(event.getGuild().getIdLong(),Long.valueOf(args[1]),Integer.parseInt(args[2])) >= 1){
+                    event.getMessage().addReaction("✅").queue();
+                } else {
+                    event.getMessage().addReaction("❌").queue();
+                }
 
             } catch (NumberFormatException e){
                 return;
@@ -301,7 +305,11 @@ public class ModifyGuildSettings extends ListenerAdapter {
                 }
 
                 SherlockBot.guildMap.get(event.getGuild().getId()).removeModRole(args[1]);
-                database.removeModRole(event.getGuild().getIdLong(),Long.valueOf(args[1]));
+                if(database.removeModRole(event.getGuild().getIdLong(),Long.valueOf(args[1])) >= 1){
+                    event.getMessage().addReaction("✅").queue();
+                } else {
+                    event.getMessage().addReaction("❌").queue();
+                }
 
             } catch (NumberFormatException e){
                 return;
