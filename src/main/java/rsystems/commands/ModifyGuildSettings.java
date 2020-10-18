@@ -126,7 +126,8 @@ public class ModifyGuildSettings extends ListenerAdapter {
          */
         if (SherlockBot.commands.get(5).checkCommandMod(event.getMessage())) {
             try {
-                if ((args.length == 3) && (event.getGuild().getRoleById(args[2]) != null)) {
+                if ((args.length >= 3) && (event.getGuild().getRoleById(args[2]) != null)) {
+
                     // Add role to self roles of guildmap
                     SherlockBot.guildMap.get(event.getGuild().getId()).addSelfRole(args[1], Long.valueOf(args[2]));
                     int databaseStatusCode = database.insertSelfRole(event.getGuild().getIdLong(), args[1], Long.valueOf(args[2]));
@@ -149,10 +150,14 @@ public class ModifyGuildSettings extends ListenerAdapter {
                 } else {
                     // Request failed internal checks
                     if (args.length < 3) {
+
                         event.getChannel().sendMessage("Not enough arguments supplied.").queue();
+
                     } else if (event.getGuild().getRoleById(args[2]) == null) {
+
                         // Cannot find role associated with ID provided
                         event.getChannel().sendMessage(event.getAuthor().getAsMention() + " I could not find a role associated with that ID.").queue();
+
                     }
                     event.getMessage().addReaction("⚠").queue();
                 }
@@ -312,6 +317,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     return;
                 }
             }
+
         }
 
         /*

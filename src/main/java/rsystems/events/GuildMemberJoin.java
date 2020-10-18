@@ -81,7 +81,7 @@ public class GuildMemberJoin extends ListenerAdapter {
     private String formattedWelcomeMSG(Guild guild, Member member) {
 
         String output = SherlockBot.guildMap.get(guild.getId()).getWelcomeMessage();
-        ;
+
 
         output = output.replace("{user.name}", member.getEffectiveName());
         output = output.replace("{user.mention}", member.getAsMention());

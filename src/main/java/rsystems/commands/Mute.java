@@ -83,6 +83,9 @@ public class Mute extends ListenerAdapter {
                 String chronoType = "";
 
 
+                /*
+                GRAB THE AMOUNT OF TIME IF APPLICABLE
+                 */
                 if (event.getMessage().getContentDisplay().contains("-t ")) {
                     //Grab the string AFTER -t, excluding the first 3 characters (Length of -t )
                     String timeArgument = event.getMessage().getContentDisplay().substring(event.getMessage().getContentDisplay().indexOf("-t ") + 3);
@@ -253,7 +256,7 @@ public class Mute extends ListenerAdapter {
 
     private boolean muteUser(Guild guild, Member member, MessageChannel channel, Member requester) {
         try {
-            guild.addRoleToMember(member, Objects.requireNonNull(guild.getRoleById(SherlockBot.guildMap.get(guild.getId()).getMuteRoleID()))).reason("Called by: " + requester.getUser().getAsTag()).queue();
+            guild.addRoleToMember(member, guild.getRoleById(SherlockBot.guildMap.get(guild.getId()).getMuteRoleID())).reason("Called by: " + requester.getUser().getAsTag()).queue();
             return true;
         } catch (HierarchyException e) {
             channel.sendMessage("That user is above me in rank!").queue();

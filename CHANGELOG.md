@@ -1,3 +1,6 @@
+## 0.1.8
+Bug fixes for channel cooldown and automatic unmute functions
+
 ## 0.1.7
 In order to keep the terminology consistent as more releases are to come, We have switched the "AssignableRoles" to "SelfRoles" to provide a better fit for naming.  Please review the command changes below:
 
