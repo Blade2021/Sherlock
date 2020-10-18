@@ -13,18 +13,20 @@ import rsystems.handlers.LanguageFilter;
 import rsystems.handlers.SQLHandler;
 import rsystems.objects.Command;
 import rsystems.objects.GuildSettings;
+import rsystems.threads.ThreeMinute;
 
 import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
 
 public class SherlockBot {
     public static ArrayList<Command> commands = new ArrayList<>();
     public static Map<String,GuildSettings> guildMap = new HashMap<>();
     public static SQLHandler database = new SQLHandler(Config.get("Database_Host"),Config.get("Database_User"),Config.get("Database_Pass"));
     public static User bot = null;
-    public static String version = "0.1.7";
+    public static String version = "0.1.8";
 
     public static void main(String[] args) throws LoginException {
         JDA api = JDABuilder.createDefault(Config.get("token"))
@@ -50,12 +52,13 @@ public class SherlockBot {
         api.addEventListener(new Generics());
         api.addEventListener(new WelcomeSettings());
         api.addEventListener(new GuildMemberJoin());
+        api.addEventListener(new ModCommands());
 
         try{
             api.awaitReady();
             bot = api.getSelfUser();
 
-            //Add each guild's log channel to the Map
+            //Get the data for each guild from the database
             api.getGuilds().forEach(guild -> {
                 guildMap.put(guild.getId(),new GuildSettings("!"));
                 database.loadGuildData(guild.getId());
@@ -64,6 +67,9 @@ public class SherlockBot {
         } catch(InterruptedException e){
 
         }
+
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new ThreeMinute(), 60*1000,60*1000);
 
         loadCommands();
 
@@ -102,14 +108,12 @@ public class SherlockBot {
         commands.add(new Command("addException")); // 29
         commands.add(new Command("removeException")); // 30
         commands.add(new Command("getExceptions")); // 31
-        commands.add(new Command("placeholder")); // 32
+        commands.add(new Command("pull")); // 32
         commands.add(new Command("placeholder")); // 33
         commands.add(new Command("placeholder")); // 34
         commands.add(new Command("placeholder")); // 35
         commands.add(new Command("placeholder")); // 36
         commands.add(new Command("placeholder")); // 37
-
-
     }
 
 }

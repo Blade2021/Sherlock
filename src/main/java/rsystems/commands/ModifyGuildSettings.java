@@ -93,7 +93,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         if (SherlockBot.commands.get(14).checkCommandMod(event.getMessage())) {
             try {
                 if (args.length <= 1) {
-                    event.getChannel().sendMessage(String.format("%s The current embed filter setting: %d\nPlease use `%sEmbedFilter [int]` to set a different value.",
+                    event.getChannel().sendMessage(String.format("%s The current embed filter setting: %d\nPlease use `%sEmbedFilter [0-3]` to set a different value.",
                             event.getAuthor().getAsMention(),
                             SherlockBot.guildMap.get(event.getGuild().getId()).getEmbedFilter(),
                             SherlockBot.guildMap.get(event.getGuild().getId()).getPrefix()))

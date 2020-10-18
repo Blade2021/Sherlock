@@ -1,9 +1,12 @@
 package rsystems.handlers;
 
+import org.mariadb.jdbc.MariaDbConnection;
+import org.mariadb.jdbc.MariaDbPoolDataSource;
 import rsystems.Config;
 import rsystems.SherlockBot;
-import rsystems.objects.SelfRole;
 import rsystems.objects.InfractionObject;
+import rsystems.objects.SelfRole;
+import rsystems.objects.TimedEvent;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -13,6 +16,8 @@ import java.util.HashMap;
 public class SQLHandler {
 
     protected static Connection connection = null;
+    protected static MariaDbConnection connection1 = null;
+    protected static MariaDbPoolDataSource dataSource = null;
     private final String DatabaseURL;
     private final String DatabaseUser;
     private final String DatabaseUserPass;
@@ -21,6 +26,8 @@ public class SQLHandler {
         this.DatabaseURL = DatabaseURL;
         this.DatabaseUser = DatabaseUser;
         this.DatabaseUserPass = DatabaseUserPass;
+
+        //dataSource = new MariaDbPoolDataSource(String.format("%s?user=%s&password=%s&maxPoolSize=10",DatabaseURL,DatabaseUser,DatabaseUserPass));
         connect();
     }
 
@@ -31,8 +38,17 @@ public class SQLHandler {
      */
     public void connect() {
         try {
-            connection = DriverManager.getConnection(DatabaseURL, DatabaseUser, DatabaseUserPass);
 
+            connection = DriverManager.getConnection(DatabaseURL, DatabaseUser, DatabaseUserPass);
+            //dataSource.getConnection();
+
+            while(connection.isClosed()){
+                try {
+                    Thread.sleep(100);
+                }catch(InterruptedException e){
+
+                }
+            }
             if (connection.isValid(30)) {
                 System.out.println("Database connected");
             }
@@ -137,6 +153,30 @@ public class SQLHandler {
         return output;
     }
 
+    public Long getLong(String table, String columnName, String identifierColumn, Long identifier) {
+        Long output = null;
+
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s where %s = %d",columnName,table,identifierColumn,identifier));
+
+            while (rs.next()) {
+                output = rs.getLong(columnName);
+            }
+
+        } catch (SQLException throwables) {
+            System.out.println(throwables.getMessage());
+        } finally {
+            // do nothing at the moment
+        }
+
+        return output;
+    }
+
 
     public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, Long value) {
         int output = 0;
@@ -177,13 +217,14 @@ public class SQLHandler {
         try {
             if ((connection == null) || (connection.isClosed())) {
                 connect();
+                Thread.sleep(1000);
             }
 
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = \"%s\" WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
             output = st.getUpdateCount();
 
-        } catch (SQLException throwables) {
+        } catch (SQLException | InterruptedException throwables) {
             throwables.printStackTrace();
         }
         return output;
@@ -467,6 +508,30 @@ public class SQLHandler {
         }
         return 0;
     }
+
+    public ArrayList<TimedEvent> timedEventList(){
+        ArrayList<TimedEvent> events = new ArrayList<>();
+
+        try{
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery("SELECT EventType, ChildGuildID, EventID, EndDate FROM TimedEvents WHERE Expired = 0");
+            while(rs.next()){
+                events.add(new TimedEvent(rs.getInt("EventType"),rs.getLong("ChildGuildID"),rs.getLong("EventID"),rs.getString("EndDate")));
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            throwables.getErrorCode();
+
+        }
+
+        return events;
+    }
+
     public boolean expireTimedEvent(Long GuildID, Long UserID){
 
         try {
@@ -476,7 +541,7 @@ public class SQLHandler {
 
             Statement st = connection.createStatement();
 
-            st.executeQuery(String.format("UPDATE TimedEvents set Expired = 1 WHERE (ChildGuildID = %d) and (EventID = %d) and (EndDate > NOW())", GuildID, UserID));
+            st.executeQuery(String.format("UPDATE TimedEvents set Expired = 1 WHERE (ChildGuildID = %d) and (EventID = %d)", GuildID, UserID));
             return true;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
