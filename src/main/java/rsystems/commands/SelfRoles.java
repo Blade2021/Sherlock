@@ -10,6 +10,7 @@ import rsystems.objects.SelfRole;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static rsystems.SherlockBot.database;
 
@@ -38,21 +39,30 @@ public class SelfRoles extends ListenerAdapter {
                     if (roles.contains(event.getGuild().getRoleById(roleID))) {
                         event.getGuild().removeRoleFromMember(event.getMember(), event.getGuild().getRoleById(roleID)).reason("Requested by user").queue(success -> {
                             event.getMessage().addReaction("✅").queue();
+                            event.getChannel().sendMessage(event.getAuthor().getAsMention() + "I have removed the " + event.getGuild().getRoleById(roleID).getName() + " from you.").queue(
+                                    messageSentSuccess -> {
+                                        messageSentSuccess.delete().queueAfter(30, TimeUnit.SECONDS);
+                                    }
+                            );
                         });
                     } else {
                         //Member does not have role, Add it
                         event.getGuild().addRoleToMember(event.getMember(), event.getGuild().getRoleById(roleID)).reason("Requested by user").queue(success -> {
                             event.getMessage().addReaction("✅").queue();
+                            event.getChannel().sendMessage(event.getAuthor().getAsMention() + "I have added the " + event.getGuild().getRoleById(roleID).getName() + " to you.").queue(
+                                    messageSentSuccess -> {
+                                        messageSentSuccess.delete().queueAfter(30, TimeUnit.SECONDS);
+                                    }
+                            );
+
                         });
                     }
                 } catch (NullPointerException | IllegalArgumentException e) {
                     event.getChannel().sendMessage(event.getMember().getAsMention() + " I could not find the role associated with that command.").queue();
                     event.getMessage().addReaction("⚠").queue();
-                    //todo log error
                 } catch (PermissionException e) {
                     event.getChannel().sendMessage("Missing Permission:" + e.getPermission().toString());
                     event.getMessage().addReaction("⚠").queue();
-                    //todo log error
                 }
             }
         }
