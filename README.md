@@ -23,7 +23,7 @@ I fully welcome all new ideas and feature requests however for this bot, I am tr
 - **Language Filtering** - Custom triggers to warn/delete messages containing explicit content.
 - **Timed Events (Muting/Ban)** - Automatic unban/unmute after time expiration.
 - **Infraction System** - Log mod/admin notes against a user.
-- **Assignable Roles** - Allows users to self assign themselves roles that are determined by you.
+- **Self Roles** - Allows users to self assign themselves roles that are determined by you.
 - **Embed Filtering** - Suppresses embed messages if too many embeds are detected within a certain amount of time/messages.
 - **Welcome Messages** - Give members who join your server a nice hearty welcome!
 - **Customizable Moderator Roles** - Give your moderators access to the commands that YOU designate.  
