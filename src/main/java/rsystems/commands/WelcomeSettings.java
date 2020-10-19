@@ -18,7 +18,7 @@ public class WelcomeSettings extends ListenerAdapter {
         /*
         GET/SET WELCOME MESSAGE METHOD
          */
-        if (SherlockBot.commands.get(21).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(21).checkCommand(event.getMessage())) {
             // GET CURRENT METHOD
             if(args.length <= 1){
                 event.getChannel().sendMessage(event.getAuthor().getAsMention() + SherlockBot.guildMap.get(event.getGuild().getId()).getWelcomeMethod()).queue();
@@ -43,7 +43,7 @@ public class WelcomeSettings extends ListenerAdapter {
         /*
         GET/SET WELCOME CHANNEL ID
          */
-        if (SherlockBot.commands.get(22).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(22).checkCommand(event.getMessage())) {
             // GET CURRENT METHOD
             if(args.length <= 1){
                 event.getChannel().sendMessage(event.getAuthor().getAsMention() + SherlockBot.guildMap.get(event.getGuild().getId()).getWelcomeChannelID()).queue();
@@ -71,7 +71,7 @@ public class WelcomeSettings extends ListenerAdapter {
         /*
         GET/SET WELCOME MESSAGE
          */
-        if (SherlockBot.commands.get(23).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(23).checkCommand(event.getMessage())) {
             // GET CURRENT METHOD
             if(args.length <= 1){
                 event.getChannel().sendMessage(event.getAuthor().getAsMention() + SherlockBot.guildMap.get(event.getGuild().getId()).getWelcomeMessage()).queue();
@@ -92,7 +92,7 @@ public class WelcomeSettings extends ListenerAdapter {
         /*
         GET/SET WELCOME MESSAGE TIMEOUT
          */
-        if (SherlockBot.commands.get(24).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(24).checkCommand(event.getMessage())) {
 
             // GET CURRENT METHOD
             if(args.length <= 1){

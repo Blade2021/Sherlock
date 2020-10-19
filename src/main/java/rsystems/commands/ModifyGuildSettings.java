@@ -27,7 +27,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         String[] args = event.getMessage().getContentRaw().split("\\s+");
 
         //CHANGE PREFIX
-        if (SherlockBot.commands.get(8).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(8).checkCommand(event.getMessage())) {
             try {
                 database.putValue("GuildTable", "Prefix", "GuildID", event.getGuild().getIdLong(), args[1]);
                 SherlockBot.guildMap.get(event.getGuild().getId()).setPrefix(args[1]);
@@ -42,7 +42,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         }
 
         // GET/SET LOG CHANNEL ID
-        if (SherlockBot.commands.get(6).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(6).checkCommand(event.getMessage())) {
             try {
                 if (args.length > 1) {
                     String newID = ""; // Initialize a variable for storing ID
@@ -90,7 +90,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         }
 
         //CHANGE Embed filter level
-        if (SherlockBot.commands.get(14).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(14).checkCommand(event.getMessage())) {
             try {
                 if (args.length <= 1) {
                     event.getChannel().sendMessage(String.format("%s The current embed filter setting: %d\nPlease use `%sEmbedFilter [0-3]` to set a different value.",
@@ -124,7 +124,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         /*
         ADD ROLE TO SELF ROLES OF GUILDMAP
          */
-        if (SherlockBot.commands.get(5).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(5).checkCommand(event.getMessage())) {
             try {
                 if ((args.length >= 3) && (event.getGuild().getRoleById(args[2]) != null)) {
 
@@ -172,7 +172,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         /*
         REMOVE ROLE FROM SELF ROLES OF GUILDMAP
          */
-        if (SherlockBot.commands.get(4).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(4).checkCommand(event.getMessage())) {
             if (args.length >= 1) {
                 if (SherlockBot.guildMap.get(event.getGuild().getId()).selfRoleMap.containsKey(args[1])) {
                     SherlockBot.guildMap.get(event.getGuild().getId()).removeSelfRole(args[1]);
@@ -199,7 +199,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         /*
         ADD WORD TO LANGUAGE FILTER
          */
-        if (SherlockBot.commands.get(10).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(10).checkCommand(event.getMessage())) {
 
             try {
                 event.getAuthor().openPrivateChannel().queue((channel) -> {
@@ -222,7 +222,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         /*
         REMOVE WORD FROM LANGUAGE FILTER
          */
-        if (SherlockBot.commands.get(11).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(11).checkCommand(event.getMessage())) {
             try {
                 event.getAuthor().openPrivateChannel().queue((channel) -> {
                     try {
@@ -244,7 +244,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         /*
         GET A LIST OF BADWORDS FROM LANGUAGE FILTER
          */
-        if (SherlockBot.commands.get(12).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(12).checkCommand(event.getMessage())) {
             try {
                 event.getAuthor().openPrivateChannel().queue((channel) -> {
 
@@ -274,7 +274,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         /*
         ADD MOD ROLE
          */
-        if (SherlockBot.commands.get(25).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(25).checkCommand(event.getMessage())) {
             if (args.length >= 3) {
 
                 try {
@@ -298,7 +298,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         /*
         REMOVE MOD ROLE
          */
-        if (SherlockBot.commands.get(26).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(26).checkCommand(event.getMessage())) {
             if (args.length >= 2) {
 
                 try {
@@ -323,7 +323,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         /*
         UPDATE MOD PERMISSIONS
          */
-        if (SherlockBot.commands.get(27).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(27).checkCommand(event.getMessage())) {
             if (args.length >= 3) {
 
                 try {
@@ -355,7 +355,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         /*
         GET MOD ROLES
          */
-        if (SherlockBot.commands.get(28).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(28).checkCommand(event.getMessage())) {
 
             EmbedBuilder embedBuilder = new EmbedBuilder();
             StringBuilder roleNameString = new StringBuilder();
@@ -389,7 +389,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         ADD EXCEPTION
          */
 
-        if (SherlockBot.commands.get(29).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(29).checkCommand(event.getMessage())) {
             if (args.length >= 3) {
 
                 try {
@@ -412,7 +412,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         /*
         REMOVE MOD ROLE
          */
-        if (SherlockBot.commands.get(30).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(30).checkCommand(event.getMessage())) {
             if (args.length >= 2) {
 
                 try {
@@ -432,7 +432,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         /*
         GET MOD ROLES
          */
-        if (SherlockBot.commands.get(31).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(31).checkCommand(event.getMessage())) {
 
             EmbedBuilder embedBuilder = new EmbedBuilder();
             StringBuilder channelNameString = new StringBuilder();
@@ -466,7 +466,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         /*
         CHECK AUTHORIZED
          */
-        if (SherlockBot.commands.get(19).checkCommand(event.getMessage().getContentDisplay(), event.getGuild().getId())) {
+        if (SherlockBot.commandMap.get(19).checkCommand(event.getMessage())) {
             Boolean authorized = false;
             int index = Integer.parseInt(args[1]);
 

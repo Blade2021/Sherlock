@@ -37,7 +37,7 @@ public class Mute extends ListenerAdapter {
             /*
                             MUTE USER COMMAND
              */
-            if (SherlockBot.commands.get(2).checkCommandMod(event.getMessage(),0)) {
+            if (SherlockBot.commandMap.get(2).checkCommand(event.getMessage())) {
                 LogChannel logChannel = new LogChannel();
                 ArrayList<Member> mutedUsers = new ArrayList<>();
 
@@ -209,7 +209,7 @@ public class Mute extends ListenerAdapter {
             /*
                             UN-MUTE COMMAND
              */
-            if (SherlockBot.commands.get(3).checkCommandMod(event.getMessage(),0)) {
+            if (SherlockBot.commandMap.get(3).checkCommand(event.getMessage())) {
 
                 LogChannel logChannel = new LogChannel();
                 ArrayList<Member> qualifiedMembers = new ArrayList<>();

@@ -23,7 +23,7 @@ public class ChannelCooldown extends ListenerAdapter {
             return;
         }
 
-        if (SherlockBot.commands.get(13).checkCommandMod(event.getMessage(), 2)) {
+        if (SherlockBot.commandMap.get(13).checkCommand(event.getMessage())) {
 
             String[] args = event.getMessage().getContentRaw().split("\\s+");
 
@@ -103,19 +103,6 @@ public class ChannelCooldown extends ListenerAdapter {
         System.out.println("Starting cooldown sequence");
 
         LocalDateTime currentDateTime = LocalDateTime.now();
-
-
-        /*
-        if (!channel.getRolePermissionOverrides().contains(guild.getPublicRole())) {
-            try{
-                channel.createPermissionOverride(guild.getPublicRole()).setDeny(Permission.MESSAGE_WRITE).queue();
-                database.insertTimedEvent(guild.getIdLong(), channel.getIdLong(), 2, "Channel Cooldown", guild.getPublicRole().getIdLong(), 0, currentDateTime, expirationDate);
-            } catch(IllegalStateException e){
-                System.out.println("Could not create override for " + guild.getPublicRole());
-            }
-        }
-
-         */
 
 
         for (PermissionOverride permissionOverride : channel.getRolePermissionOverrides()) {

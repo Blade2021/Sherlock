@@ -71,7 +71,7 @@ public class SelfRoles extends ListenerAdapter {
         /*
         GET A LIST OF SELF ROLES
          */
-        if (SherlockBot.commands.get(9).checkCommand(event.getMessage().getContentRaw(), event.getGuild().getId())) {
+        if (SherlockBot.commandMap.get(9).checkCommand(event.getMessage())) {
             EmbedBuilder embedBuilder = new EmbedBuilder();
             StringBuilder roleCommands = new StringBuilder();
             StringBuilder rolesString = new StringBuilder();

@@ -32,7 +32,7 @@ public class Infraction extends ListenerAdapter {
             String[] args = event.getMessage().getContentRaw().split("\\s+");
 
             // WRITE INFRACTION COMMAND
-            if (SherlockBot.commands.get(1).checkCommandMod(event.getMessage(),1)) {
+            if (SherlockBot.commandMap.get(1).checkCommand(event.getMessage())) {
                 
                 if (args.length >= 2) {
                     ArrayList<Member> qualifiedMembers = new ArrayList<>();
@@ -64,7 +64,7 @@ public class Infraction extends ListenerAdapter {
             GET A LIST OF INFRACTIONS AGAINST A USER
              */
 
-            if (SherlockBot.commands.get(18).checkCommandMod(event.getMessage(),1)) {
+            if (SherlockBot.commandMap.get(18).checkCommand(event.getMessage())) {
                 Member targetMember = null;
 
                 if(event.getMessage().getMentionedMembers().size() > 0){

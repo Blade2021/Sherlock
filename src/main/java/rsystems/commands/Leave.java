@@ -16,7 +16,7 @@ public class Leave extends ListenerAdapter {
 
 
         // LEAVE GUILD COMMAND
-        if (SherlockBot.commands.get(0).checkCommandMod(event.getMessage())) {
+        if (SherlockBot.commandMap.get(0).checkCommand(event.getMessage())) {
 
             // Moved inside the conditional to reduce effort if not required
             String[] args = event.getMessage().getContentRaw().split("\\s+");

@@ -1,0 +1,131 @@
+{
+  "leave": {
+    "id": 0,
+    "permission": 32768
+  },
+  "infract": {
+    "id": 1,
+    "permission": 2
+  },
+  "mute": {
+  "id": 2,
+  "permission": 1
+  },
+  "unmute": {
+    "id": 3,
+    "permission": 1
+  },
+  "removeSelfRole": {
+    "id": 4,
+    "permission": 32768
+  },
+  "addSelfRole": {
+    "id": 5,
+    "permission": 32768
+  },
+  "logChannel": {
+    "id": 6,
+    "permission": 32768
+  },
+  "commands": {
+    "id": 7,
+    "permission": 32768
+  },
+  "setPrefix": {
+    "id": 8,
+    "permission": 32768
+  },
+  "getSelfRoles": {
+    "id": 9,
+    "permission": 32768
+  },
+  "lfAdd": {
+    "id": 10,
+    "permission": 32768
+  },
+  "lfRemove": {
+    "id": 11,
+    "permission": 32768
+  },
+  "lfList": {
+    "id": 12,
+    "permission": 32768
+  },
+  "cooldown": {
+    "id": 13,
+    "permission": 4
+  },
+  "embedFilter": {
+    "id": 14,
+    "permission": 32768
+  },
+  "info": {
+    "id": 15,
+    "permission": 0,
+    "alias": ["help"]
+  },
+  "ginfo": {
+    "id": 16,
+    "permission": 32768
+  },
+  "settings": {
+    "id": 17,
+    "permission": 32768
+  },
+  "lookup": {
+    "id": 18,
+    "permission": 2
+  },
+  "check": {
+    "id": 19,
+    "permission": 32768
+  },
+  "placeHolder": {
+    "id": 20,
+    "permission": 32768
+  },
+  "welcomeMethod": {
+    "id": 21,
+    "permission": 32768
+  },
+  "welcomeChannelID": {
+    "id": 22,
+    "permission": 32768
+  },
+  "welcomeMessage": {
+    "id": 23,
+    "permission": 32768
+  },
+  "welcomeTimeout": {
+    "id": 24,
+    "permission": 32768
+  },
+  "addModRole": {
+    "id": 25,
+    "permission": 32768
+  },
+  "removeModRole": {
+    "id": 26,
+    "permission": 32768
+  },
+  "updateModRole": {
+    "id": 27,
+    "permission": 32768
+  },
+  "getModRoles": {
+    "id": 28,
+    "permission": 32768
+  },
+  "addException": {
+    "id": 29,
+    "permission": 32768
+  },
+  "removeException": {
+    "id": 30,
+    "permission": 32768
+  },
+  "getExceptions": {
+    "id": 31,
+    "permission": 32768
+  }
+}

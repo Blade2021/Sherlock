@@ -17,7 +17,7 @@ public class Generics extends ListenerAdapter {
         /*
         COMMANDS COMMAND
          */
-        if (SherlockBot.commands.get(7).checkCommand(event.getMessage().getContentDisplay(),event.getGuild().getId())){
+        if (SherlockBot.commandMap.get(7).checkCommand(event.getMessage())){
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.setTitle("BoT Information")
                     .setColor(Color.ORANGE)
@@ -36,7 +36,7 @@ public class Generics extends ListenerAdapter {
         /*
         INFO COMMAND
          */
-        if (SherlockBot.commands.get(15).checkCommand(event.getMessage().getContentDisplay(),event.getGuild().getId())){
+        if (SherlockBot.commandMap.get(15).checkCommand(event.getMessage())){
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.setTitle("BoT Information")
                     .setColor(Color.ORANGE)
@@ -57,7 +57,7 @@ public class Generics extends ListenerAdapter {
         /*
         GUILD INFO COMMAND
          */
-        if (SherlockBot.commands.get(16).checkCommand(event.getMessage().getContentDisplay(),event.getGuild().getId())){
+        if (SherlockBot.commandMap.get(16).checkCommand(event.getMessage())){
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.setTitle("BoT Information")
                     .setColor(Color.cyan)
@@ -77,7 +77,7 @@ public class Generics extends ListenerAdapter {
         /*
         GUILD INFO COMMAND
          */
-        if (SherlockBot.commands.get(17).checkCommand(event.getMessage().getContentDisplay(),event.getGuild().getId())){
+        if (SherlockBot.commandMap.get(17).checkCommand(event.getMessage())){
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.setTitle("BoT Information")
                     .setColor(Color.cyan)

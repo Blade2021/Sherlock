@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import rsystems.commands.*;
 import rsystems.events.*;
+import rsystems.handlers.CommandLoader;
 import rsystems.handlers.LanguageFilter;
 import rsystems.handlers.SQLHandler;
 import rsystems.objects.Command;
@@ -16,17 +17,16 @@ import rsystems.objects.GuildSettings;
 import rsystems.threads.ThreeMinute;
 
 import javax.security.auth.login.LoginException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 
 public class SherlockBot {
-    public static ArrayList<Command> commands = new ArrayList<>();
+    public static Map<Integer, Command> commandMap = new HashMap<>();
     public static Map<String,GuildSettings> guildMap = new HashMap<>();
     public static SQLHandler database = new SQLHandler(Config.get("Database_Host"),Config.get("Database_User"),Config.get("Database_Pass"));
     public static User bot = null;
-    public static String version = "0.1.9";
+    public static String version = "0.2.0";
 
     public static void main(String[] args) throws LoginException {
         JDA api = JDABuilder.createDefault(Config.get("token"))
@@ -71,49 +71,8 @@ public class SherlockBot {
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new ThreeMinute(), 60*1000,60*1000);
 
-        loadCommands();
+        CommandLoader commandLoader = new CommandLoader();
 
-    }
-
-    private static void loadCommands(){
-        commands.add(new Command("leave")); // 0
-        commands.add(new Command("infract")); // 1
-        commands.add(new Command("mute")); // 2
-        commands.add(new Command("unmute")); // 3
-        commands.add(new Command("removeSelfRole")); // 4
-        commands.add(new Command("addSelfRole")); // 5
-        commands.add(new Command("logChannel")); // 6
-        commands.add(new Command("commands")); // 7
-        commands.add(new Command("setPrefix")); // 8
-        commands.add(new Command("getSelfRoles")); // 9
-        commands.add(new Command("lfadd")); // 10
-        commands.add(new Command("lfremove")); // 11
-        commands.add(new Command("lflist")); // 12
-        commands.add(new Command("cooldown")); // 13
-        commands.add(new Command("embedFilter")); // 14
-        commands.add(new Command("info")); // 15
-        commands.add(new Command("ginfo")); // 16
-        commands.add(new Command("settings")); // 17
-        commands.add(new Command("lookup")); // 18
-        commands.add(new Command("check")); // 19
-        commands.add(new Command("placeholder")); // 20
-        commands.add(new Command("welcomeMethod")); // 21
-        commands.add(new Command("welcomeChannelID")); // 22
-        commands.add(new Command("welcomeMessage")); // 23
-        commands.add(new Command("welcomeTimeout")); // 24
-        commands.add(new Command("addModRole")); // 25
-        commands.add(new Command("removeModRole")); // 26
-        commands.add(new Command("updateModRole")); // 27
-        commands.add(new Command("getModRoles")); // 28
-        commands.add(new Command("addException")); // 29
-        commands.add(new Command("removeException")); // 30
-        commands.add(new Command("getExceptions")); // 31
-        commands.add(new Command("pull")); // 32
-        commands.add(new Command("placeholder")); // 33
-        commands.add(new Command("placeholder")); // 34
-        commands.add(new Command("placeholder")); // 35
-        commands.add(new Command("placeholder")); // 36
-        commands.add(new Command("placeholder")); // 37
     }
 
 }

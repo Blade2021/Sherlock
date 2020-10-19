@@ -1,6 +1,7 @@
 package rsystems.objects;
 
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.exceptions.PermissionException;
@@ -19,6 +20,11 @@ public class Command {
     protected boolean deleteTrigger;
 
     public Command(String command) {
+        this.command = command;
+    }
+
+    public Command(String command, int id) {
+        this.id = id;
         this.command = command;
     }
 
@@ -90,117 +96,97 @@ public class Command {
         this.deleteTrigger = deleteTrigger;
     }
 
-    public boolean checkCommand(String message, String guildID) {
+    public int getId() {
+        return id;
+    }
+
+    public boolean checkCommand(Message message) {
+        String guildID = message.getGuild().getId();
         String prefix = SherlockBot.guildMap.get(guildID).getPrefix();
-
-        String formattedMessage = message.toLowerCase();
-        if (formattedMessage.startsWith(prefix + this.command.toLowerCase())) {
-            return true;
-        } else {
-            final Boolean[] returnValue = {false};
-            this.alias.forEach(alias -> {
-                if (formattedMessage.startsWith(prefix + alias.toLowerCase())) {
-                    returnValue[0] = true;
-                }
-            });
-            return returnValue[0];
-        }
-    }
-
-    //Check if message had command, alias, AND correct auth level
-    public boolean checkCommandMod(Message message) {
-        String prefix = SherlockBot.guildMap.get(message.getGuild().getId()).getPrefix();
         String formattedMessage = message.getContentDisplay().toLowerCase();
-        final Boolean[] authorized = {false};
+
+        Boolean commandMatch = false;
 
         if (formattedMessage.startsWith(prefix + this.command.toLowerCase())) {
-            if (message.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+            commandMatch = true;
+        } else {
+            for (String alias : this.getAlias()) {
+                if (formattedMessage.startsWith(prefix + alias.toLowerCase())) {
+                    commandMatch = true;
+                }
+            }
+        }
+        if (commandMatch) {
+            if (this.rank > 0) {
+                if (!checkPermissionLevel(this.rank, guildID, message.getMember())) {
+                    try {
+                        message.getChannel().sendMessage(message.getAuthor().getAsMention() + " You are not authorized for that command").queue();
+                    } catch (NullPointerException | PermissionException e) {
+                        System.out.println(String.format("An error occurred when trying to send a message. GUILD:%s CHANNEL:%s", message.getGuild().getId(), message.getChannel().getId()));
+                    }
+                    return false;
+                } else {
+                    //USER IS AUTHORIZED
+                    return true;
+                }
+            } else {
+                // PERMISSION FOR COMMAND IS ZERO
                 return true;
-            } else {
-                if (!authorized[0]) {
-                    message.getChannel().sendMessage(message.getAuthor().getAsMention() + " You are not authorized to use that command").queue();
-                }
             }
-        } else {
-            final boolean[] returnValue = {false};
-            this.alias.forEach(alias -> {
-                if (formattedMessage.startsWith(prefix + alias.toLowerCase())) {
-                    if (message.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-                        authorized[0] = true;
-                        returnValue[0] = true;
-                    } else {
-                        if (!authorized[0]) {
-                            message.getChannel().sendMessage(message.getAuthor().getAsMention() + " You are not authorized to use that command").queue();
-                        }
-                    }
-                }
-            });
-            return returnValue[0];
         }
+        //COMMAND WAS NOT FOUND
         return false;
     }
 
-    //Check if message had command, alias, AND correct auth level
-    public boolean checkCommandMod(Message message, int binaryIndex) {
-        String prefix = SherlockBot.guildMap.get(message.getGuild().getId()).getPrefix();
-        String formattedMessage = message.getContentDisplay().toLowerCase();
 
-        boolean commandFound = false;
-        if (formattedMessage.startsWith(prefix + this.command.toLowerCase())) {
-            commandFound = true;
-        } else {
-            for (String s : this.alias) {
-                if(formattedMessage.startsWith(prefix + s.toLowerCase())){
-                    commandFound = true;
-                }
-            }
-        }
+    //Check if requester is authorized for command
+    public boolean checkPermissionLevel(int binaryIndex, String guildID, Member requester) {
+        boolean authorized = false;
 
-        if(commandFound) {
-            boolean authorized = false;
-
-            if (message.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+        //MEMBER HAS ADMIN PERMISSIONS SO ALLOW ALL
+        if (requester.hasPermission(Permission.ADMINISTRATOR)) {
+            authorized = true;
+        } else if((binaryIndex >= 32768) && (requester.hasPermission(Permission.ADMINISTRATOR))){
                 authorized = true;
-            } else {
-                String guildID = message.getGuild().getId();
-                int modRoleValue = 0;
-                String binaryString = "";
-                char indexChar = '0';
+        } else {
+            int modRoleValue = 0;
+            String binaryString = null;
+            char indexChar = '0';
 
+            //Parse through each role that the member has
+            for (Role r : requester.getRoles()) {
 
-                for (Role r : message.getMember().getRoles()) {
+                //Does role fall into defined moderation roles
+                if (SherlockBot.guildMap.get(guildID).modRoleMap.containsKey(r.getId())) {
 
-                    if (SherlockBot.guildMap.get(guildID).modRoleMap.containsKey(r.getId())) {
+                    //Get the role's Permission level
+                    modRoleValue = SherlockBot.guildMap.get(guildID).modRoleMap.get(r.getId());
 
-                        modRoleValue = SherlockBot.guildMap.get(guildID).modRoleMap.get(r.getId());
-                        binaryString = Integer.toBinaryString(modRoleValue);
-                        String reverseString = new StringBuilder(binaryString).reverse().toString();
-                        try{
-                            indexChar = reverseString.charAt(binaryIndex);
-                        } catch(IndexOutOfBoundsException e){
+                    /*
+                    Form a binary string based on the permission level integer found.
+                    Example: 24 = 11000
+                     */
+                    binaryString = Integer.toBinaryString(modRoleValue);
 
-                        } finally {
-                            if(indexChar == '1'){
-                                authorized = true;
-                            } else {
-                                authorized = false;
-                            }
+                    //Reverse the string for processing
+                    String reverseString = new StringBuilder(binaryString).reverse().toString();
+
+                    try {
+                        indexChar = reverseString.charAt(binaryIndex);
+                    } catch (IndexOutOfBoundsException e) {
+
+                    } finally {
+                        if (indexChar == '1') {
+                            authorized = true;
+                        } else {
+                            authorized = false;
                         }
                     }
                 }
             }
-            if(!authorized){
-                try{
-                    message.getChannel().sendMessage(message.getAuthor().getAsMention() + " You are not authorized for that command").queue();
-                } catch(NullPointerException | PermissionException e){
-                    System.out.println(String.format("An error occurred when trying to send a message. GUILD:%s CHANNEL:%s",message.getGuild().getId(),message.getChannel().getId()));
-                }
-            }
-
-            return authorized;
         }
 
-        return false;
+        return authorized;
     }
 
 

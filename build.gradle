@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'rsystems'
-version '0.1.9'
+version '0.2.0'
 
 mainClassName = 'rsystems.SherlockBot'
 
@@ -29,6 +29,7 @@ dependencies {
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3' //Logger
 
     implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.0'
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 }
 
 compileJava.options.encoding = 'UTF-8'
