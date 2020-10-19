@@ -1,3 +1,6 @@
+## 0.2.0
+Major changes to the command system.  Commands now support aliases and individual ranking is set from the command data file.
+
 ## 0.1.8
 Bug fixes for channel cooldown and automatic unmute functions
 
