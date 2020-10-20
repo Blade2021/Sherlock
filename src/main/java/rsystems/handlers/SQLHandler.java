@@ -647,7 +647,7 @@ public class SQLHandler {
 
             Statement st = connection.createStatement();
 
-            ResultSet rs = st.executeQuery("SELECT Violation, UserNote, DateSubmitted, Submitter FROM InfractionTable WHERE ChildGuildID = " + Long.valueOf(guildID) + " AND ViolatorID = " + Long.valueOf(violatorID));
+            ResultSet rs = st.executeQuery(String.format("SELECT Violation, UserNote, DateSubmitted, Submitter FROM InfractionTable WHERE ChildGuildID = %d AND ViolatorID = %d order by DateSubmitted desc LIMIT 10",Long.valueOf(guildID),Long.valueOf(violatorID)));
             while (rs.next()) {
                 infractionObjects.add(new InfractionObject(rs.getString("Violation"), rs.getString("UserNote"), rs.getDate("DateSubmitted"), rs.getLong("Submitter")));
             }

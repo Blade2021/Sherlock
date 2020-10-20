@@ -1,3 +1,6 @@
+## 0.2.1
+Update the lookup command to provide more clear data.  
+
 ## 0.2.0
 Major changes to the command system.  Commands now support aliases and individual ranking is set from the command data file.
 

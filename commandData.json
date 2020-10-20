@@ -5,7 +5,8 @@
   },
   "infract": {
     "id": 1,
-    "permission": 2
+    "permission": 2,
+    "alias": ["warn"]
   },
   "mute": {
   "id": 2,
@@ -29,7 +30,8 @@
   },
   "commands": {
     "id": 7,
-    "permission": 32768
+    "permission": 32768,
+    "alias": ["help"]
   },
   "setPrefix": {
     "id": 8,
@@ -41,15 +43,18 @@
   },
   "lfAdd": {
     "id": 10,
-    "permission": 32768
+    "permission": 32768,
+    "alias": ["blacklist add"]
   },
   "lfRemove": {
     "id": 11,
-    "permission": 32768
+    "permission": 32768,
+    "alias": ["blacklist remove"]
   },
   "lfList": {
     "id": 12,
-    "permission": 32768
+    "permission": 32768,
+    "alias": ["blacklist list"]
   },
   "cooldown": {
     "id": 13,
@@ -62,11 +67,12 @@
   "info": {
     "id": 15,
     "permission": 0,
-    "alias": ["help"]
+    "alias": []
   },
   "ginfo": {
     "id": 16,
-    "permission": 32768
+    "permission": 32768,
+    "alias": ["guildInfo","serverInfo"]
   },
   "settings": {
     "id": 17,
