@@ -257,6 +257,29 @@ public class LogChannel {
         }
     }
 
+    public void logArchiveChannel(Guild guild, Long archiveCategory, String channelList, String channelIDList, Member submitter){
+        String channelLogID = SherlockBot.guildMap.get(guild.getId()).getLogChannelID();
+        if(channelLogID != null){
+
+            EmbedBuilder embedBuilder = new EmbedBuilder()
+                    .setTitle("Archive Channel Action")
+                    .addField("Archive Category Name",guild.getCategoryById(archiveCategory).getName(),true)
+                    .addField("Archive Category ID:",String.valueOf(archiveCategory),false)
+                    .addField("Channel Name:",channelList,true)
+                    .addField("Channel IDs:", channelIDList, true)
+                    .setColor(Color.RED)
+                    .setFooter("Submitted by: " + submitter.getUser().getAsTag());
+
+            embedBuilder.setColor(getColor(3));
+
+            try{
+                guild.getTextChannelById(channelLogID).sendMessage(embedBuilder.build()).queue();
+            } catch(NullPointerException | PermissionException e){
+
+            }
+        }
+    }
+
     public void logLanguageFilterAction(GuildMessageReceivedEvent event, String triggerWord){
         String channelLogID = SherlockBot.guildMap.get(event.getGuild().getId()).getLogChannelID();
         if(channelLogID != null){

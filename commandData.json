@@ -133,5 +133,25 @@
   "getExceptions": {
     "id": 31,
     "permission": 32768
+  },
+  "setArchiveCategory": {
+    "id": 32,
+    "permission": 32768,
+    "alias": ["setArchiveCat"]
+  },
+  "getArchiveCategory": {
+    "id": 33,
+    "permission": 32768,
+    "alias": ["getArchiveCat"]
+  },
+  "archiveChannel": {
+    "id": 34,
+    "permission": 32768,
+    "alias": ["channelArchive"]
+  },
+  "returnChannel": {
+    "id": 35,
+    "permission": 32768,
+    "alias": ["channelReturn"]
   }
 }

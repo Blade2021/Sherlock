@@ -106,6 +106,7 @@ public class Command {
         String formattedMessage = message.getContentDisplay().toLowerCase();
 
         Boolean commandMatch = false;
+        Boolean authorized = false;
 
         if (formattedMessage.startsWith(prefix + this.command.toLowerCase())) {
             commandMatch = true;
@@ -116,6 +117,7 @@ public class Command {
                 }
             }
         }
+
         if (commandMatch) {
             if (this.rank > 0) {
                 if (!checkPermissionLevel(this.rank, guildID, message.getMember())) {
@@ -124,18 +126,17 @@ public class Command {
                     } catch (NullPointerException | PermissionException e) {
                         System.out.println(String.format("An error occurred when trying to send a message. GUILD:%s CHANNEL:%s", message.getGuild().getId(), message.getChannel().getId()));
                     }
-                    return false;
                 } else {
                     //USER IS AUTHORIZED
-                    return true;
+                    authorized = true;
                 }
             } else {
                 // PERMISSION FOR COMMAND IS ZERO
-                return true;
+                authorized = true;
             }
         }
-        //COMMAND WAS NOT FOUND
-        return false;
+
+        return (commandMatch) && (authorized);
     }
 
 

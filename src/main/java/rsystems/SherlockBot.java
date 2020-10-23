@@ -53,6 +53,9 @@ public class SherlockBot {
         api.addEventListener(new WelcomeSettings());
         api.addEventListener(new GuildMemberJoin());
         api.addEventListener(new ModCommands());
+        api.addEventListener(new GuildMessageDeleted());
+        api.addEventListener(new ArchiveChannel());
+        api.addEventListener(new GuildChannelMoveEvent());
 
         try{
             api.awaitReady();

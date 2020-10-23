@@ -410,7 +410,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         }
 
         /*
-        REMOVE MOD ROLE
+        REMOVE EXCEPTION
          */
         if (SherlockBot.commandMap.get(30).checkCommand(event.getMessage())) {
             if (args.length >= 2) {
@@ -430,7 +430,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         }
 
         /*
-        GET MOD ROLES
+        GET EXCEPTIONS
          */
         if (SherlockBot.commandMap.get(31).checkCommand(event.getMessage())) {
 
@@ -461,6 +461,66 @@ public class ModifyGuildSettings extends ListenerAdapter {
             event.getChannel().sendMessage(embedBuilder.build()).queue();
             embedBuilder.clear();
         }
+
+        /*
+        SET ARCHIVE CATEGORY
+         */
+        if (SherlockBot.commandMap.get(32).checkCommand(event.getMessage())) {
+            if (args.length >= 2) {
+
+                try {
+                    if(event.getGuild().getCategoryById(args[1]) != null){
+                        Long catChannelID = event.getGuild().getCategoryById(args[1]).getIdLong();
+
+                        SherlockBot.guildMap.get(event.getGuild().getId()).setArchiveCategory(catChannelID);
+                        if(database.setArchiveCategory(event.getGuild().getIdLong(),catChannelID) > 0){
+                            event.getMessage().addReaction("✅").queue();
+                        }
+                    } else {
+                        //User did not mention a channel
+                        if(event.getGuild().getCategoriesByName(args[1],true) != null){
+                            Long catChannelID = event.getGuild().getCategoriesByName(args[1],true).get(0).getIdLong();
+
+                            SherlockBot.guildMap.get(event.getGuild().getId()).setArchiveCategory(catChannelID);
+                            if(database.setArchiveCategory(event.getGuild().getIdLong(),catChannelID) > 0){
+                                event.getMessage().addReaction("✅").queue();
+                            }
+                        }
+                    }
+                } catch (NullPointerException e) {
+                    System.out.println("Could not find category when searching for term: " + args[1]);
+                } catch (NumberFormatException e){
+                    if(event.getGuild().getCategoriesByName(args[1],true) != null){
+                        Long catChannelID = event.getGuild().getCategoriesByName(args[1],true).get(0).getIdLong();
+
+                        SherlockBot.guildMap.get(event.getGuild().getId()).setArchiveCategory(catChannelID);
+                        if(database.setArchiveCategory(event.getGuild().getIdLong(),catChannelID) > 0){
+                            event.getMessage().addReaction("✅").queue();
+                        }
+                    }
+                }
+            } else {
+                event.getChannel().sendMessage(event.getAuthor().getAsMention() + " You did not provide a categoryID or give a category name.").queue();
+            }
+        }
+
+
+        /*
+        GET ARCHIVE CATEGORY
+         */
+        if (SherlockBot.commandMap.get(33).checkCommand(event.getMessage())) {
+            if (SherlockBot.guildMap.get(event.getGuild().getId()).getArchiveCategoryID() != null) {
+
+                try {
+                    event.getChannel().sendMessage("Current Archive Category: " + event.getGuild().getCategoryById(SherlockBot.guildMap.get(event.getGuild().getId()).getArchiveCategoryID()).getName()).queue();
+                } catch (NullPointerException e) {
+
+                }
+            } else {
+                event.getChannel().sendMessage("You do not have a archive category set.").queue();
+            }
+        }
+
 
 
         /*

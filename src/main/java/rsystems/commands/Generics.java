@@ -26,7 +26,9 @@ public class Generics extends ListenerAdapter {
                     .setFooter("Called by: " + event.getMember().getEffectiveName(),event.getMember().getUser().getEffectiveAvatarUrl());
 
             if(event.getChannel().canTalk()) {
-                event.getChannel().sendMessage(embedBuilder.build()).queue();
+                event.getChannel().sendMessage(embedBuilder.build()).queue(success -> {
+                    SherlockBot.database.insertAutoTriggerDelete(event.getGuild().getIdLong(),event.getMessageIdLong(),success.getIdLong());
+                });
             }
 
             embedBuilder.clear();
@@ -48,7 +50,9 @@ public class Generics extends ListenerAdapter {
                     .setFooter("Called by: " + event.getMember().getEffectiveName(),event.getMember().getUser().getEffectiveAvatarUrl());
 
             if(event.getChannel().canTalk()) {
-                event.getChannel().sendMessage(embedBuilder.build()).queue();
+                event.getChannel().sendMessage(embedBuilder.build()).queue(success -> {
+                    SherlockBot.database.insertAutoTriggerDelete(event.getGuild().getIdLong(),event.getMessageIdLong(),success.getIdLong());
+                });
             }
 
             embedBuilder.clear();
@@ -86,7 +90,9 @@ public class Generics extends ListenerAdapter {
                     .setFooter("Called by: " + event.getMember().getEffectiveName(),event.getMember().getUser().getEffectiveAvatarUrl());
 
             if(event.getChannel().canTalk()) {
-                event.getChannel().sendMessage(embedBuilder.build()).queue();
+                event.getChannel().sendMessage(embedBuilder.build()).queue(success -> {
+                    SherlockBot.database.insertAutoTriggerDelete(event.getGuild().getIdLong(),event.getMessageIdLong(),success.getIdLong());
+                });
             }
 
             embedBuilder.clear();

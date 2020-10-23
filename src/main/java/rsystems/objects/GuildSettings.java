@@ -13,6 +13,7 @@ public class GuildSettings {
     public Map<String, Integer> modRoleMap = new HashMap<>();
     public Map<String, Integer> exceptionMap = new HashMap<>();
     private ArrayList<String> blacklistedWords = new ArrayList<>();
+    private Long archiveCategory = null;
 
     private Long welcomeChannelID;
     private String welcomeMessage;
@@ -148,5 +149,13 @@ public class GuildSettings {
 
     public void setWelcomeMessageTimeout(int welcomeMessageTimeout) {
         this.welcomeMessageTimeout = welcomeMessageTimeout;
+    }
+
+    public Long getArchiveCategoryID() {
+        return archiveCategory;
+    }
+
+    public void setArchiveCategory(Long archiveCategory) {
+        this.archiveCategory = archiveCategory;
     }
 }

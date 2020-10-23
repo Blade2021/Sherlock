@@ -378,6 +378,12 @@ public class SQLHandler {
                 SherlockBot.guildMap.get(guildID).addChannelException(String.valueOf(rs.getLong("ChannelID")),rs.getInt("Type"));
             }
 
+
+            rs = st.executeQuery("SELECT ArchiveCat FROM GuildTable WHERE GuildID = " + Long.valueOf(guildID));
+            while(rs.next()){
+                SherlockBot.guildMap.get(guildID).setArchiveCategory(rs.getLong("ArchiveCat"));
+            }
+
             System.out.println("Guild data loaded | GuildID" + guildID);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -575,6 +581,67 @@ public class SQLHandler {
         }
 
         return null;
+    }
+
+    public int setArchiveCategory(Long GuildID, Long CategoryID){
+
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("UPDATE GuildTable SET ArchiveCat = %d",CategoryID));
+
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            throwables.getErrorCode();
+        }
+
+        return 0;
+    }
+
+    public Long getArchiveCategory(Long GuildID){
+        Long output = null;
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("SELECT ArchiveCat FROM GuildTable WHERE GuildID = %d",GuildID));
+            while(rs.next()){
+                output = rs.getLong("ArchiveCat");
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            throwables.getErrorCode();
+        }
+
+        return output;
+    }
+
+    public int storeArchiveChannel(Long GuildID, Long ChannelID, Long ParentCategory, int ChannelPosition){
+
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("INSERT INTO ArchiveTable (ChildGuildID, ChannelID, PreviousCategory, PreviousPosition) VALUES (%d, %d, %d, %d)",GuildID,ChannelID,ParentCategory,ChannelPosition));
+            return st.getUpdateCount();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            throwables.getErrorCode();
+        }
+
+        return 0;
     }
 
     /*
@@ -809,5 +876,58 @@ public class SQLHandler {
         }
 
         return false;
+    }
+
+    public Integer insertAutoTriggerDelete(Long guildID, Long triggerMessageID, Long responseMessageID) {
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("INSERT INTO TriggerTable (ChildGuildID, TriggerMessageID, ResponseMessageID) VALUES (%d, %d, %d)", guildID, triggerMessageID, responseMessageID));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
+    }
+
+    public Integer deleteRow(String TableName, String IdentifierColumn, Long Identifier) {
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("DELETE FROM %s WHERE %s = %d", TableName, IdentifierColumn, Identifier));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
+    }
+
+    public Long triggerMessageLookup(Long guildID, Long messageID){
+        Long output = null;
+
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("SELECT ResponseMessageID FROM TriggerTable WHERE ChildGuildID = %d AND TriggerMessageID = %d",guildID, messageID));
+            while(rs.next()){
+                output = rs.getLong("ResponseMessageID");
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return output;
     }
 }

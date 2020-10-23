@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
 
+import java.awt.*;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ public class GuildRoleDeleted extends ListenerAdapter {
                 EmbedBuilder embedBuilder = new EmbedBuilder()
                         .setTitle("Role Assignment Deleted")
                         .setDescription("A role containing assignments in this bot was deleted. The following commands were deleted.")
+                        .setColor(Color.RED)
                         .addField("Assigned Commands:",relatedCommands.toString(),false)
                         .addField("Role Name:",event.getRole().getName(),true)
                         .addField("Role ID:",event.getRole().getId(),true);
