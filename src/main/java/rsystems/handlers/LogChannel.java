@@ -301,6 +301,26 @@ public class LogChannel {
         }
     }
 
+    public void logNotification(Guild guild, String title, String description, int color, String field1Title, String field1Value, String field2Title, String field2Value){
+        String channelLogID = SherlockBot.guildMap.get(guild.getId()).getLogChannelID();
+        if(channelLogID != null){
+
+            EmbedBuilder embedBuilder = new EmbedBuilder()
+                    .setTitle(title)
+                    .setDescription(description)
+                    .addField(field1Title,field1Value,true)
+                    .addField(field2Title,field2Value,true)
+                    .setColor(getColor(color))
+                    .setFooter("System Notification");
+
+            try{
+                guild.getTextChannelById(channelLogID).sendMessage(embedBuilder.build()).queue();
+            } catch(NullPointerException | PermissionException e){
+
+            }
+        }
+    }
+
     private Color getColor(int colorCode){
         switch(colorCode){
             case 0:

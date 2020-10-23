@@ -146,12 +146,12 @@
   },
   "archiveChannel": {
     "id": 34,
-    "permission": 32768,
+    "permission": 8,
     "alias": ["channelArchive"]
   },
   "returnChannel": {
     "id": 35,
-    "permission": 32768,
+    "permission": 8,
     "alias": ["channelReturn"]
   }
 }

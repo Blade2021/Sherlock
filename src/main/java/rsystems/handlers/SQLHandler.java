@@ -195,6 +195,23 @@ public class SQLHandler {
         return output;
     }
 
+    public int putValueNull(String tableName, String columnName, String identifierColumn, Long identifier) {
+        int output = 0;
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+            st.execute(String.format("UPDATE %s SET %s = null WHERE %s = %d", tableName, columnName, identifierColumn, identifier));
+            output = st.getUpdateCount();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return output;
+    }
+
     public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, int value) {
         int output = 0;
         try {
@@ -592,7 +609,7 @@ public class SQLHandler {
 
             Statement st = connection.createStatement();
 
-            st.execute(String.format("UPDATE GuildTable SET ArchiveCat = %d",CategoryID));
+            st.execute(String.format("UPDATE GuildTable SET ArchiveCat = %d WHERE GuildID = %d",CategoryID, GuildID));
 
             return st.getUpdateCount();
         } catch (SQLException throwables) {
@@ -909,6 +926,29 @@ public class SQLHandler {
         }
         return 0;
     }
+
+    public ArrayList<Long> archiveChannelList(Long categoryID, Long guildID){
+        ArrayList<Long> output = new ArrayList<>();
+
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("SELECT ChannelID FROM ArchiveTable WHERE PreviousCategory = %d AND ChildGuildID = %d", categoryID, guildID));
+            while(rs.next()){
+                output.add(rs.getLong("ChannelID"));
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return output;
+    }
+
 
     public Long triggerMessageLookup(Long guildID, Long messageID){
         Long output = null;

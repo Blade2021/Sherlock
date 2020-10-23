@@ -1,3 +1,6 @@
+## 0.3.0
+Archive channels 
+
 ## 0.2.1
 Update the lookup command to provide more clear data.  
 
