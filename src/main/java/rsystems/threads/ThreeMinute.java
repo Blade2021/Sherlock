@@ -23,7 +23,7 @@ public class ThreeMinute extends TimerTask {
                         unmuteUser(timedEvent.eventGuildID,timedEvent.eventUserID);
                         break;
                     case 2:
-                        //unmute channel
+                        System.out.println("blah blah blah");
                         break;
                     case 3:
                         //unban user
