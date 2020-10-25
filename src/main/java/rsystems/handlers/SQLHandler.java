@@ -472,6 +472,25 @@ public class SQLHandler {
         return null;
     }
 
+    public boolean insertTimedEvent(Long GuildID, Long UserID, int EventType, String reason, Long EventKey, int EventValue){
+
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("INSERT INTO TimedEvents (ChildGuildID, EventID, EventType, Reason, Event_SubKey, Event_SubValue) VALUES (%d, %d, %d, \"%s\", %d, %d)", GuildID, UserID, EventType, reason, EventKey, EventValue));
+            return true;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            throwables.getErrorCode();
+        }
+
+        return false;
+    }
+
     public boolean insertTimedEvent(Long GuildID, Long UserID, int EventType, String reason, LocalDateTime startDatetime, LocalDateTime endDateTime){
 
         try {
@@ -544,7 +563,9 @@ public class SQLHandler {
 
             ResultSet rs = st.executeQuery("SELECT EventType, ChildGuildID, EventID, EndDate FROM TimedEvents WHERE Expired = 0");
             while(rs.next()){
-                events.add(new TimedEvent(rs.getInt("EventType"),rs.getLong("ChildGuildID"),rs.getLong("EventID"),rs.getString("EndDate")));
+                if(!rs.getString("EndDate").equalsIgnoreCase("0000-00-00 00:00:00")){
+                    events.add(new TimedEvent(rs.getInt("EventType"),rs.getLong("ChildGuildID"),rs.getLong("EventID"),rs.getString("EndDate")));
+                }
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -574,7 +595,7 @@ public class SQLHandler {
         return false;
     }
 
-    public HashMap<Long,Integer> removeCooldown(Long GuildID, Long EventID){
+    public HashMap<Long,Integer> retractEvent(Long GuildID, Long EventID){
         HashMap<Long,Integer> output = new HashMap<>();
 
         try {

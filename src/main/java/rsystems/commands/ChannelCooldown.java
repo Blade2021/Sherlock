@@ -127,7 +127,7 @@ public class ChannelCooldown extends ListenerAdapter {
     public boolean endChannelCooldown(Guild guild, TextChannel channel) {
         System.out.println("Resetting cooldown for Channel");
         HashMap<Long, Integer> eventMap = new HashMap<>();
-        eventMap.putAll(database.removeCooldown(guild.getIdLong(), channel.getIdLong()));
+        eventMap.putAll(database.retractEvent(guild.getIdLong(), channel.getIdLong()));
         if (eventMap.size() > 0) {
             System.out.println("debug size:" + eventMap.size());
             for (PermissionOverride permissionOverride : channel.getPermissionOverrides()) {
