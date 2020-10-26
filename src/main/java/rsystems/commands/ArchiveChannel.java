@@ -11,7 +11,9 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
 import rsystems.handlers.LogChannel;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -74,12 +76,19 @@ public class ArchiveChannel extends ListenerAdapter {
          */
         if (SherlockBot.commandMap.get(35).checkCommand(event.getMessage())) {
             if(event.getMessage().getMentionedChannels().size() > 0){
+
+                ArrayList<TextChannel> failedChannels = new ArrayList<>();
+
                 for(TextChannel channel:event.getMessage().getMentionedChannels()){
                     Long previousCat = null;
                     Integer previousPosition = null;
 
                     if(SherlockBot.database.getLong("ArchiveTable","PreviousCategory","ChannelID",channel.getIdLong()) != null){
                         previousCat = SherlockBot.database.getLong("ArchiveTable","PreviousCategory","ChannelID",channel.getIdLong());
+                    } else {
+                        //Add the channel to the failed channels list and continue to the next mentioned channel
+                        failedChannels.add(channel);
+                        continue;
                     }
 
                     if(SherlockBot.database.getInt("ArchiveTable","PreviousPosition","ChannelID",channel.getIdLong()) != null){
@@ -102,6 +111,26 @@ public class ArchiveChannel extends ListenerAdapter {
                     }catch(NullPointerException e){
 
                     }
+                }
+
+
+                /*
+                Failed to retrieve data for mentioned channels
+                 */
+
+                if(failedChannels.size() > 0){
+                    StringBuilder stringBuilder = new StringBuilder();
+
+                    Iterator it = failedChannels.iterator();
+                    while(it.hasNext()){
+                        TextChannel channel = (TextChannel) it.next();
+                        stringBuilder.append(channel.getAsMention());
+                        if(it.hasNext()){
+                            stringBuilder.append(", ");
+                        }
+                    }
+
+                    event.getChannel().sendMessage("I did not have any origin information for: " + stringBuilder.toString()).queue();
                 }
             }
         }
