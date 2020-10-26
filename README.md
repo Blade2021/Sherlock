@@ -26,7 +26,8 @@ I fully welcome all new ideas and feature requests however for this bot, I am tr
 - **Self Roles** - Allows users to self assign themselves roles that are determined by you.
 - **Embed Filtering** - Suppresses embed messages if too many embeds are detected within a certain amount of time/messages.
 - **Welcome Messages** - Give members who join your server a nice hearty welcome!
-- **Customizable Moderator Roles** - Give your moderators access to the commands that YOU designate.  
+- **Customizable Moderator Roles** - Give your moderators access to the commands that YOU designate using our moderator permission system.
+- **Channel Archiving** - Set a category for archiving channels then send or return them with easy commands.
 
 ## Upcoming Features
 
@@ -37,5 +38,5 @@ I fully welcome all new ideas and feature requests however for this bot, I am tr
 ## Getting Sherlock
 Disclosure:
 This bot is still in early stage of development and may contain bugs.  By inviting this bot, you agree that you understand and accept the risk.
-[Authorize Link](https://discord.com/api/oauth2/authorize?client_id=758855978853859340&permissions=8&scope=bot)
+[Authorize Link](https://discord.com/api/oauth2/authorize?client_id=758855978853859340&permissions=268528758&scope=bot)
 
