@@ -512,7 +512,8 @@ public class ModifyGuildSettings extends ListenerAdapter {
             if (SherlockBot.guildMap.get(event.getGuild().getId()).getArchiveCategoryID() != null) {
 
                 try {
-                    event.getChannel().sendMessage("Current Archive Category: " + event.getGuild().getCategoryById(SherlockBot.guildMap.get(event.getGuild().getId()).getArchiveCategoryID()).getName()).queue();
+                    Long archiveCategoryID = SherlockBot.guildMap.get(event.getGuild().getId()).getArchiveCategoryID();
+                    event.getChannel().sendMessage(String.format("Current Archive Category: %s\nCategory ID: %d",event.getGuild().getCategoryById(archiveCategoryID).getName(),archiveCategoryID)).queue();
                 } catch (NullPointerException e) {
 
                 }

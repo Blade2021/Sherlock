@@ -59,7 +59,7 @@ public class ArchiveChannel extends ListenerAdapter {
                         embedBuilder.clear();
 
                         LogChannel logChannel = new LogChannel();
-                        logChannel.logArchiveChannel(event.getGuild(),SherlockBot.guildMap.get(event.getGuild().getId()).getArchiveCategoryID(),channelNameString.toString(),channelIDString.toString(),event.getMember());
+                        logChannel.logArchiveChannel(event.getGuild(),channelNameString.toString(),channelIDString.toString(),event.getMember());
                     }
 
                 }catch(NullPointerException e){

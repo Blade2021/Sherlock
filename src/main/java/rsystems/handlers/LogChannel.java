@@ -257,18 +257,17 @@ public class LogChannel {
         }
     }
 
-    public void logArchiveChannel(Guild guild, Long archiveCategory, String channelList, String channelIDList, Member submitter){
+    public void logArchiveChannel(Guild guild, String channelList, String channelIDList, Member submitter){
         String channelLogID = SherlockBot.guildMap.get(guild.getId()).getLogChannelID();
         if(channelLogID != null){
 
             EmbedBuilder embedBuilder = new EmbedBuilder()
                     .setTitle("Archive Channel Action")
-                    .addField("Archive Category Name",guild.getCategoryById(archiveCategory).getName(),true)
-                    .addField("Archive Category ID:",String.valueOf(archiveCategory),false)
+                    .setDescription("Moved a channel to the archive category")
                     .addField("Channel Name:",channelList,true)
                     .addField("Channel IDs:", channelIDList, true)
-                    .setColor(Color.RED)
-                    .setFooter("Submitted by: " + submitter.getUser().getAsTag());
+                    .setColor(Color.CYAN)
+                    .setFooter("Submitted by: " + submitter.getUser().getAsTag(),submitter.getUser().getEffectiveAvatarUrl());
 
             embedBuilder.setColor(getColor(3));
 
