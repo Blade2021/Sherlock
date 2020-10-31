@@ -2,6 +2,7 @@
 
 <a href="https://www.buymeacoff.ee/Blade2021" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>  
 
+<a href=https://teamcity.roots.systems><img src="https://img.shields.io/teamcity/build/e/Sherlock_ShadowBuild?server=https%3A%2F%2Fteamcity.roots.systems&style=plastic">
 <a href=https://discord.gg/dB4jeC3><img alt="Discord" src="https://img.shields.io/discord/386701951662030858?style=plastic"></a>
 <a href=https://github.com/Blade2021/Sherlock/issues><img alt="GitHub issues" src="https://img.shields.io/github/issues-raw/blade2021/sherlock?style=plastic"></a>
 <a href=https://github.com/blade2021/Sherlock><img alt="GitHub" src="https://img.shields.io/github/license/blade2021/sherlock?style=plastic"></a>  
