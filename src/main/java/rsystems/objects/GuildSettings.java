@@ -19,6 +19,7 @@ public class GuildSettings {
     private String welcomeMessage;
     private int welcomeMethod;
     private int welcomeMessageTimeout;
+    private int nicknameMimicFilter = 0;
 
     //Guild IDs
     private String muteRoleID;

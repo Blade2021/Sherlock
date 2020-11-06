@@ -96,7 +96,10 @@ public class SelfRoles extends ListenerAdapter {
                     .addField("Role Name",rolesString.toString(),true)
                     .addField("Role ID",roleIDString.toString(),true);
             event.getChannel().sendMessage(embedBuilder.build()).queue();
-            event.getMessage().delete().reason("Cleaning up after bot trigger").queue();
+            /*
+            todo:Replace with automatic message remove
+             */
+            //event.getMessage().delete().reason("Cleaning up after bot trigger").queue();
             embedBuilder.clear();
         }
     }

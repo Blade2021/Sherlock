@@ -1,86 +1,105 @@
 {
   "leave": {
     "id": 0,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#leave"
   },
   "infract": {
     "id": 1,
     "permission": 2,
-    "alias": ["warn"]
+    "alias": ["warn"],
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#infractions"
   },
   "mute": {
   "id": 2,
-  "permission": 1
+  "permission": 1,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#muting"
   },
   "unmute": {
     "id": 3,
-    "permission": 1
+    "permission": 1,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#muting"
   },
   "removeSelfRole": {
     "id": 4,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#self-roles"
   },
   "addSelfRole": {
     "id": 5,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#self-roles"
   },
   "logChannel": {
     "id": 6,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#log-channel"
   },
   "commands": {
     "id": 7,
     "permission": 32768,
-    "alias": ["help"]
+    "alias": ["help"],
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands"
   },
   "setPrefix": {
     "id": 8,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#prefix-change"
   },
   "getSelfRoles": {
     "id": 9,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#self-roles"
   },
   "lfAdd": {
     "id": 10,
     "permission": 32768,
-    "alias": ["blacklist add"]
+    "alias": ["blacklist add"],
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#language-filtering"
   },
   "lfRemove": {
     "id": 11,
     "permission": 32768,
-    "alias": ["blacklist remove"]
-  },
+    "alias": ["blacklist remove"],
+  "wikiLink":"https://github.com/Blade2021/Sherlock/wiki/Commands#language-filtering"
+},
   "lfList": {
     "id": 12,
     "permission": 32768,
-    "alias": ["blacklist list"]
+    "alias": ["blacklist list"],
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#language-filtering"
   },
   "cooldown": {
     "id": 13,
-    "permission": 4
+    "permission": 4,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#channel-cooldown-features"
   },
   "embedFilter": {
     "id": 14,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#embed-filtering"
   },
   "info": {
     "id": 15,
     "permission": 0,
-    "alias": ["sherlock"]
+    "alias": ["sherlock"],
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands"
   },
   "ginfo": {
     "id": 16,
     "permission": 32768,
-    "alias": ["guildInfo","serverInfo"]
+    "alias": ["guildInfo","serverInfo"],
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands"
   },
   "settings": {
     "id": 17,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands"
   },
   "lookup": {
     "id": 18,
-    "permission": 2
+    "permission": 2,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#infractions"
   },
   "check": {
     "id": 19,
@@ -92,66 +111,87 @@
   },
   "welcomeMethod": {
     "id": 21,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#welcome-messages"
   },
   "welcomeChannelID": {
     "id": 22,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#welcome-messages"
   },
   "welcomeMessage": {
     "id": 23,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#welcome-messages"
   },
   "welcomeTimeout": {
     "id": 24,
-    "permission": 32768
+    "permission": 32768,
+  "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#welcome-messages"
   },
   "addModRole": {
     "id": 25,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#moderator-role-assignment"
   },
   "removeModRole": {
     "id": 26,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#moderator-role-assignment"
   },
   "updateModRole": {
     "id": 27,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#moderator-role-assignment"
   },
   "getModRoles": {
     "id": 28,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#moderator-role-assignment"
   },
   "addException": {
     "id": 29,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#channel-exceptions"
   },
   "removeException": {
     "id": 30,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#channel-exceptions"
   },
   "getExceptions": {
     "id": 31,
-    "permission": 32768
+    "permission": 32768,
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#channel-exceptions"
   },
   "setArchiveCategory": {
     "id": 32,
     "permission": 32768,
-    "alias": ["setArchiveCat"]
+    "alias": ["setArchiveCat"],
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#archive-category"
   },
   "getArchiveCategory": {
     "id": 33,
     "permission": 32768,
-    "alias": ["getArchiveCat"]
+    "alias": ["getArchiveCat"],
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#archive-category"
   },
   "archiveChannel": {
     "id": 34,
     "permission": 8,
-    "alias": ["channelArchive"]
+    "alias": ["channelArchive"],
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#archive-category"
   },
   "returnChannel": {
     "id": 35,
     "permission": 8,
-    "alias": ["channelReturn"]
+    "alias": ["channelReturn"],
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#archive-category"
+  },
+  "test": {
+    "id": 47,
+    "permission": 8,
+    "alias": [],
+    "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#archive-category"
   }
 }

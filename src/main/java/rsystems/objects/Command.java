@@ -18,6 +18,7 @@ public class Command {
     protected String syntax;
     protected int rank;
     protected boolean deleteTrigger;
+    protected String wikiLink;
 
     public Command(String command) {
         this.command = command;
@@ -100,6 +101,14 @@ public class Command {
         return id;
     }
 
+    public String getWikiLink() {
+        return wikiLink;
+    }
+
+    public void setWikiLink(String wikiLink) {
+        this.wikiLink = wikiLink;
+    }
+
     public boolean checkCommand(Message message) {
         String guildID = message.getGuild().getId();
         String prefix = SherlockBot.guildMap.get(guildID).getPrefix();
@@ -172,8 +181,18 @@ public class Command {
                     //Reverse the string for processing
                     String reverseString = new StringBuilder(binaryString).reverse().toString();
 
+                    //Turn the command rank into a binary string
+                    String binaryIndexString = Integer.toBinaryString(binaryIndex);
+
+                    //Reverse the string for lookup
+                    String reverseLookupString = new StringBuilder(binaryIndexString).reverse().toString();
+
+                    //Grab the index of the on bit
+                    int realIndex = reverseLookupString.indexOf('1');
                     try {
-                        indexChar = reverseString.charAt(binaryIndex);
+
+                        indexChar = reverseString.charAt(realIndex);
+
                     } catch (IndexOutOfBoundsException e) {
 
                     } finally {

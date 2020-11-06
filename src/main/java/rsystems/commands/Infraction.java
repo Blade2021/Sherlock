@@ -107,11 +107,11 @@ public class Infraction extends ListenerAdapter {
                     }
 
                     EmbedBuilder embedBuilder = new EmbedBuilder();
-                    embedBuilder.setTitle("User Lookup")
+                    embedBuilder.setTitle("User Lookup - " + targetMember.getId())
+                            .setThumbnail(targetMember.getUser().getEffectiveAvatarUrl())
                             .addField("Member Name:",targetMember.getAsMention(),true)
                             .addField("Member Join Date",targetMember.getTimeJoined().format(DateTimeFormatter.ofPattern("MM-dd-yyyy")),true)
                             .addBlankField(true)
-                            .addField("User ID:",targetMember.getId(),false)
                             .addField("Submission Date",dateString.toString(),true)
                             .addField("Violation",violationString.toString(),true)
                             .addField("Submitter",submitterString.toString(),true)
