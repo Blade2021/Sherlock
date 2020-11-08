@@ -188,6 +188,12 @@
     "alias": ["channelReturn"],
     "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#archive-category"
   },
+  "topic": {
+    "id": 36,
+    "permission": 0,
+    "alias": [],
+    "wikiLink": ""
+  },
   "test": {
     "id": 47,
     "permission": 8,
