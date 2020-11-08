@@ -4,11 +4,13 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
 
 import java.awt.*;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static rsystems.SherlockBot.database;
@@ -358,26 +360,71 @@ public class ModifyGuildSettings extends ListenerAdapter {
         if (SherlockBot.commandMap.get(28).checkCommand(event.getMessage())) {
 
             EmbedBuilder embedBuilder = new EmbedBuilder();
-            StringBuilder roleNameString = new StringBuilder();
-            StringBuilder roleIDString = new StringBuilder();
-            StringBuilder rolePermissions = new StringBuilder();
+            embedBuilder.setThumbnail(event.getJDA().getSelfUser().getEffectiveAvatarUrl());
 
-            for (Map.Entry<String, Integer> entry : SherlockBot.guildMap.get(event.getGuild().getId()).modRoleMap.entrySet()) {
+            Iterator it = SherlockBot.guildMap.get(event.getGuild().getId()).modRoleMap.entrySet().iterator();
+            while(it.hasNext()){
+
+                Map.Entry entry = (Map.Entry)it.next();
+
+
                 try {
-                    String roleName = event.getGuild().getRoleById(entry.getKey()).getName();
-                    roleNameString.append(roleName).append("\n");
+                    String roleName = event.getGuild().getRoleById((String) entry.getKey()).getName();
+                    String permissionBinary = Integer.toBinaryString((Integer) entry.getValue());
+                    String reverseBinString = new StringBuilder(permissionBinary).reverse().toString();
+                    StringBuilder rolePermissions = new StringBuilder();
 
-                    roleIDString.append(entry.getKey()).append("\n");
-                    rolePermissions.append(entry.getValue()).append("\n");
+                    for(int i=0; i < reverseBinString.length(); i++){
+                        if(reverseBinString.charAt(i) == '1'){
+                            switch(i){
+                                case 0:
+                                    rolePermissions.append("Mute/Unmute").append("\n");
+                                    break;
+                                case 1:
+                                    rolePermissions.append("Infractions").append("\n");
+                                    break;
+                                case 2:
+                                    rolePermissions.append("Channel Cooldown").append("\n");
+                                    break;
+                                case 3:
+                                    rolePermissions.append("Archive Channels").append("\n");
+                                    break;
+                                case 4:
+                                    rolePermissions.append("Clear").append("\n");
+                                    break;
+                                case 5:
+                                    rolePermissions.append("Auto Role Assignment").append("\n");
+                                    break;
+                                case 6:
+                                    rolePermissions.append("Assignable Roles").append("\n");
+                                    break;
+                                case 7:
+                                    rolePermissions.append("Mute/Unmute").append("\n");
+                                    break;
+                                case 8:
+                                    rolePermissions.append("Mute/Unmute").append("\n");
+                                    break;
+                                case 9:
+                                    rolePermissions.append("Mute/Unmute").append("\n");
+                                    break;
+                            }
+                        }
+                    }
+
+                    embedBuilder.addField("Role: " + roleName,String.format("**ID:** %s\n**Permission Value:** %s",entry.getKey().toString(),entry.getValue().toString()
+                    ),true);
+                    embedBuilder.addField("Permissions",rolePermissions.toString(),true);
+                    if(it.hasNext()) {
+                        embedBuilder.addField("", "", false);
+                    }
+
                 } catch (NullPointerException e) {
+                    System.out.println("null found");
                     continue;
                 }
             }
 
             embedBuilder.setTitle("Mod Role Table")
-                    .addField("Role Name:", roleNameString.toString(), true)
-                    .addField("Role ID:", roleIDString.toString(), true)
-                    .addField("Role Permissions", rolePermissions.toString(), true)
                     .setFooter("Called by: " + event.getMember().getEffectiveName(), event.getAuthor().getEffectiveAvatarUrl())
                     .setColor(Color.CYAN);
 
@@ -523,6 +570,44 @@ public class ModifyGuildSettings extends ListenerAdapter {
         }
 
 
+        /*
+        ADD AUTO ROLE
+         */
+        if (SherlockBot.commandMap.get(20).checkCommand(event.getMessage())) {
+            if (args.length >= 2) {
+
+                try {
+                    if (event.getGuild().getRoleById(args[1]) != null) {
+
+                        if (database.insertAutoRole(event.getGuild().getIdLong(), Long.valueOf(args[1])) >= 1) {
+                            event.getMessage().addReaction("✅").queue();
+                        } else {
+                            event.getMessage().addReaction("❌").queue();
+                        }
+
+                        return;
+                    }
+
+                } catch (NumberFormatException e) {
+                }
+
+                // Role was not found using ID
+                try{
+                    for(Role r:event.getGuild().getRoles()){
+                        if(r.getName().equalsIgnoreCase(args[1])){
+                            if (database.insertAutoRole(event.getGuild().getIdLong(), r.getIdLong()) >= 1) {
+                                event.getMessage().addReaction("✅").queue();
+                            } else {
+                                event.getMessage().addReaction("❌").queue();
+                            }
+                        }
+                    }
+                } catch(NullPointerException | PermissionException e){
+
+                }
+            }
+        }
+
 
         /*
         CHECK AUTHORIZED
@@ -571,7 +656,6 @@ public class ModifyGuildSettings extends ListenerAdapter {
             }
         }
 
-
     }
 
 
@@ -617,6 +701,39 @@ public class ModifyGuildSettings extends ListenerAdapter {
                 }
             }
         }
+    }
 
+    private void handleAutoRole(GuildMessageReceivedEvent event, Boolean removal){
+        String[] args = event.getMessage().getContentRaw().split("\\s+");
+
+        try {
+            if (event.getGuild().getRoleById(args[1]) != null) {
+
+                if (database.insertAutoRole(event.getGuild().getIdLong(), Long.valueOf(args[1])) >= 1) {
+                    event.getMessage().addReaction("✅").queue();
+                } else {
+                    event.getMessage().addReaction("❌").queue();
+                }
+
+                return;
+            }
+
+        } catch (NumberFormatException e) {
+        }
+
+        // Role was not found using ID
+        try{
+            for(Role r:event.getGuild().getRoles()){
+                if(r.getName().equalsIgnoreCase(args[1])){
+                    if (database.insertAutoRole(event.getGuild().getIdLong(), r.getIdLong()) >= 1) {
+                        event.getMessage().addReaction("✅").queue();
+                    } else {
+                        event.getMessage().addReaction("❌").queue();
+                    }
+                }
+            }
+        } catch(NullPointerException | PermissionException e){
+
+        }
     }
 }
