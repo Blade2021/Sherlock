@@ -37,7 +37,7 @@
   },
   "commands": {
     "id": 7,
-    "permission": 32768,
+    "permission": 0,
     "alias": ["help"],
     "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands"
   },
@@ -65,7 +65,7 @@
 },
   "lfList": {
     "id": 12,
-    "permission": 32768,
+    "permission": 0,
     "alias": ["blacklist list"],
     "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#language-filtering"
   },

@@ -425,6 +425,7 @@ public class SQLHandler {
                 throwables.printStackTrace();
             }
         } else {
+            //DB Row Max limit reached
             return 201;
         }
         return 0;
@@ -460,6 +461,72 @@ public class SQLHandler {
 
             while (rs.next()) {
                 output.add(new SelfRole(guildID, rs.getString("RoleCommand"), rs.getLong("RoleID")));
+            }
+
+            return output;
+
+        } catch (SQLException throwables) {
+            System.out.println(throwables.getMessage());
+        } finally {
+            // do nothing at the moment
+        }
+        return null;
+    }
+
+    // Add an self role to the database
+    public Integer insertAutoRole(Long guildID, Long roleID) {
+
+        if(checkSize(guildID,"AutoRole")) {
+
+            try {
+                if ((connection == null) || (connection.isClosed())) {
+                    connect();
+                }
+
+                Statement st = connection.createStatement();
+
+                st.execute(String.format("INSERT INTO AutoRole (ChildGuildID, RoleID) VALUES (%d, %d)", guildID, roleID));
+                return 200;
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        } else {
+            //DB Row Max limit reached
+            return 201;
+        }
+        return 0;
+    }
+
+    // Remove an self role to the database
+    public Integer removeAutoRole(Long guildID, Long roleID) {
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("DELETE FROM AutoRole WHERE (ChildGuildID = %d) AND (RoleID = %d)", guildID, roleID));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
+    }
+
+    //Get self Roles - Called by GuildLoader
+    public ArrayList<Long> getAutoRoles(Long guildID) {
+        ArrayList<Long> output = new ArrayList<>();
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT RoleID FROM AutoRole WHERE ChildGuildID = " + guildID);
+
+            while (rs.next()) {
+                output.add(rs.getLong("RoleID"));
             }
 
             return output;
