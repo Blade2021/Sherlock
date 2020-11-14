@@ -46,7 +46,7 @@ public class SQLHandler {
                 try {
                     Thread.sleep(100);
                 }catch(InterruptedException e){
-
+                    //do nothing
                 }
             }
             if (connection.isValid(30)) {
@@ -98,8 +98,6 @@ public class SQLHandler {
 
         } catch (SQLException throwables) {
             System.out.println(throwables.getMessage());
-        } finally {
-            // do nothing at the moment
         }
 
         return output;
@@ -122,8 +120,6 @@ public class SQLHandler {
 
         } catch (SQLException throwables) {
             System.out.println(throwables.getMessage());
-        } finally {
-            // do nothing at the moment
         }
 
         return output;
@@ -146,8 +142,6 @@ public class SQLHandler {
 
         } catch (SQLException throwables) {
             System.out.println(throwables.getMessage());
-        } finally {
-            // do nothing at the moment
         }
 
         return output;
@@ -170,8 +164,6 @@ public class SQLHandler {
 
         } catch (SQLException throwables) {
             System.out.println(throwables.getMessage());
-        } finally {
-            // do nothing at the moment
         }
 
         return output;
@@ -254,7 +246,7 @@ public class SQLHandler {
             }
 
             Statement st = connection.createStatement();
-            st.execute(String.format("INSERT INTO %s (ChildGuildID, Event, ReceivingUserID, SendingUserID) VALUES (%d %s, %d, %d)"));
+            st.execute(String.format("INSERT INTO %s (ChildGuildID, Event, ReceivingUserID, SendingUserID) VALUES (%d %s, %d, %d)",tableName, Long.valueOf(GuildID),event,senderColumn,receiverColumn));
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -342,7 +334,7 @@ public class SQLHandler {
             /*
                     GRAB SELF ROLES FROM DATABASE
              */
-            ArrayList<SelfRole> selfRoles = new ArrayList<>();
+            ArrayList<SelfRole> selfRoles;
             selfRoles = getSelfRoles(Long.valueOf(guildID));
             for (SelfRole role : selfRoles) {
                 SherlockBot.guildMap.get(guildID).selfRoleMap.put(role.command, role.RoleID);
@@ -364,26 +356,27 @@ public class SQLHandler {
             int rowsFound = 0;
             while(rs.next()){
                 rowsFound++;
-                System.out.println(rowsFound);
+                //System.out.println(rowsFound);
             }
 
             if(rowsFound == 0){
+                System.out.println("Adding welcome row to GuildTable");
                 addWelcomeRow(guildID);
+            } else {
+
+                rs = st.executeQuery("SELECT WelcomeChannelID, WelcomeMessage, WelcomeMethod, MessageTimeout FROM WelcomeTable WHERE ChildGuildID = " + Long.valueOf(guildID));
+                while (rs.next()) {
+                    welcomeChannelID = rs.getLong("WelcomeChannelID");
+                    welcomeMessage = rs.getString("WelcomeMessage");
+                    welcomeMethod = rs.getInt("WelcomeMethod");
+                    welcomeMessageTimeout = rs.getInt("MessageTimeout");
+                }
+                SherlockBot.guildMap.get(guildID).setWelcomeChannelID(welcomeChannelID);
+                SherlockBot.guildMap.get(guildID).setWelcomeMessage(welcomeMessage);
+                SherlockBot.guildMap.get(guildID).setWelcomeMethod(welcomeMethod);
+                SherlockBot.guildMap.get(guildID).setWelcomeMessageTimeout(welcomeMessageTimeout);
+
             }
-
-
-            rs = st.executeQuery("SELECT WelcomeChannelID, WelcomeMessage, WelcomeMethod, MessageTimeout FROM WelcomeTable WHERE ChildGuildID = " + Long.valueOf(guildID));
-            while (rs.next()) {
-                welcomeChannelID = rs.getLong("WelcomeChannelID");
-                welcomeMessage = rs.getString("WelcomeMessage");
-                welcomeMethod = rs.getInt("WelcomeMethod");
-                welcomeMessageTimeout = rs.getInt("MessageTimeout");
-            }
-            SherlockBot.guildMap.get(guildID).setWelcomeChannelID(welcomeChannelID);
-            SherlockBot.guildMap.get(guildID).setWelcomeMessage(welcomeMessage);
-            SherlockBot.guildMap.get(guildID).setWelcomeMethod(welcomeMethod);
-            SherlockBot.guildMap.get(guildID).setWelcomeMessageTimeout(welcomeMessageTimeout);
-
 
             rs = st.executeQuery("SELECT ModRoleID, Permissions FROM ModRoleTable WHERE ChildGuildID = " + Long.valueOf(guildID));
             while(rs.next()){
@@ -467,8 +460,6 @@ public class SQLHandler {
 
         } catch (SQLException throwables) {
             System.out.println(throwables.getMessage());
-        } finally {
-            // do nothing at the moment
         }
         return null;
     }
@@ -542,8 +533,6 @@ public class SQLHandler {
 
         } catch (SQLException throwables) {
             System.out.println(throwables.getMessage());
-        } finally {
-            // do nothing at the moment
         }
         return null;
     }
