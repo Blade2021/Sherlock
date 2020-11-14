@@ -10,8 +10,14 @@ public class GuildChannelMoveEvent extends ListenerAdapter {
 Protection against moving a channel out of the archive category.
  */
     public void onTextChannelUpdateParent( TextChannelUpdateParentEvent event) {
-        if(event.getOldParent().getIdLong() == SherlockBot.guildMap.get(event.getGuild().getId()).getArchiveCategoryID()){
-            SherlockBot.database.deleteRow("ArchiveTable","ChannelID",event.getChannel().getIdLong());
+        try{
+            if(SherlockBot.guildMap.get(event.getGuild().getId()).getArchiveCategoryID() != null) {
+                if (event.getOldParent().getIdLong() == SherlockBot.guildMap.get(event.getGuild().getId()).getArchiveCategoryID()) {
+                    SherlockBot.database.deleteRow("ArchiveTable", "ChannelID", event.getChannel().getIdLong());
+                }
+            }
+        } catch (NullPointerException e){
+            // send to exception handler
         }
     }
 }

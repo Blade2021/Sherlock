@@ -49,9 +49,9 @@ public class SelfRoles extends ListenerAdapter {
                         //Member does not have role, Add it
                         event.getGuild().addRoleToMember(event.getMember(), event.getGuild().getRoleById(roleID)).reason("Requested by user").queue(success -> {
                             event.getMessage().addReaction("✅").queue();
-                            event.getChannel().sendMessage(event.getAuthor().getAsMention() + "I have added the " + event.getGuild().getRoleById(roleID).getName() + " to you.").queue(
+                            event.getChannel().sendMessage(event.getAuthor().getAsMention() + " I have added the " + event.getGuild().getRoleById(roleID).getName() + " to you.").queue(
                                     messageSentSuccess -> {
-                                        messageSentSuccess.delete().queueAfter(30, TimeUnit.SECONDS);
+                                        //messageSentSuccess.delete().queueAfter(30, TimeUnit.SECONDS);
                                     }
                             );
 

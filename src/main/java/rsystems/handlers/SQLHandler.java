@@ -485,8 +485,17 @@ public class SQLHandler {
 
                 Statement st = connection.createStatement();
 
-                st.execute(String.format("INSERT INTO AutoRole (ChildGuildID, RoleID) VALUES (%d, %d)", guildID, roleID));
-                return 200;
+                ResultSet rs = st.executeQuery(String.format("SELECT RoleID FROM AutoRole WHERE ChildGuildID = %d AND RoleID = %d", guildID, roleID));
+                int results = 0;
+                while(rs.next()){
+                    results++;
+                }
+                if(results > 0) {
+                    return 400;
+                } else {
+                    st.execute(String.format("INSERT INTO AutoRole (ChildGuildID, RoleID) VALUES (%d, %d)", guildID, roleID));
+                    return 200;
+                }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }

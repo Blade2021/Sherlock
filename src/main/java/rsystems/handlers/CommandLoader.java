@@ -28,6 +28,12 @@ public class CommandLoader {
                 //do nothing
             }
 
+            try{
+                tempCommand.setWikiLink(parsedData.get("wikiLink").toString());
+            }catch (NullPointerException e){
+
+            }
+
             try {
                 if (Integer.parseInt(parsedData.get("permission").toString()) > 0) {
                     tempCommand.setRank(Integer.parseInt(parsedData.get("permission").toString()));

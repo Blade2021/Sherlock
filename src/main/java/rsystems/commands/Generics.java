@@ -43,7 +43,7 @@ public class Generics extends ListenerAdapter {
             embedBuilder.setTitle("BoT Information")
                     .setColor(Color.ORANGE)
                     .setThumbnail(event.getJDA().getSelfUser().getEffectiveAvatarUrl())
-                    .setDescription("Greetings, I am Sherlock.  \n\nI am built upon dynamics that allow me to be a great partner for any and all guilds, helping with administration and simple guild functions.")
+                    .setDescription("Greetings, I am Sherlock.  \n\nI am built upon dynamics that allow me to be a great partner for any and all guilds, helping with administration and simple guild functions.\n\nI am currently serving: **" + event.getJDA().getGuilds().size() + " servers**")
                     .addField("Ping:",event.getGuild().getJDA().getGatewayPing() + "ms",true)
                     .addField("Version:",SherlockBot.version,true)
                     .addField("Source:","[Github](https://github.com/Blade2021/Sherlock)",true)
@@ -56,6 +56,7 @@ public class Generics extends ListenerAdapter {
             }
 
             embedBuilder.clear();
+
         }
 
         /*

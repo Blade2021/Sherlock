@@ -1,3 +1,6 @@
+##0.3.7
+!topic is now an available command to pull the triggering channels topic.
+
 ## 0.3.2
 Added failure handling to retrieve archive channel data.
 

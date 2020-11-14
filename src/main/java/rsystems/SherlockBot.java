@@ -29,7 +29,7 @@ public class SherlockBot {
     public static Map<String,GuildSettings> guildMap = new HashMap<>();
     public static SQLHandler database = new SQLHandler(Config.get("Database_Host"),Config.get("Database_User"),Config.get("Database_Pass"));
     public static User bot = null;
-    public static String version = "0.3.7";
+    public static String version = "0.4.0";
 
     static final Logger logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 

@@ -117,6 +117,7 @@
   "welcomeChannelID": {
     "id": 22,
     "permission": 32768,
+    "alias": ["welcomeChannel"],
     "wikiLink": "https://github.com/Blade2021/Sherlock/wiki/Commands#welcome-messages"
   },
   "welcomeMessage": {
@@ -191,6 +192,24 @@
   "topic": {
     "id": 36,
     "permission": 0,
+    "alias": [],
+    "wikiLink": ""
+  },
+  "addAutoRole": {
+    "id": 37,
+    "permission": 32,
+    "alias": [],
+    "wikiLink": ""
+  },
+  "removeAutoRole": {
+    "id": 38,
+    "permission": 32,
+    "alias": [],
+    "wikiLink": ""
+  },
+  "getAutoRoles": {
+    "id": 39,
+    "permission": 32,
     "alias": [],
     "wikiLink": ""
   },

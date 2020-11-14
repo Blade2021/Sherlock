@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -75,7 +76,6 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     event.getMessage().addReaction("✅").queue();
                 } else {
                     String logChannelID = SherlockBot.guildMap.get(event.getGuild().getId()).getLogChannelID();
-                    System.out.println(logChannelID);
                     if ((logChannelID != null) && !(logChannelID.equalsIgnoreCase("0")) && (event.getGuild().getTextChannelById(logChannelID).canTalk())) {
                         event.getChannel().sendMessage(event.getGuild().getTextChannelById(logChannelID).getAsMention() + "\nLogChannelID: " + logChannelID).queue();
                     } else {
@@ -573,13 +573,13 @@ public class ModifyGuildSettings extends ListenerAdapter {
         /*
         ADD AUTO ROLE
          */
-        if (SherlockBot.commandMap.get(20).checkCommand(event.getMessage())) {
+        if (SherlockBot.commandMap.get(37).checkCommand(event.getMessage())) {
             if (args.length >= 2) {
 
                 try {
                     if (event.getGuild().getRoleById(args[1]) != null) {
 
-                        if (database.insertAutoRole(event.getGuild().getIdLong(), Long.valueOf(args[1])) >= 1) {
+                        if (database.insertAutoRole(event.getGuild().getIdLong(), Long.valueOf(args[1])) == 200) {
                             event.getMessage().addReaction("✅").queue();
                         } else {
                             event.getMessage().addReaction("❌").queue();
@@ -608,6 +608,73 @@ public class ModifyGuildSettings extends ListenerAdapter {
             }
         }
 
+        /*
+        REMOVE AUTO ROLE
+         */
+        if (SherlockBot.commandMap.get(38).checkCommand(event.getMessage())) {
+            if (args.length >= 2) {
+
+                try {
+                    if (event.getGuild().getRoleById(args[1]) != null) {
+
+                        if (database.removeAutoRole(event.getGuild().getIdLong(), Long.valueOf(args[1])) >= 1) {
+                            event.getMessage().addReaction("✅").queue();
+                        } else {
+                            event.getMessage().addReaction("❌").queue();
+                        }
+
+                        return;
+                    }
+
+                } catch (NumberFormatException e) {
+                }
+
+                // Role was not found using ID
+                try{
+                    for(Role r:event.getGuild().getRoles()){
+                        if(r.getName().equalsIgnoreCase(args[1])){
+                            if (database.removeAutoRole(event.getGuild().getIdLong(), r.getIdLong()) >= 1) {
+                                event.getMessage().addReaction("✅").queue();
+                            } else {
+                                event.getMessage().addReaction("❌").queue();
+                            }
+                        }
+                    }
+                } catch(NullPointerException | PermissionException e){
+
+                }
+            }
+        }
+
+        /*
+        GET AUTO ROLES
+         */
+        if (SherlockBot.commandMap.get(39).checkCommand(event.getMessage())) {
+
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            StringBuilder roleName = new StringBuilder();
+            StringBuilder roleID = new StringBuilder();
+
+            ArrayList<Long> roles = SherlockBot.database.getAutoRoles(event.getGuild().getIdLong());
+
+            for(Long id:roles){
+                try {
+                    roleName.append(event.getGuild().getRoleById(id).getName()).append("\n");
+                    roleID.append(id).append("\n");
+                } catch(NullPointerException e){
+                    continue;
+                }
+            }
+
+            embedBuilder.setTitle("Auto Role List")
+                    .addField("Role Name:", roleName.toString(), true)
+                    .addField("Role ID:", roleID.toString(), true)
+                    .setFooter("Called by: " + event.getMember().getEffectiveName(), event.getAuthor().getEffectiveAvatarUrl())
+                    .setColor(Color.CYAN);
+
+            event.getChannel().sendMessage(embedBuilder.build()).queue();
+            embedBuilder.clear();
+        }
 
         /*
         CHECK AUTHORIZED

@@ -174,7 +174,12 @@ public class ArchiveChannel extends ListenerAdapter {
 
                 System.out.println("Attempting to set override for Role:" + permissionOverride.getRole().getName());
                 database.insertTimedEvent(guild.getIdLong(), channel.getIdLong(), 3, "Channel Archive", permissionOverride.getRole().getIdLong(), currentState);
-                channel.upsertPermissionOverride(permissionOverride.getPermissionHolder()).deny(Permission.MESSAGE_WRITE).queue();
+                try{
+                    channel.upsertPermissionOverride(permissionOverride.getPermissionHolder()).deny(Permission.MESSAGE_WRITE).queue();
+                    database.insertTimedEvent(guild.getIdLong(), channel.getIdLong(), 3, "Channel Archive", permissionOverride.getRole().getIdLong(), currentState);
+                }catch(Exception e){
+                    //todo send to exception handler
+                }
             }
         }
     }
