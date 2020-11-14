@@ -63,10 +63,12 @@ public class ModifyGuildSettings extends ListenerAdapter {
                                 newID = args[1];
                             } else {
                                 event.getMessage().addReaction("⚠").queue();
+                                System.out.println("Null found when setting LogChannel | " + event.getGuild().getId());
                                 return;
                             }
                         } catch (NumberFormatException e) {
                             event.getMessage().addReaction("⚠").queue();
+                            System.out.println("NumberFormatException | " + event.getGuild().getId());
                             return;
                         }
                     }
@@ -85,6 +87,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
             } catch (IndexOutOfBoundsException | NullPointerException e) {
                 try {
                     event.getMessage().addReaction("⚠").queue();
+                    System.out.println("Catch error when setting logChannel | " + event.getGuild().getId());
                 } catch (Exception global_exception) {
                     global_exception.printStackTrace();
                 }
