@@ -225,9 +225,10 @@ public class LogChannel {
             EmbedBuilder embedBuilder = new EmbedBuilder()
                     .setTitle("Muted User")
                     .addField("Reason:",reason, false)
-                    .addField("Violators:",violator.getAsTag(),false)
-                    .setFooter("Submitted by: " + submitter.getUser().getAsTag());
-            embedBuilder.setColor(getColor(3));
+                    .addField("Violator:",violator.getAsTag(),true)
+                    .addField("UserID:",violator.getId(),true)
+                    .setFooter("Submitted by: " + submitter.getUser().getAsTag(),submitter.getUser().getEffectiveAvatarUrl());
+            embedBuilder.setColor(getColor(1));
 
             try{
                 guild.getTextChannelById(channelLogID).sendMessage(embedBuilder.build()).queue();
@@ -245,9 +246,10 @@ public class LogChannel {
                     .setTitle("Muted User")
                     .addField("Reason:",reason,false)
                     .addField("Violators:",violator.getAsTag(),true)
-                    .addField("Time:", timeValue + " " + timeType, true)
-                    .setFooter("Submitted by: " + submitter.getUser().getAsTag());
-            embedBuilder.setColor(getColor(3));
+                    .addField("UserID:",violator.getId(),true)
+                    .addField("Time:", timeValue + " " + timeType, false)
+                    .setFooter("Submitted by: " + submitter.getUser().getAsTag(),submitter.getUser().getEffectiveAvatarUrl());
+            embedBuilder.setColor(getColor(1));
 
             try{
                 guild.getTextChannelById(channelLogID).sendMessage(embedBuilder.build()).queue();
