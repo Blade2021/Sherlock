@@ -22,14 +22,13 @@ import javax.security.auth.login.LoginException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
-import java.util.logging.Level;
 
 public class SherlockBot {
     public static Map<Integer, Command> commandMap = new HashMap<>();
     public static Map<String,GuildSettings> guildMap = new HashMap<>();
     public static SQLHandler database = new SQLHandler(Config.get("Database_Host"),Config.get("Database_User"),Config.get("Database_Pass"));
     public static User bot = null;
-    public static String version = "0.4.2";
+    public static String version = "0.4.3";
 
     static final Logger logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 
@@ -86,7 +85,7 @@ public class SherlockBot {
 
 
         // get the logger you want to suppress
-        java.util.logging.Logger.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(Level.INFO);
+        //.util.logging.Logger.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(Level.INFO);
     }
 
 }
