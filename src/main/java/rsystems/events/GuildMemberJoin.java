@@ -2,6 +2,7 @@ package rsystems.events;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
@@ -22,17 +23,24 @@ public class GuildMemberJoin extends ListenerAdapter {
         }
 
         //Auto Role Handler
-        if(SherlockBot.database.getAutoRoles(event.getGuild().getIdLong()).size() > 0){
+        if (SherlockBot.database.getAutoRoles(event.getGuild().getIdLong()).size() > 0) {
             ArrayList<Long> autoRoles = new ArrayList<>();
             autoRoles.addAll(SherlockBot.database.getAutoRoles(event.getGuild().getIdLong()));
 
-            for(Long roleID:autoRoles){
-                try{
-                    event.getGuild().addRoleToMember(event.getMember(),event.getGuild().getRoleById(roleID)).queue();
-                } catch(PermissionException | NullPointerException e){
-                    System.out.println(String.format("An error occurred when trying to assign auto role (%d) to member (%d).",roleID,event.getMember().getIdLong()));
+            ArrayList<Role> autoRoleArray = new ArrayList<>();
+            for (Long roleID : autoRoles) {
+                if (event.getGuild().getRoleById(roleID) != null) {
+                    autoRoleArray.add(event.getGuild().getRoleById(roleID));
                 }
+
             }
+
+            try {
+                event.getGuild().modifyMemberRoles(event.getMember(), autoRoleArray).queue();
+            } catch (PermissionException | NullPointerException e) {
+                System.out.println(String.format("An error occurred when trying to assign auto role(s) to member (%d).", event.getMember().getIdLong()));
+            }
+
         }
 
     }
