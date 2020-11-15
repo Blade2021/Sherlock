@@ -7,8 +7,6 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import rsystems.commands.*;
 import rsystems.events.*;
 import rsystems.handlers.CommandLoader;
@@ -29,8 +27,6 @@ public class SherlockBot {
     public static SQLHandler database = new SQLHandler(Config.get("Database_Host"),Config.get("Database_User"),Config.get("Database_Pass"));
     public static User bot = null;
     public static String version = "0.4.4";
-
-    static final Logger logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 
     public static void main(String[] args) throws LoginException {
         JDA api = JDABuilder.createDefault(Config.get("token"))
@@ -83,9 +79,6 @@ public class SherlockBot {
 
         CommandLoader commandLoader = new CommandLoader();
 
-
-        // get the logger you want to suppress
-        //.util.logging.Logger.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(Level.INFO);
     }
 
 }
