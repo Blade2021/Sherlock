@@ -44,6 +44,7 @@ public class SQLHandler {
 
             while(connection.isClosed()){
                 try {
+                    System.out.println("Database connection lost.  Attempting reconnection...");
                     Thread.sleep(100);
                 }catch(InterruptedException e){
                     //do nothing

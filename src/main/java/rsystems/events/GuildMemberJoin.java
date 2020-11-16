@@ -11,6 +11,7 @@ import rsystems.SherlockBot;
 import rsystems.handlers.LogChannel;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class GuildMemberJoin extends ListenerAdapter {
@@ -23,21 +24,25 @@ public class GuildMemberJoin extends ListenerAdapter {
         }
 
         //Auto Role Handler
-        if (SherlockBot.database.getAutoRoles(event.getGuild().getIdLong()).size() > 0) {
-            ArrayList<Long> autoRoles = new ArrayList<>();
-            autoRoles.addAll(SherlockBot.database.getAutoRoles(event.getGuild().getIdLong()));
+        //Check database to see if auto roles are configured
+        if (!SherlockBot.database.getAutoRoles(event.getGuild().getIdLong()).isEmpty()) {
 
-            ArrayList<Role> autoRoleArray = new ArrayList<>();
-            for (Long roleID : autoRoles) {
+            //Initiate an arrayList to hold the Role objects
+            List<Role> autoRoleArray = new ArrayList<>();
+
+            //Parse the autoroles array to only add roles that are legit
+            for (Long roleID : SherlockBot.database.getAutoRoles(event.getGuild().getIdLong())) {
                 if (event.getGuild().getRoleById(roleID) != null) {
                     autoRoleArray.add(event.getGuild().getRoleById(roleID));
                 }
 
             }
 
+            //Attempt to add the roles to the member joining
             try {
-                event.getGuild().modifyMemberRoles(event.getMember(), autoRoleArray).queue();
+                event.getGuild().modifyMemberRoles(event.getMember(), autoRoleArray, null).queue();
             } catch (PermissionException | NullPointerException e) {
+                //Catch errors
                 System.out.println(String.format("An error occurred when trying to assign auto role(s) to member (%d).", event.getMember().getIdLong()));
             }
 
