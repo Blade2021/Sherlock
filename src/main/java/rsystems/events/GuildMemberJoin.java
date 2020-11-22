@@ -40,7 +40,7 @@ public class GuildMemberJoin extends ListenerAdapter {
 
             //Attempt to add the roles to the member joining
             try {
-                event.getGuild().modifyMemberRoles(event.getMember(), autoRoleArray, null).queue();
+                event.getGuild().modifyMemberRoles(event.getMember(), autoRoleArray, null).queueAfter(10,TimeUnit.SECONDS);
             } catch (PermissionException | NullPointerException e) {
                 //Catch errors
                 System.out.println(String.format("An error occurred when trying to assign auto role(s) to member (%d).", event.getMember().getIdLong()));
