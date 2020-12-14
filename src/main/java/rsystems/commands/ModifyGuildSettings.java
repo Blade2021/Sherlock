@@ -81,7 +81,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     if ((logChannelID != null) && !(logChannelID.equalsIgnoreCase("0")) && (event.getGuild().getTextChannelById(logChannelID).canTalk())) {
                         event.getChannel().sendMessage(event.getGuild().getTextChannelById(logChannelID).getAsMention() + "\nLogChannelID: " + logChannelID).queue();
                     } else {
-                        event.getChannel().sendMessage(event.getAuthor().getAsMention() + " No log channel has been set  \uD83E\uDDD0").queue();
+                        event.getMessage().reply("No log channel has been set  \uD83E\uDDD0").queue();
                     }
                 }
             } catch (IndexOutOfBoundsException | NullPointerException e) {
@@ -144,10 +144,10 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     } else {
                         switch (databaseStatusCode) {
                             case 201:
-                                event.getChannel().sendMessage(event.getAuthor().getAsMention() + " ERROR 201: You have hit the maximum number of self roles.  Please try to remove some before continuing.").queue();
+                                event.getMessage().reply("ERROR 201: You have hit the maximum number of self roles.  Please try to remove some before continuing.").queue();
                                 break;
                             case 400:
-                                event.getChannel().sendMessage(event.getAuthor().getAsMention() + " ERROR 400: Database had an unknown error.  This event has been logged.").queue();
+                                event.getMessage().reply("ERROR 400: Database had an unknown error.  This event has been logged.").queue();
                         }
                         // Unsuccessful (0 rows updated)
                         database.logError(event.getGuild().getId(), "Failed to add self role", databaseStatusCode);
@@ -156,12 +156,12 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     // Request failed internal checks
                     if (args.length < 3) {
 
-                        event.getChannel().sendMessage("Not enough arguments supplied.").queue();
+                        event.getMessage().reply("Not enough arguments supplied.").queue();
 
                     } else if (event.getGuild().getRoleById(args[2]) == null) {
 
                         // Cannot find role associated with ID provided
-                        event.getChannel().sendMessage(event.getAuthor().getAsMention() + " I could not find a role associated with that ID.").queue();
+                        event.getMessage().reply("I could not find a role associated with that ID.").queue();
 
                     }
                     event.getMessage().addReaction("⚠").queue();
@@ -169,7 +169,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
             } catch (NullPointerException e) {
                 event.getMessage().addReaction("⚠").queue();
             } catch (NumberFormatException e) {
-                event.getChannel().sendMessage("What in tarnation is that>?").queue();
+                event.getMessage().reply("What in tarnation is that>?").queue();
                 event.getMessage().addReaction("⚠").queue();
             }
         }
@@ -210,7 +210,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                 event.getAuthor().openPrivateChannel().queue((channel) -> {
                     try {
                         event.getMessage().addReaction("\uD83D\uDCE8 ").queue();
-                        event.getChannel().sendMessage(event.getAuthor().getAsMention() + " Please check your private messages for further information").queue();
+                        event.getMessage().reply("Please check your private messages for further information").queue();
                     } catch (NullPointerException e) {
 
                     }
@@ -232,7 +232,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                 event.getAuthor().openPrivateChannel().queue((channel) -> {
                     try {
                         event.getMessage().addReaction("\uD83D\uDCE8 ").queue();
-                        event.getChannel().sendMessage(event.getAuthor().getAsMention() + " Please check your private messages for further information").queue();
+                        event.getMessage().reply("Please check your private messages for further information").queue();
                     } catch (NullPointerException e) {
 
                     }
@@ -550,7 +550,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     }
                 }
             } else {
-                event.getChannel().sendMessage(event.getAuthor().getAsMention() + " You did not provide a categoryID or give a category name.").queue();
+                event.getMessage().reply(" You did not provide a categoryID or give a category name.").queue();
             }
         }
 
@@ -563,12 +563,12 @@ public class ModifyGuildSettings extends ListenerAdapter {
 
                 try {
                     Long archiveCategoryID = SherlockBot.guildMap.get(event.getGuild().getId()).getArchiveCategoryID();
-                    event.getChannel().sendMessage(String.format("Current Archive Category: %s\nCategory ID: %d",event.getGuild().getCategoryById(archiveCategoryID).getName(),archiveCategoryID)).queue();
+                    event.getMessage().reply(String.format("Current Archive Category: %s\nCategory ID: %d",event.getGuild().getCategoryById(archiveCategoryID).getName(),archiveCategoryID)).queue();
                 } catch (NullPointerException e) {
 
                 }
             } else {
-                event.getChannel().sendMessage("You do not have a archive category set.").queue();
+                event.getMessage().reply("You do not have a archive category set.").queue();
             }
         }
 

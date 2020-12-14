@@ -7,11 +7,13 @@ import java.util.Map;
 public class GuildSettings {
     private String prefix;
     //private ArrayList<String> modRoles = new ArrayList<>();
+
     public String logChannelID;
     public int embedFilter = 0;
     public Map<String, Long> selfRoleMap = new HashMap<>();
     public Map<String, Integer> modRoleMap = new HashMap<>();
     public Map<String, Integer> exceptionMap = new HashMap<>();
+    public Map<Long, RoleReactionObject> reactionMap = new HashMap<>();
     private ArrayList<String> blacklistedWords = new ArrayList<>();
     private Long archiveCategory = null;
 
@@ -157,5 +159,13 @@ public class GuildSettings {
 
     public void setArchiveCategory(Long archiveCategory) {
         this.archiveCategory = archiveCategory;
+    }
+
+    public Map<Long, RoleReactionObject> getReactionMap() {
+        return reactionMap;
+    }
+
+    public void setReactionMap(Map<Long, RoleReactionObject> reactionMap) {
+        this.reactionMap = reactionMap;
     }
 }

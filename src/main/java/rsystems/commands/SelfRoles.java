@@ -39,7 +39,7 @@ public class SelfRoles extends ListenerAdapter {
                     if (roles.contains(event.getGuild().getRoleById(roleID))) {
                         event.getGuild().removeRoleFromMember(event.getMember(), event.getGuild().getRoleById(roleID)).reason("Requested by user").queue(success -> {
                             event.getMessage().addReaction("✅").queue();
-                            event.getChannel().sendMessage(event.getAuthor().getAsMention() + "I have removed the " + event.getGuild().getRoleById(roleID).getName() + " from you.").queue(
+                            event.getMessage().reply("I have removed the " + event.getGuild().getRoleById(roleID).getName() + " from you.").queue(
                                     messageSentSuccess -> {
                                         messageSentSuccess.delete().queueAfter(30, TimeUnit.SECONDS);
                                     }
@@ -49,7 +49,7 @@ public class SelfRoles extends ListenerAdapter {
                         //Member does not have role, Add it
                         event.getGuild().addRoleToMember(event.getMember(), event.getGuild().getRoleById(roleID)).reason("Requested by user").queue(success -> {
                             event.getMessage().addReaction("✅").queue();
-                            event.getChannel().sendMessage(event.getAuthor().getAsMention() + " I have added the " + event.getGuild().getRoleById(roleID).getName() + " to you.").queue(
+                            event.getMessage().reply(" I have added the " + event.getGuild().getRoleById(roleID).getName() + " to you.").queue(
                                     messageSentSuccess -> {
                                         //messageSentSuccess.delete().queueAfter(30, TimeUnit.SECONDS);
                                     }
@@ -58,10 +58,10 @@ public class SelfRoles extends ListenerAdapter {
                         });
                     }
                 } catch (NullPointerException | IllegalArgumentException e) {
-                    event.getChannel().sendMessage(event.getMember().getAsMention() + " I could not find the role associated with that command.").queue();
+                    event.getMessage().reply("I could not find the role associated with that command.").queue();
                     event.getMessage().addReaction("⚠").queue();
                 } catch (PermissionException e) {
-                    event.getChannel().sendMessage("Missing Permission:" + e.getPermission().toString());
+                    event.getMessage().reply("Missing Permission:" + e.getPermission().toString());
                     event.getMessage().addReaction("⚠").queue();
                 }
             }

@@ -230,7 +230,7 @@ public class Mute extends ListenerAdapter {
                         System.out.println("Could not find user to mute");
                         event.getMessage().addReaction("⚠").queue();
                     } catch (NumberFormatException e) {
-                        event.getChannel().sendMessage("What in tarnation is that>?").queue();
+                        event.getMessage().reply("What in tarnation is that>?").queue();
                         event.getMessage().addReaction("⚠").queue();
                     }
                 }
