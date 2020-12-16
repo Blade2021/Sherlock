@@ -53,7 +53,7 @@ public class ChannelTopic extends ListenerAdapter {
                             while (it.hasNext()) {
                                 Long checkId = (Long) it.next();
                                 if (checkId == event.getChannel().getIdLong()) {
-                                    System.out.println("Removing " + it.next() + " from channel topic cooldown map");
+                                    System.out.println("Removing " + checkId + " from channel topic cooldown map");
                                     it.remove();
                                 }
                             }
