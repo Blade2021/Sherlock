@@ -7,6 +7,8 @@ public class InfractionObject {
     public String note;
     public Date submissionDate;
     public Long submitterID;
+    public Long messageID;
+    public Long caseNumber;
 
     public InfractionObject(String violation, String note, Date submissionDate, Long submitterID) {
         this.violation = violation;

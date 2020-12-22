@@ -28,10 +28,9 @@ public class LanguageFilter extends ListenerAdapter {
         if(triggerWord != null){
 
             //Bad word was detected!
-            System.out.println("Bad word detected");
             try {
                 event.getMessage().addReaction("⚠").queue();
-                event.getChannel().sendMessage(event.getMessage().getAuthor().getAsMention() + badMessage).queue(success -> {
+                event.getMessage().reply(badMessage).queue(success -> {
                     success.delete().queueAfter(60, TimeUnit.SECONDS);
                 });
                 futures.put(event.getMessageId(), event.getMessage().delete().submitAfter(60, TimeUnit.SECONDS));
