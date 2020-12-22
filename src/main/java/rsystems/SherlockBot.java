@@ -26,7 +26,7 @@ public class SherlockBot {
     public static Map<String,GuildSettings> guildMap = new HashMap<>();
     public static SQLHandler database = new SQLHandler(Config.get("Database_Host"),Config.get("Database_User"),Config.get("Database_Pass"));
     public static User bot = null;
-    public static String version = "0.5.1";
+    public static String version = "0.6.0";
 
     public static void main(String[] args) throws LoginException {
         JDA api = JDABuilder.createDefault(Config.get("token"))
@@ -59,6 +59,8 @@ public class SherlockBot {
         api.addEventListener(new GuildCategoryDeleted());
         api.addEventListener(new GuildTextChannelDeleted());
         api.addEventListener(new ChannelTopic());
+        api.addEventListener(new GuildReactionListener());
+        api.addEventListener(new GuildEmoteRemoved());
 
         try{
             api.awaitReady();

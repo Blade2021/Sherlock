@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'rsystems'
-version '0.5.1'
+version '0.6.0'
 
 mainClassName = 'rsystems.SherlockBot'
 
@@ -29,6 +29,7 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
     compile("ch.qos.logback:logback-classic:1.2.3")
+    compile 'com.vdurmont:emoji-java:5.1.1'
 
     implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.0'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'

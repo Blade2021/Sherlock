@@ -26,5 +26,10 @@ public class GuildMessageDeleted extends ListenerAdapter {
                 }
             });
         }
+
+        //Delete any rows in the db connected to that messageID
+        SherlockBot.database.deleteRow("ReactionTable","MessageID",event.getMessageIdLong());
+
+
     }
 }

@@ -5,6 +5,7 @@ import org.mariadb.jdbc.MariaDbPoolDataSource;
 import rsystems.Config;
 import rsystems.SherlockBot;
 import rsystems.objects.InfractionObject;
+import rsystems.objects.RoleReactionObject;
 import rsystems.objects.SelfRole;
 import rsystems.objects.TimedEvent;
 
@@ -357,7 +358,6 @@ public class SQLHandler {
             int rowsFound = 0;
             while(rs.next()){
                 rowsFound++;
-                //System.out.println(rowsFound);
             }
 
             if(rowsFound == 0){
@@ -394,6 +394,29 @@ public class SQLHandler {
             while(rs.next()){
                 SherlockBot.guildMap.get(guildID).setArchiveCategory(rs.getLong("ArchiveCat"));
             }
+
+            rs = st.executeQuery("SELECT MessageID, ReactionID, RoleID, AddRole FROM ReactionTable WHERE ChildGuildID = " + Long.valueOf(guildID));
+            while(rs.next()){
+                Long messageID = rs.getLong("MessageID");
+                String reactionID = rs.getString("ReactionID");
+                Long roleID = rs.getLong("RoleID");
+                boolean addRole = rs.getBoolean("AddRole");
+
+                if(SherlockBot.guildMap.get(guildID).getReactionMap().containsKey(messageID)){
+                    ArrayList<RoleReactionObject> roles = SherlockBot.guildMap.get(guildID).getReactionMap().get(messageID);
+                    roles.add(new RoleReactionObject(messageID,reactionID,roleID,addRole));
+
+                    SherlockBot.guildMap.get(guildID).getReactionMap().put(messageID,roles);
+                } else {
+                    ArrayList<RoleReactionObject> tempList = new ArrayList<>();
+                    tempList.add(new RoleReactionObject(messageID,reactionID,roleID));
+
+                    SherlockBot.guildMap.get(guildID).getReactionMap().putIfAbsent(messageID,tempList);
+
+                }
+                System.out.println(String.format("Adding Reaction Role| MessageID:%d | ReactionID:%s | RoleID: %d",messageID,reactionID,roleID));
+            }
+
 
             System.out.println("Guild data loaded | GuildID" + guildID);
         } catch (SQLException throwables) {
@@ -748,6 +771,40 @@ public class SQLHandler {
         return 0;
     }
 
+    public int insertReactionRole(Long guildID, Long messageID, String reactionID, Long roleID){
+
+        try{
+            if((connection == null) || (connection.isClosed())){
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("INSERT INTO ReactionTable (ChildGuildID, MessageID, ReactionID, RoleID) VALUES (%d, %d, \"%s\", %d)",guildID, messageID, reactionID, roleID));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int removeReactionRole(Long guildID, Long messageID, String reactionID){
+
+        try{
+            if((connection == null) || (connection.isClosed())){
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("DELETE FROM ReactionTable WHERE (ChildGuildID = %d) AND (MessageID = %d) AND (ReactionID = \"%s\")",guildID, messageID, reactionID));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
+    }
+
     /*
 
     OTHER METHODS....
@@ -1007,6 +1064,22 @@ public class SQLHandler {
             Statement st = connection.createStatement();
 
             st.execute(String.format("DELETE FROM %s WHERE %s = %d", TableName, IdentifierColumn, Identifier));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
+    }
+
+    public Integer deleteRow(String TableName, String IdentifierColumn, String Identifier) {
+        try {
+            if ((connection == null) || (connection.isClosed())) {
+                connect();
+            }
+
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("DELETE FROM %s WHERE %s = \"%s\"", TableName, IdentifierColumn, Identifier));
             return st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();

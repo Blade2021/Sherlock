@@ -77,6 +77,8 @@ public class GuildRoleDeleted extends ListenerAdapter {
 
         }
 
+        // Delete any rows from the database connected to that role
+        SherlockBot.database.deleteRow("ReactionTable","RoleID",event.getRole().getIdLong());
 
 
     }

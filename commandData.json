@@ -213,6 +213,18 @@
     "alias": [],
     "wikiLink": ""
   },
+  "addReactionRole": {
+    "id": 40,
+    "permission": 64,
+    "alias": ["arr"],
+    "wikiLink": ""
+  },
+  "removeReactionRole": {
+    "id": 41,
+    "permission": 64,
+    "alias": ["rrr"],
+    "wikiLink": ""
+  },
   "test": {
     "id": 47,
     "permission": 8,

@@ -1,18 +1,20 @@
 package rsystems.commands;
 
+import com.vdurmont.emoji.EmojiParser;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
+import rsystems.objects.RoleReactionObject;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
+import java.util.*;
 
 import static rsystems.SherlockBot.database;
 
@@ -366,9 +368,9 @@ public class ModifyGuildSettings extends ListenerAdapter {
             embedBuilder.setThumbnail(event.getJDA().getSelfUser().getEffectiveAvatarUrl());
 
             Iterator it = SherlockBot.guildMap.get(event.getGuild().getId()).modRoleMap.entrySet().iterator();
-            while(it.hasNext()){
+            while (it.hasNext()) {
 
-                Map.Entry entry = (Map.Entry)it.next();
+                Map.Entry entry = (Map.Entry) it.next();
 
 
                 try {
@@ -377,9 +379,9 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     String reverseBinString = new StringBuilder(permissionBinary).reverse().toString();
                     StringBuilder rolePermissions = new StringBuilder();
 
-                    for(int i=0; i < reverseBinString.length(); i++){
-                        if(reverseBinString.charAt(i) == '1'){
-                            switch(i){
+                    for (int i = 0; i < reverseBinString.length(); i++) {
+                        if (reverseBinString.charAt(i) == '1') {
+                            switch (i) {
                                 case 0:
                                     rolePermissions.append("Mute/Unmute").append("\n");
                                     break;
@@ -414,10 +416,10 @@ public class ModifyGuildSettings extends ListenerAdapter {
                         }
                     }
 
-                    embedBuilder.addField("Role: " + roleName,String.format("**ID:** %s\n**Permission Value:** %s",entry.getKey().toString(),entry.getValue().toString()
-                    ),true);
-                    embedBuilder.addField("Permissions",rolePermissions.toString(),true);
-                    if(it.hasNext()) {
+                    embedBuilder.addField("Role: " + roleName, String.format("**ID:** %s\n**Permission Value:** %s", entry.getKey().toString(), entry.getValue().toString()
+                    ), true);
+                    embedBuilder.addField("Permissions", rolePermissions.toString(), true);
+                    if (it.hasNext()) {
                         embedBuilder.addField("", "", false);
                     }
 
@@ -519,32 +521,32 @@ public class ModifyGuildSettings extends ListenerAdapter {
             if (args.length >= 2) {
 
                 try {
-                    if(event.getGuild().getCategoryById(args[1]) != null){
+                    if (event.getGuild().getCategoryById(args[1]) != null) {
                         Long catChannelID = event.getGuild().getCategoryById(args[1]).getIdLong();
 
                         SherlockBot.guildMap.get(event.getGuild().getId()).setArchiveCategory(catChannelID);
-                        if(database.setArchiveCategory(event.getGuild().getIdLong(),catChannelID) > 0){
+                        if (database.setArchiveCategory(event.getGuild().getIdLong(), catChannelID) > 0) {
                             event.getMessage().addReaction("✅").queue();
                         }
                     } else {
                         //User did not mention a channel
-                        if(event.getGuild().getCategoriesByName(args[1],true) != null){
-                            Long catChannelID = event.getGuild().getCategoriesByName(args[1],true).get(0).getIdLong();
+                        if (event.getGuild().getCategoriesByName(args[1], true) != null) {
+                            Long catChannelID = event.getGuild().getCategoriesByName(args[1], true).get(0).getIdLong();
 
                             SherlockBot.guildMap.get(event.getGuild().getId()).setArchiveCategory(catChannelID);
-                            if(database.setArchiveCategory(event.getGuild().getIdLong(),catChannelID) > 0){
+                            if (database.setArchiveCategory(event.getGuild().getIdLong(), catChannelID) > 0) {
                                 event.getMessage().addReaction("✅").queue();
                             }
                         }
                     }
                 } catch (NullPointerException e) {
                     System.out.println("Could not find category when searching for term: " + args[1]);
-                } catch (NumberFormatException e){
-                    if(event.getGuild().getCategoriesByName(args[1],true) != null){
-                        Long catChannelID = event.getGuild().getCategoriesByName(args[1],true).get(0).getIdLong();
+                } catch (NumberFormatException e) {
+                    if (event.getGuild().getCategoriesByName(args[1], true) != null) {
+                        Long catChannelID = event.getGuild().getCategoriesByName(args[1], true).get(0).getIdLong();
 
                         SherlockBot.guildMap.get(event.getGuild().getId()).setArchiveCategory(catChannelID);
-                        if(database.setArchiveCategory(event.getGuild().getIdLong(),catChannelID) > 0){
+                        if (database.setArchiveCategory(event.getGuild().getIdLong(), catChannelID) > 0) {
                             event.getMessage().addReaction("✅").queue();
                         }
                     }
@@ -563,7 +565,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
 
                 try {
                     Long archiveCategoryID = SherlockBot.guildMap.get(event.getGuild().getId()).getArchiveCategoryID();
-                    event.getMessage().reply(String.format("Current Archive Category: %s\nCategory ID: %d",event.getGuild().getCategoryById(archiveCategoryID).getName(),archiveCategoryID)).queue();
+                    event.getMessage().reply(String.format("Current Archive Category: %s\nCategory ID: %d", event.getGuild().getCategoryById(archiveCategoryID).getName(), archiveCategoryID)).queue();
                 } catch (NullPointerException e) {
 
                 }
@@ -595,9 +597,9 @@ public class ModifyGuildSettings extends ListenerAdapter {
                 }
 
                 // Role was not found using ID
-                try{
-                    for(Role r:event.getGuild().getRoles()){
-                        if(r.getName().equalsIgnoreCase(args[1])){
+                try {
+                    for (Role r : event.getGuild().getRoles()) {
+                        if (r.getName().equalsIgnoreCase(args[1])) {
                             if (database.insertAutoRole(event.getGuild().getIdLong(), r.getIdLong()) >= 1) {
                                 event.getMessage().addReaction("✅").queue();
                             } else {
@@ -605,7 +607,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                             }
                         }
                     }
-                } catch(NullPointerException | PermissionException e){
+                } catch (NullPointerException | PermissionException e) {
 
                 }
             }
@@ -633,9 +635,9 @@ public class ModifyGuildSettings extends ListenerAdapter {
                 }
 
                 // Role was not found using ID
-                try{
-                    for(Role r:event.getGuild().getRoles()){
-                        if(r.getName().equalsIgnoreCase(args[1])){
+                try {
+                    for (Role r : event.getGuild().getRoles()) {
+                        if (r.getName().equalsIgnoreCase(args[1])) {
                             if (database.removeAutoRole(event.getGuild().getIdLong(), r.getIdLong()) >= 1) {
                                 event.getMessage().addReaction("✅").queue();
                             } else {
@@ -643,7 +645,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                             }
                         }
                     }
-                } catch(NullPointerException | PermissionException e){
+                } catch (NullPointerException | PermissionException e) {
 
                 }
             }
@@ -660,11 +662,11 @@ public class ModifyGuildSettings extends ListenerAdapter {
 
             ArrayList<Long> roles = SherlockBot.database.getAutoRoles(event.getGuild().getIdLong());
 
-            for(Long id:roles){
+            for (Long id : roles) {
                 try {
                     roleName.append(event.getGuild().getRoleById(id).getName()).append("\n");
                     roleID.append(id).append("\n");
-                } catch(NullPointerException e){
+                } catch (NullPointerException e) {
                     continue;
                 }
             }
@@ -677,6 +679,103 @@ public class ModifyGuildSettings extends ListenerAdapter {
 
             event.getChannel().sendMessage(embedBuilder.build()).queue();
             embedBuilder.clear();
+        }
+
+
+        /*
+        ADD REACTION ROLE
+         */
+        if (SherlockBot.commandMap.get(40).checkCommand(event.getMessage())) {
+            String message = event.getMessage().getContentDisplay();
+
+            //Replace all mentioned channels of message String
+            for (TextChannel channel : event.getMessage().getMentionedChannels()) {
+                message = message.replace(channel.getName(), "");
+            }
+
+            //Create local argument list from Message
+            String[] localArgs = message.split("\\s+");
+
+            //Set the channel to look for the destination message
+            TextChannel messageChannel = event.getChannel();
+            if (event.getMessage().getMentionedChannels().size() > 0) {
+                messageChannel = event.getMessage().getMentionedChannels().get(0);
+            }
+
+
+            //Try to find the destination message
+            messageChannel.retrieveMessageById(localArgs[1]).queue(messageID -> {
+
+                //Try to grab role from second argument provided
+                final Role role = event.getGuild().getRoleById(localArgs[2]);
+
+                //Role was found
+                if (role != null) {
+
+                    //Destination message was found, See if Requesting message had emotes in message
+                    if (!event.getMessage().getEmotes().isEmpty()) {
+                    // EMOTE WAS FOUND
+
+                        //Set the emote to the first emote found.  (only allow one insertion at a time)
+                        final Emote emote = event.getMessage().getEmotes().get(0);
+
+                        //Try to add the reaction to the message
+                        messageID.addReaction(emote).queue(successAddition -> {
+                            SherlockBot.guildMap.get(event.getGuild().getId()).insertReactionRole(messageID.getIdLong(),emote.getId(),role.getIdLong());
+                            if(SherlockBot.database.insertReactionRole(event.getGuild().getIdLong(),messageID.getIdLong(),emote.getId(),role.getIdLong()) >= 1){
+                                //Success
+                                event.getMessage().addReaction("✅").queue();
+                            }
+                        });
+                    } else {
+
+                        // IS REACTION AN EMOJI???
+                        List<String> emojiList = EmojiParser.extractEmojis(event.getMessage().getContentRaw());
+                        if (!emojiList.isEmpty()) {
+                            messageID.addReaction(emojiList.get(0)).queue(success -> {
+                                SherlockBot.guildMap.get(event.getGuild().getId()).insertReactionRole(messageID.getIdLong(),EmojiParser.parseToAliases(emojiList.get(0)),role.getIdLong());
+                                if(SherlockBot.database.insertReactionRole(event.getGuild().getIdLong(),messageID.getIdLong(),EmojiParser.parseToAliases(emojiList.get(0)),role.getIdLong()) >= 1){
+                                    //Success
+                                    event.getMessage().addReaction("✅").queue();
+                                }
+
+                            });
+                        }
+                    }
+
+                }
+            });
+
+
+        }
+
+        /*
+        REMOVE REACTION ROLE
+         */
+        if (SherlockBot.commandMap.get(41).checkCommand(event.getMessage())) {
+
+            if (args.length >= 1) {
+                Long messageID = Long.valueOf(args[1]);
+
+                if (SherlockBot.guildMap.get(event.getGuild().getId()).getReactionMap().containsKey(messageID)) {
+
+                    ArrayList<RoleReactionObject> roleList = SherlockBot.guildMap.get(event.getGuild().getId()).getReactionMap().get(messageID);
+
+                    Iterator it = roleList.iterator();
+                    while (it.hasNext()) {
+                        RoleReactionObject object = (RoleReactionObject) it.next();
+                        if (args[1].equalsIgnoreCase(object.reactionID)) {
+                            it.remove();
+
+                            SherlockBot.database.removeReactionRole(event.getGuild().getIdLong(),messageID,object.reactionID);
+                        }
+                    }
+
+                    if (!roleList.isEmpty()) {
+                        SherlockBot.guildMap.get(event.getGuild().getId()).getReactionMap().put(messageID, roleList);
+                    }
+                }
+            }
         }
 
         /*
@@ -773,7 +872,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
         }
     }
 
-    private void handleAutoRole(GuildMessageReceivedEvent event, Boolean removal){
+    private void handleAutoRole(GuildMessageReceivedEvent event, Boolean removal) {
         String[] args = event.getMessage().getContentRaw().split("\\s+");
 
         try {
@@ -792,9 +891,9 @@ public class ModifyGuildSettings extends ListenerAdapter {
         }
 
         // Role was not found using ID
-        try{
-            for(Role r:event.getGuild().getRoles()){
-                if(r.getName().equalsIgnoreCase(args[1])){
+        try {
+            for (Role r : event.getGuild().getRoles()) {
+                if (r.getName().equalsIgnoreCase(args[1])) {
                     if (database.insertAutoRole(event.getGuild().getIdLong(), r.getIdLong()) >= 1) {
                         event.getMessage().addReaction("✅").queue();
                     } else {
@@ -802,7 +901,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                     }
                 }
             }
-        } catch(NullPointerException | PermissionException e){
+        } catch (NullPointerException | PermissionException e) {
 
         }
     }
