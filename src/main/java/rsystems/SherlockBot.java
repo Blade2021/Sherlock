@@ -14,9 +14,11 @@ import rsystems.handlers.LanguageFilter;
 import rsystems.handlers.SQLHandler;
 import rsystems.objects.Command;
 import rsystems.objects.GuildSettings;
+import rsystems.objects.UserRoleReactionObject;
 import rsystems.threads.ThreeMinute;
 
 import javax.security.auth.login.LoginException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -24,9 +26,12 @@ import java.util.Timer;
 public class SherlockBot {
     public static Map<Integer, Command> commandMap = new HashMap<>();
     public static Map<String,GuildSettings> guildMap = new HashMap<>();
+    public static Map<Long, Map<Long, ArrayList<UserRoleReactionObject>>> reactionHandleMap = new HashMap<>();
     public static SQLHandler database = new SQLHandler(Config.get("Database_Host"),Config.get("Database_User"),Config.get("Database_Pass"));
     public static User bot = null;
-    public static String version = "0.6.0";
+    public static String version = "0.6.1";
+
+    public static JDA jda = null;
 
     public static void main(String[] args) throws LoginException {
         JDA api = JDABuilder.createDefault(Config.get("token"))
@@ -64,6 +69,8 @@ public class SherlockBot {
 
         try{
             api.awaitReady();
+
+            jda = api;
             bot = api.getSelfUser();
 
             //Get the data for each guild from the database

@@ -112,16 +112,18 @@ public class Command {
     public boolean checkCommand(Message message) {
         String guildID = message.getGuild().getId();
         String prefix = SherlockBot.guildMap.get(guildID).getPrefix();
-        String formattedMessage = message.getContentDisplay().toLowerCase();
+        String formattedMessage = message.getContentRaw().toLowerCase();
 
         Boolean commandMatch = false;
         Boolean authorized = false;
 
-        if (formattedMessage.startsWith(prefix + this.command.toLowerCase())) {
+        String[] args = formattedMessage.split("\\s+");
+
+        if (args[0].equalsIgnoreCase(prefix + this.command)) {
             commandMatch = true;
         } else {
             for (String alias : this.getAlias()) {
-                if (formattedMessage.startsWith(prefix + alias.toLowerCase())) {
+                if (args[0].equalsIgnoreCase(prefix + alias)) {
                     commandMatch = true;
                 }
             }
