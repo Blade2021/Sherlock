@@ -29,7 +29,7 @@ public class SherlockBot {
     public static Map<Long, Map<Long, ArrayList<UserRoleReactionObject>>> reactionHandleMap = new HashMap<>();
     public static SQLHandler database = new SQLHandler(Config.get("Database_Host"),Config.get("Database_User"),Config.get("Database_Pass"));
     public static User bot = null;
-    public static String version = "0.6.1";
+    public static String version = "0.6.2";
 
     public static JDA jda = null;
 

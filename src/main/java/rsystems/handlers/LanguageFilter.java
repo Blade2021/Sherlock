@@ -47,7 +47,7 @@ public class LanguageFilter extends ListenerAdapter {
 
     public void onGuildMessageUpdate(GuildMessageUpdateEvent event) {
         if (languageCheck(event.getGuild().getId(), event.getMessage().getContentDisplay())) {
-            Boolean futureFound = false;
+            boolean futureFound = false;
             for(Map.Entry<String,Future<?>> entry:futures.entrySet()){
                 String key = entry.getKey();
                 if(key.equalsIgnoreCase(event.getMessageId())){
