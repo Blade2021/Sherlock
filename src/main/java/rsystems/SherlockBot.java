@@ -7,12 +7,12 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import rsystems.commands.*;
-import rsystems.events.*;
+import rsystems.events.GuildMessageEvent;
+import rsystems.events.JoinGuild;
 import rsystems.handlers.CommandLoader;
-import rsystems.handlers.LanguageFilter;
 import rsystems.handlers.SQLHandler;
-import rsystems.objects.Command;
+import rsystems.objects.Command_OLD;
+import rsystems.objects.DBPool;
 import rsystems.objects.GuildSettings;
 import rsystems.objects.UserRoleReactionObject;
 import rsystems.threads.ThreeMinute;
@@ -24,14 +24,20 @@ import java.util.Map;
 import java.util.Timer;
 
 public class SherlockBot {
-    public static Map<Integer, Command> commandMap = new HashMap<>();
-    public static Map<String,GuildSettings> guildMap = new HashMap<>();
+
+    public static DBPool dbPool = new DBPool(Config.get("DATABASE_HOST"), Config.get("DATABASE_USER"),Config.get("DATABASE_PASS"));
+    public static SQLHandler database = new SQLHandler(dbPool.getPool());
+
+
+    public static Map<Integer, Command_OLD> commandMap = new HashMap<>();
+    public static Map<Long,GuildSettings> guildMap = new HashMap<>();
     public static Map<Long, Map<Long, ArrayList<UserRoleReactionObject>>> reactionHandleMap = new HashMap<>();
-    public static SQLHandler database = new SQLHandler(Config.get("Database_Host"),Config.get("Database_User"),Config.get("Database_Pass"));
+    //public static SQLHandler database = new SQLHandler(Config.get("Database_Host"),Config.get("Database_User"),Config.get("Database_Pass"));
     public static User bot = null;
     public static String version = "0.6.2";
-
     public static JDA jda = null;
+
+    public static String defaultPrefix = "!sl";
 
     public static void main(String[] args) throws LoginException {
         JDA api = JDABuilder.createDefault(Config.get("token"))
@@ -41,33 +47,12 @@ public class SherlockBot {
                 .setChunkingFilter(ChunkingFilter.ALL)
                 .build();
 
-        api.addEventListener(new LocalChannelManager());
+        api.addEventListener(new GuildMessageEvent());
         api.addEventListener(new JoinGuild());
-        api.addEventListener(new Leave());
-        api.addEventListener(new LeaveGuild());
-        api.addEventListener(new Infraction());
-        api.addEventListener(new Mute());
-        api.addEventListener(new SelfRoles());
-        api.addEventListener(new ModifyGuildSettings());
-        api.addEventListener(new PrivateMessageReceived());
-        api.addEventListener(new GuildRoleDeleted());
-        api.addEventListener(new LanguageFilter());
-        api.addEventListener(new EmbedMessageListener());
-        api.addEventListener(new ChannelCooldown());
-        api.addEventListener(new Generics());
-        api.addEventListener(new WelcomeSettings());
-        api.addEventListener(new GuildMemberJoin());
-        api.addEventListener(new ModCommands());
-        api.addEventListener(new GuildMessageDeleted());
-        api.addEventListener(new ArchiveChannel());
-        api.addEventListener(new GuildChannelMoveEvent());
-        api.addEventListener(new GuildCategoryDeleted());
-        api.addEventListener(new GuildTextChannelDeleted());
-        api.addEventListener(new ChannelTopic());
-        api.addEventListener(new GuildReactionListener());
-        api.addEventListener(new GuildEmoteRemoved());
 
         try{
+            CommandLoader commandLoader = new CommandLoader();
+
             api.awaitReady();
 
             jda = api;
@@ -75,8 +60,9 @@ public class SherlockBot {
 
             //Get the data for each guild from the database
             api.getGuilds().forEach(guild -> {
-                guildMap.put(guild.getId(),new GuildSettings("!"));
-                database.loadGuildData(guild.getId());
+
+                guildMap.put(guild.getIdLong(),SherlockBot.database.getGuildData(guild.getIdLong()));
+
             });
 
         } catch(InterruptedException e){
@@ -85,8 +71,6 @@ public class SherlockBot {
 
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new ThreeMinute(), 60*1000,60*1000);
-
-        CommandLoader commandLoader = new CommandLoader();
 
     }
 

@@ -136,7 +136,7 @@ public class ModifyGuildSettings extends ListenerAdapter {
                 if ((args.length >= 3) && (event.getGuild().getRoleById(args[2]) != null)) {
 
                     // Add role to self roles of guildmap
-                    SherlockBot.guildMap.get(event.getGuild().getId()).addSelfRole(args[1], Long.valueOf(args[2]));
+                    SherlockBot.guildMap.get(event.getGuild().getId()).addSelfRole(args[1].toLowerCase(), Long.valueOf(args[2]));
                     int databaseStatusCode = database.insertSelfRole(event.getGuild().getIdLong(), args[1], Long.valueOf(args[2]));
                     System.out.println("Database Status Code: " + databaseStatusCode);
                     if (databaseStatusCode == 200) {

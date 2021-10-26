@@ -90,7 +90,7 @@ public class LanguageFilter extends ListenerAdapter {
                 event.getMessage().removeReaction("⚠").queue();
                 event.getMessage().removeReaction("⁉").queue();
 
-                System.out.println(futures.size());
+                //System.out.println(futures.size());
             } catch(NullPointerException ignored){}
         }
     }

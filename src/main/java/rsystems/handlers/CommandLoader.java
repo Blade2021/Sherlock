@@ -3,7 +3,7 @@ package rsystems.handlers;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import rsystems.SherlockBot;
-import rsystems.objects.Command;
+import rsystems.objects.Command_OLD;
 
 import java.util.ArrayList;
 
@@ -21,7 +21,7 @@ public class CommandLoader {
 
             int commmandID = Integer.parseInt(parsedData.get("id").toString());
 
-            Command tempCommand = new Command(keyStr.toString(),commmandID);
+            Command_OLD tempCommand = new Command_OLD(keyStr.toString(),commmandID);
             try{
                 tempCommand.setAlias(getArrayList(parsedData,"alias"));
             }catch(NullPointerException e){
@@ -42,6 +42,8 @@ public class CommandLoader {
                 //
             }
 
+
+            System.out.printf("Loaded Command: %s  ID: %d\n",tempCommand.getCommand(),commmandID);
             SherlockBot.commandMap.putIfAbsent(commmandID,tempCommand);
         });
     }

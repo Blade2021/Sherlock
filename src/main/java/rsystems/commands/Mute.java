@@ -37,173 +37,174 @@ public class Mute extends ListenerAdapter {
             /*
                             MUTE USER COMMAND
              */
-            if (SherlockBot.commandMap.get(2).checkCommand(event.getMessage())) {
-                LogChannel logChannel = new LogChannel();
-                ArrayList<Member> mutedUsers = new ArrayList<>();
+                if (SherlockBot.commandMap.get(2) != null && SherlockBot.commandMap.get(2).checkCommand(event.getMessage())) {
+                    LogChannel logChannel = new LogChannel();
+                    ArrayList<Member> mutedUsers = new ArrayList<>();
 
                 /*
                 GET A LIST OF MEMBERS
                  */
-                List<Member> MentionedMembers = event.getMessage().getMentionedMembers();
-                if (MentionedMembers.size() > 0) {
-                    for (Member m : MentionedMembers) {
-                        if (muteUser(event.getGuild(), m, event.getChannel(), event.getMember())) {
-                            mutedUsers.add(m);
-                        }
-                    }
-
-                } else {
-                    // Try to mute user using USERID
-                    try {
-                        if ((args.length > 1) && (event.getGuild().getSelfMember().canInteract(Objects.requireNonNull(event.getGuild().getMemberById(args[1]))))) {
-                            if (muteUser(event.getGuild(), event.getGuild().getMemberById(args[1]), event.getChannel(), event.getMember())) {
-                                mutedUsers.add(event.getGuild().getMemberById(args[1]));
+                    List<Member> MentionedMembers = event.getMessage().getMentionedMembers();
+                    if (MentionedMembers.size() > 0) {
+                        for (Member m : MentionedMembers) {
+                            if (muteUser(event.getGuild(), m, event.getChannel(), event.getMember())) {
+                                mutedUsers.add(m);
                             }
                         }
-                    } catch (NullPointerException e) {
-                        System.out.println("Could not find user to mute");
-                        event.getMessage().addReaction("⚠").queue();
-                    } catch (NumberFormatException e) {
-                        event.getChannel().sendMessage("What in tarnation is that>?").queue();
-                        event.getMessage().addReaction("⚠").queue();
+
+                    } else {
+                        // Try to mute user using USERID
+                        try {
+                            if ((args.length > 1) && (event.getGuild().getSelfMember().canInteract(Objects.requireNonNull(event.getGuild().getMemberById(args[1]))))) {
+                                if (muteUser(event.getGuild(), event.getGuild().getMemberById(args[1]), event.getChannel(), event.getMember())) {
+                                    mutedUsers.add(event.getGuild().getMemberById(args[1]));
+                                }
+                            }
+                        } catch (NullPointerException e) {
+                            System.out.println("Could not find user to mute");
+                            event.getMessage().addReaction("⚠").queue();
+                        } catch (NumberFormatException e) {
+                            event.getChannel().sendMessage("What in tarnation is that>?").queue();
+                            event.getMessage().addReaction("⚠").queue();
+                        }
                     }
-                }
 
                 /*
                 Start initiating variables for output to logger & notification call
                  */
-                boolean timedEvent = false;
-                // Grab the first date
-                LocalDateTime currentDateTime = LocalDateTime.now();
-                // Initiate the new date variable
-                LocalDateTime newDateTime = null;
-                StringBuilder numberString = new StringBuilder();
-                //Parse the numberString into a integer
-                int number = 0;
-                String chronoType = "";
+                    boolean timedEvent = false;
+                    // Grab the first date
+                    LocalDateTime currentDateTime = LocalDateTime.now();
+                    // Initiate the new date variable
+                    LocalDateTime newDateTime = null;
+                    StringBuilder numberString = new StringBuilder();
+                    //Parse the numberString into a integer
+                    int number = 0;
+                    String chronoType = "";
 
 
                 /*
                 GRAB THE AMOUNT OF TIME IF APPLICABLE
                  */
-                if (event.getMessage().getContentDisplay().contains("-t ")) {
-                    //Grab the string AFTER -t, excluding the first 3 characters (Length of -t )
-                    String timeArgument = event.getMessage().getContentDisplay().substring(event.getMessage().getContentDisplay().indexOf("-t ") + 3);
-                    char chronoUnit = 0;
+                    if (event.getMessage().getContentDisplay().contains("-t ")) {
+                        //Grab the string AFTER -t, excluding the first 3 characters (Length of -t )
+                        String timeArgument = event.getMessage().getContentDisplay().substring(event.getMessage().getContentDisplay().indexOf("-t ") + 3);
+                        char chronoUnit = 0;
 
 
-                    // Parse through the string character by character until a digit is not found, then move the char for processing
-                    for (Character c : timeArgument.toCharArray()) {
-                        if (isDigit(c)) {
-                            numberString.append(c);
-                        } else if(c == ' '){
-                            // do nothing (skip spaces)
-                        } else {
-                            chronoUnit = c;
-                            break;
+                        // Parse through the string character by character until a digit is not found, then move the char for processing
+                        for (Character c : timeArgument.toCharArray()) {
+                            if (isDigit(c)) {
+                                numberString.append(c);
+                            } else if (c == ' ') {
+                                // do nothing (skip spaces)
+                            } else {
+                                chronoUnit = c;
+                                break;
+                            }
                         }
-                    }
-                    //Parse the numberString into a integer for incrementing the date
-                    number = Integer.parseInt(numberString.toString());
+                        //Parse the numberString into a integer for incrementing the date
+                        number = Integer.parseInt(numberString.toString());
 
-                    //See what type of unit to use
-                    switch (chronoUnit) {
-                        case 'm':
-                        case 'M':
-                            newDateTime = currentDateTime.plus(number, ChronoUnit.MINUTES);
-                            timedEvent = true;
-                            chronoType = "Minutes";
-                            break;
-                        case 'h':
-                        case 'H':
-                            newDateTime = currentDateTime.plus(number, ChronoUnit.HOURS);
-                            timedEvent = true;
-                            chronoType = "Hours";
-                            break;
-                        case 'd':
-                        case 'D':
-                            newDateTime = currentDateTime.plus(number, ChronoUnit.DAYS);
-                            timedEvent = true;
-                            chronoType = "Days";
-                            break;
-                        default:
-                            event.getChannel().sendMessage("Incorrect command formatting used").queue();
-                            return;
-                    }
-                }
+                        //See what type of unit to use
+                        switch (chronoUnit) {
+                            case 'm':
+                            case 'M':
+                                newDateTime = currentDateTime.plus(number, ChronoUnit.MINUTES);
+                                timedEvent = true;
+                                chronoType = "Minutes";
+                                break;
+                            case 'h':
+                            case 'H':
+                                newDateTime = currentDateTime.plus(number, ChronoUnit.HOURS);
+                                timedEvent = true;
+                                chronoType = "Hours";
+                                break;
+                            case 'd':
+                            case 'D':
+                                newDateTime = currentDateTime.plus(number, ChronoUnit.DAYS);
+                                timedEvent = true;
+                                chronoType = "Days";
+                                break;
+                            default:
+                                event.getChannel().sendMessage("Incorrect command formatting used").queue();
+                                return;
+                        }
+
 
                 /*
                 Get a reason if applicable.
                  */
-                String reason = "No reason given";
-                if (event.getMessage().getContentDisplay().contains("-r ")) {
+                    String reason = "No reason given";
+                    if (event.getMessage().getContentDisplay().contains("-r ")) {
 
-                    int timeParamLoc = 0;
-                    if (event.getMessage().getContentDisplay().contains("-t ")) {
-                        timeParamLoc = event.getMessage().getContentDisplay().indexOf("-t ");
-                    }
-                    int reasonParamLoc = event.getMessage().getContentDisplay().indexOf("-r ");
-                    if(reasonParamLoc < timeParamLoc){
-                        reason = event.getMessage().getContentDisplay().substring(reasonParamLoc + 3,timeParamLoc);
-                    } else {
-                        reason = event.getMessage().getContentDisplay().substring(reasonParamLoc + 3);
-                    }
-
-                    if(reason.length() > 60){
-                        event.getChannel().sendMessage(event.getAuthor().getAsMention() + " Reason length is too long").queue();
-                        event.getMessage().addReaction("❌").queue();
-                        return;
-                    }
-
-                }
-
-                //Add all members to database if mute is timed
-                for (Member m : mutedUsers) {
-                    if(event.getGuild().getSelfMember().canInteract(m)){
-
-                        if(timedEvent){
-                            if(database.insertTimedEvent(event.getGuild().getIdLong(), m.getIdLong(), 1, reason, currentDateTime, newDateTime)){
-                                event.getMessage().addReaction("\uD83D\uDD50").queue();
-                                logChannel.logMuteAction(event.getGuild(),reason,m.getUser(),event.getMember(),number,chronoType);
-                            }
+                        int timeParamLoc = 0;
+                        if (event.getMessage().getContentDisplay().contains("-t ")) {
+                            timeParamLoc = event.getMessage().getContentDisplay().indexOf("-t ");
+                        }
+                        int reasonParamLoc = event.getMessage().getContentDisplay().indexOf("-r ");
+                        if (reasonParamLoc < timeParamLoc) {
+                            reason = event.getMessage().getContentDisplay().substring(reasonParamLoc + 3, timeParamLoc);
                         } else {
-                            logChannel.logMuteAction(event.getGuild(), reason, m.getUser(), event.getMember());
+                            reason = event.getMessage().getContentDisplay().substring(reasonParamLoc + 3);
                         }
 
-                        try {
-                            final boolean finalTimedEvent = timedEvent;
-                            final int finalNumber = number;
-                            final String finalChronoType = chronoType;
-                            final String finalReason = reason;
-                            m.getUser().openPrivateChannel().queue((channel) -> {
-                                EmbedBuilder embedBuilder = new EmbedBuilder();
-                                embedBuilder.setTitle("Notification")
-                                        .setColor(Color.RED)
-                                        .addField("Guild",event.getGuild().getName(),false)
-                                        .addField("Reason",finalReason,false)
-                                        .addField("Moderator",event.getMember().getEffectiveName(),true)
-                                        .addField("Moderator ID",event.getMember().getId(),true);
+                        if (reason.length() > 60) {
+                            event.getChannel().sendMessage(event.getAuthor().getAsMention() + " Reason length is too long").queue();
+                            event.getMessage().addReaction("❌").queue();
+                            return;
+                        }
 
-                                if(finalTimedEvent){
-                                    embedBuilder.setDescription(String.format("You have been muted in a guild server for %d %s", finalNumber, finalChronoType));
-                                } else {
-                                    embedBuilder.setDescription("You have been muted in a guild server.");
+                    }
+
+                    //Add all members to database if mute is timed
+                    for (Member m : mutedUsers) {
+                        if (event.getGuild().getSelfMember().canInteract(m)) {
+
+                            if (timedEvent) {
+                                if (database.insertTimedEvent(event.getGuild().getIdLong(), m.getIdLong(), 1, reason, currentDateTime, newDateTime)) {
+                                    event.getMessage().addReaction("\uD83D\uDD50").queue();
+                                    logChannel.logMuteAction(event.getGuild(), reason, m.getUser(), event.getMember(), number, chronoType);
                                 }
-                                channel.sendMessage(embedBuilder.build()).queue(null,failure -> {
-                                    logChannel.logAction(event.getGuild(),"Direct Message Failed", "Attempted to send direct message to user but failed due to Privacy Settings", m,1);
-                                });
-                                embedBuilder.clear();
-                            });
-                        } catch (NullPointerException e){
+                            } else {
+                                logChannel.logMuteAction(event.getGuild(), reason, m.getUser(), event.getMember());
+                            }
 
-                        } catch (ErrorResponseException e){
-                            if(e.getErrorCode() == 50007){
-                                logChannel.logAction(event.getGuild(), "Direct Message Failed", "Attempted to send direct message to user but failed due to Privacy Settings", m,1);
+                            try {
+                                final boolean finalTimedEvent = timedEvent;
+                                final int finalNumber = number;
+                                final String finalChronoType = chronoType;
+                                final String finalReason = reason;
+                                m.getUser().openPrivateChannel().queue((channel) -> {
+                                    EmbedBuilder embedBuilder = new EmbedBuilder();
+                                    embedBuilder.setTitle("Notification")
+                                            .setColor(Color.RED)
+                                            .addField("Guild", event.getGuild().getName(), false)
+                                            .addField("Reason", finalReason, false)
+                                            .addField("Moderator", event.getMember().getEffectiveName(), true)
+                                            .addField("Moderator ID", event.getMember().getId(), true);
+
+                                    if (finalTimedEvent) {
+                                        embedBuilder.setDescription(String.format("You have been muted in a guild server for %d %s", finalNumber, finalChronoType));
+                                    } else {
+                                        embedBuilder.setDescription("You have been muted in a guild server.");
+                                    }
+                                    channel.sendMessage(embedBuilder.build()).queue(null, failure -> {
+                                        logChannel.logAction(event.getGuild(), "Direct Message Failed", "Attempted to send direct message to user but failed due to Privacy Settings", m, 1);
+                                    });
+                                    embedBuilder.clear();
+                                });
+                            } catch (NullPointerException e) {
+
+                            } catch (ErrorResponseException e) {
+                                if (e.getErrorCode() == 50007) {
+                                    logChannel.logAction(event.getGuild(), "Direct Message Failed", "Attempted to send direct message to user but failed due to Privacy Settings", m, 1);
+                                }
                             }
                         }
                     }
                 }
-            }
+        }
 
 
             /*
