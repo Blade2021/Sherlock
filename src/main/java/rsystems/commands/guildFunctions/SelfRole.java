@@ -1,4 +1,4 @@
-package rsystems.commands.GuildFunctions;
+package rsystems.commands.guildFunctions;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;

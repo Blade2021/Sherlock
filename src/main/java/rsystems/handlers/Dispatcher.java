@@ -9,7 +9,8 @@ import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.Config;
 import rsystems.SherlockBot;
-import rsystems.commands.GuildFunctions.SelfRole;
+import rsystems.commands.guildFunctions.AutoRole;
+import rsystems.commands.guildFunctions.SelfRole;
 import rsystems.objects.Command;
 
 import java.util.*;
@@ -26,6 +27,7 @@ public class Dispatcher extends ListenerAdapter {
     public Dispatcher() {
 
         registerCommand(new SelfRole());
+        registerCommand(new AutoRole());
 
     }
 
