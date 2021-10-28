@@ -4,6 +4,8 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.PermissionException;
+import rsystems.handlers.GrabRoleID;
 import rsystems.objects.Command;
 
 import java.util.ArrayList;
@@ -24,57 +26,32 @@ public class GiveRole extends Command {
 
     @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, GuildMessageReceivedEvent event) {
-        List<Member> memberList = new ArrayList<>();
-        Role role = null;
-        String reason = null;
+        if (message.getMentionedMembers().size() == 0) {
+            // DON'T ALLOW COMMAND TO BE USED WITHOUT MENTIONABLES
+            // Mentionables is now a word.  If you ever come across this, let me know.  I'll give you a gold star.
 
-        boolean lookupUsingID = false;
 
-        String[] args = content.split("\\s+");
-
-        if(message.getMentionedMembers().size() >0){
-            memberList.addAll(message.getMentionedMembers());
         } else {
-            // Extract Member using ID Lookup
-            
-            lookupUsingID = true;
-        }
+            // MENTIONABLES WERE FOUND!  HOORAY!
 
-        if(args.length >= 2){
-            
-            String indexContent = content;
-            
-            if(!lookupUsingID) {
-                // Remove mentioned members from String
+            List<Member> memberList = new ArrayList<>(message.getMentionedMembers());
+            Long roleID = GrabRoleID.getRoleIDFromMessage(message, content);
+
+            if ((roleID != null) && (event.getGuild().getRoleById(roleID) != null)) {
+                // Was Role successfully found?
+
+                Role role = event.getGuild().getRoleById(roleID);
+
                 for (Member member : memberList) {
-                    indexContent = indexContent.replaceAll(member.getEffectiveName(), "");
-                }
-
-            }
-            indexContent = indexContent.trim();
-            int endOfRoleID = indexContent.indexOf(" ");
-            
-            Long roleID = null;
-            if(endOfRoleID > 0){
-                roleID = Long.valueOf(indexContent.substring(0,indexContent.indexOf(" ")));
-            } else {
-                roleID = Long.valueOf(indexContent);
-            }
-            
-            if(event.getGuild().getRoleById(roleID) != null){
-                role = event.getGuild().getRoleById(roleID);
-            }
-            
-            reason = indexContent.substring(endOfRoleID);
-            
-            if(event.getGuild().getSelfMember().hasPermission(Permission.MANAGE_ROLES)){
-                for(Member member:memberList){
-                    event.getGuild().addRoleToMember(member.getIdLong(),role).reason(reason).queueAfter(10, TimeUnit.SECONDS);
+                    try {
+                        event.getGuild().addRoleToMember(member.getId(), role).reason(String.format("Requested by %s", message.getAuthor().getAsTag())).queueAfter(10, TimeUnit.SECONDS);
+                    } catch (PermissionException e) {
+                        reply(event,String.format("Encountered Permission error: %s while attempting to run command.",e.getPermission()));
+                        break;
+                    }
                 }
             }
-            
         }
-
     }
 
     @Override
