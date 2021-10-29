@@ -11,7 +11,7 @@ public class GrabRoleID {
         String modifiedContent = content;
         if(message.getMentionedMembers().size() >0){
             for(Member member:message.getMentionedMembers()){
-                modifiedContent = modifiedContent.replaceAll(member.getEffectiveName(),"");
+                modifiedContent = modifiedContent.replaceAll(member.getAsMention(),"");
             }
         }
 

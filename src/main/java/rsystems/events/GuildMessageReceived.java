@@ -4,46 +4,50 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import rsystems.Config;
 import rsystems.SherlockBot;
 
+import java.sql.SQLException;
 import java.util.Map;
 
-public class GuildMessageEvent extends ListenerAdapter {
+public class GuildMessageReceived extends ListenerAdapter {
 
     public void onGuildMessageReceived(final GuildMessageReceivedEvent event) {
 
-        final String prefix = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix();
+        final String guildPrefix = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix();
         String message = event.getMessage().getContentRaw();
 
-        if ((message.toLowerCase().startsWith(prefix.toLowerCase())) || (message.toLowerCase().startsWith(Config.get("defaultPrefix").toLowerCase()))) {
+        final boolean defaultPrefixFound = message.toLowerCase().startsWith(SherlockBot.defaultPrefix.toLowerCase());
+        if (defaultPrefixFound || (message.toLowerCase().startsWith(guildPrefix.toLowerCase()))) {
             //PREFIX FOUND
 
             Long guildID = event.getGuild().getIdLong();
 
             String content = null;
-            if (message.toLowerCase().startsWith(prefix.toLowerCase())) {
-                content = message.substring(prefix.length());
+            if (defaultPrefixFound) {
+                content = message.substring(SherlockBot.defaultPrefix.length());
             } else {
-                content = message.substring(Config.get("defaultPrefix").length());
+                content = message.substring(guildPrefix.length());
             }
 
 
             //SELF ROLES
-            if (SherlockBot.database.getSelfRoles(guildID).size() > 0) {
+            try {
+                if (SherlockBot.database.getTableCount(event.getGuild().getIdLong(),"SelfRoles") > 0) {
 
-                //ITERATE THROUGH GUILD SELF ROLE MAP
-                for (Map.Entry<String, Long> entry : SherlockBot.database.getGuildSelfRoles(guildID).entrySet()) {
+                    Map<String,Long> guildSelfRoleMap = SherlockBot.database.getGuildSelfRoles(guildID);
 
-                    //check content for trigger (Ignoring case)
-                    if (entry.getKey().equalsIgnoreCase(content)) {
-                        //ENTRY FOUND
-
-                        Long roleID = entry.getValue();
-                        handleSelfRoleEvent(event,roleID);
-
+                    //ITERATE THROUGH GUILD SELF ROLE MAP
+                    for (Map.Entry<String, Long> entry : guildSelfRoleMap.entrySet()) {
+                        //check content for trigger (Ignoring case)
+                        if (entry.getKey().equalsIgnoreCase(content)) {
+                            //ENTRY FOUND
+                            Long roleID = entry.getValue();
+                            handleSelfRoleEvent(event,roleID);
+                        }
                     }
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
 
 

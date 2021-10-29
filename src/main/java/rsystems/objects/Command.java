@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 
+import java.sql.SQLException;
 import java.util.function.Consumer;
 
 public abstract class Command {
@@ -28,7 +29,7 @@ public abstract class Command {
 
     public abstract void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event);
 
-    public abstract void dispatch(User sender, MessageChannel channel, Message message, String content, GuildMessageReceivedEvent event);
+    public abstract void dispatch(User sender, MessageChannel channel, Message message, String content, GuildMessageReceivedEvent event) throws SQLException;
 
     public abstract String getHelp();
 

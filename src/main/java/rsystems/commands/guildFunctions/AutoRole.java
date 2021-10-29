@@ -12,6 +12,7 @@ import rsystems.SherlockBot;
 import rsystems.objects.Command;
 
 import java.awt.*;
+import java.sql.SQLException;
 import java.util.List;
 
 public class AutoRole extends Command {
@@ -30,7 +31,7 @@ public class AutoRole extends Command {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, GuildMessageReceivedEvent event) {
+    public void dispatch(User sender, MessageChannel channel, Message message, String content, GuildMessageReceivedEvent event) throws SQLException {
         String[] args = content.split("\\s+");
 
         if(args.length > 0){

@@ -1,5 +1,6 @@
 package rsystems.handlers;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
@@ -11,8 +12,13 @@ import rsystems.Config;
 import rsystems.SherlockBot;
 import rsystems.commands.guildFunctions.AutoRole;
 import rsystems.commands.guildFunctions.SelfRole;
+import rsystems.commands.modCommands.GiveRole;
+import rsystems.commands.modCommands.Infraction;
+import rsystems.commands.modCommands.SoftBan;
+import rsystems.commands.modCommands.TakeRole;
 import rsystems.objects.Command;
 
+import java.awt.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -28,6 +34,10 @@ public class Dispatcher extends ListenerAdapter {
 
         registerCommand(new SelfRole());
         registerCommand(new AutoRole());
+        registerCommand(new GiveRole());
+        registerCommand(new TakeRole());
+        registerCommand(new SoftBan());
+        registerCommand(new Infraction());
 
     }
 
@@ -42,13 +52,25 @@ public class Dispatcher extends ListenerAdapter {
         }
 
         final Long authorID = event.getAuthor().getIdLong();
-
-        final String prefix = Config.get("bot_prefix");
-        String message = event.getMessage().getContentRaw();
-
+        final String defaultPrefix = Config.get("defaultPrefix");
+        final String message = event.getMessage().getContentRaw();
         final MessageChannel channel = event.getChannel();
+        final String guildPrefix = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix();
+        final boolean defaultPrefixFound = message.toLowerCase().startsWith(SherlockBot.defaultPrefix.toLowerCase());
 
-        if (message.toLowerCase().startsWith(prefix.toLowerCase())) {
+        if (defaultPrefixFound || (message.toLowerCase().startsWith(guildPrefix.toLowerCase()))) {
+            //PREFIX FOUND
+
+            String prefix;
+            if (defaultPrefixFound) {
+                prefix = defaultPrefix;
+            } else {
+                prefix = guildPrefix;
+            }
+        //}
+
+
+        //if (message.toLowerCase().startsWith(prefix.toLowerCase())) {
             for (final Command c : this.getCommands()) {
                 if (message.toLowerCase().startsWith(prefix.toLowerCase() + c.getName().toLowerCase() + ' ') || message.equalsIgnoreCase(prefix + c.getName())) {
                     this.executeCommand(c, c.getName(), prefix, message, event);
@@ -74,7 +96,7 @@ public class Dispatcher extends ListenerAdapter {
 
         final Long authorID = event.getAuthor().getIdLong();
 
-        final String prefix = Config.get("bot_prefix");
+        final String prefix = Config.get("defaultPrefix");
         String message = event.getMessage().getContentRaw();
 
         final MessageChannel channel = event.getChannel();
@@ -111,7 +133,7 @@ public class Dispatcher extends ListenerAdapter {
         this.pool.submit(() ->
         {
             boolean authorized = false;
-            if (c.getPermissionIndex() == null) {
+            if ((c.getPermissionIndex() == null) && (c.getDiscordPermission() == null)) {
                 authorized = true;
             } else {
                 authorized = checkAuthorized(c, event.getGuild().getIdLong(), event.getMember(), c.getPermissionIndex());
@@ -130,10 +152,21 @@ public class Dispatcher extends ListenerAdapter {
                 } catch (final Exception e) {
                     e.printStackTrace();
                     event.getChannel().sendMessage("**There was an error processing your command!**").queue();
-                    //messageOwner(e, c, event);
+                    messageOwner(event,c,e);
                 }
             } else {
-                event.getMessage().reply(String.format(event.getAuthor().getAsMention() + " You are not authorized for command: `%s`\nPermission Index: %d", c.getName(), c.getPermissionIndex())).queue();
+
+                StringBuilder errorString = new StringBuilder();
+
+                if(c.getPermissionIndex() != null){
+                    errorString.append("Permission Index: ").append(c.getPermissionIndex()).append("\n");
+                }
+
+                if(c.getDiscordPermission() != null){
+                    errorString.append("Discord Permission: ").append(c.getDiscordPermission().getName());
+                }
+
+                event.getMessage().reply(String.format(event.getAuthor().getAsMention() + " You are not authorized for command: `%s`\n%s", c.getName(), errorString)).queue();
             }
         });
     }
@@ -263,6 +296,24 @@ public class Dispatcher extends ListenerAdapter {
         }
 
         return commandMap;
+    }
+
+    private void messageOwner(final GuildMessageReceivedEvent event, final Command c, final Exception exception){
+
+        SherlockBot.jda.getUserById(SherlockBot.botOwnerID).openPrivateChannel().queue((channel) -> {
+            EmbedBuilder embedBuilder = new EmbedBuilder()
+                    .setTitle("System Exception Encountered")
+                    .setColor(Color.RED)
+                    .addField("Command:",c.getName(),true)
+                    .addField("Calling User:",event.getMessage().getAuthor().getAsTag(),true)
+                    .addBlankField(true)
+                    .addField("Exception:",exception.getMessage(),false)
+                    .setDescription(exception.getStackTrace().toString());
+
+            channel.sendMessage(embedBuilder.build()).queue();
+
+            embedBuilder.clear();
+        });
     }
 
 }

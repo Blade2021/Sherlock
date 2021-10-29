@@ -36,7 +36,9 @@ public class TakeRole extends Command {
 
                 for (Member member : memberList) {
                     try {
-                        event.getGuild().removeRoleFromMember(member.getId(), role).reason(String.format("Requested by %s", message.getAuthor().getAsTag())).queueAfter(10, TimeUnit.SECONDS);
+                        event.getGuild().removeRoleFromMember(member.getId(), role).reason(String.format("Requested by %s", message.getAuthor().getAsTag())).queueAfter(5, TimeUnit.SECONDS, Success -> {
+                            message.addReaction("✅").queue();
+                        });
                     } catch (PermissionException e) {
                         reply(event,String.format("Encountered Permission error: %s while attempting to run command.",e.getPermission()));
                         break;

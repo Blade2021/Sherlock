@@ -30,6 +30,7 @@ public class GiveRole extends Command {
             // DON'T ALLOW COMMAND TO BE USED WITHOUT MENTIONABLES
             // Mentionables is now a word.  If you ever come across this, let me know.  I'll give you a gold star.
 
+            System.out.println("I do nothing");
 
         } else {
             // MENTIONABLES WERE FOUND!  HOORAY!
@@ -44,12 +45,16 @@ public class GiveRole extends Command {
 
                 for (Member member : memberList) {
                     try {
-                        event.getGuild().addRoleToMember(member.getId(), role).reason(String.format("Requested by %s", message.getAuthor().getAsTag())).queueAfter(10, TimeUnit.SECONDS);
+                        event.getGuild().addRoleToMember(member.getId(), role).reason(String.format("Requested by %s", message.getAuthor().getAsTag())).queueAfter(5, TimeUnit.SECONDS, Success -> {
+                            message.addReaction("✅").queue();
+                        });
                     } catch (PermissionException e) {
                         reply(event,String.format("Encountered Permission error: %s while attempting to run command.",e.getPermission()));
                         break;
                     }
                 }
+            } else {
+                reply(event,"Role was not found");
             }
         }
     }

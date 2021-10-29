@@ -7,17 +7,15 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import rsystems.events.GuildMessageEvent;
-import rsystems.events.JoinGuild;
-import rsystems.handlers.CommandLoader;
+import rsystems.events.GuildMessageReceived;
+import rsystems.handlers.Dispatcher;
 import rsystems.handlers.SQLHandler;
-import rsystems.objects.Command_OLD;
 import rsystems.objects.DBPool;
 import rsystems.objects.GuildSettings;
 import rsystems.objects.UserRoleReactionObject;
-import rsystems.threads.ThreeMinute;
 
 import javax.security.auth.login.LoginException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,15 +25,15 @@ public class SherlockBot {
 
     public static DBPool dbPool = new DBPool(Config.get("DATABASE_HOST"), Config.get("DATABASE_USER"),Config.get("DATABASE_PASS"));
     public static SQLHandler database = new SQLHandler(dbPool.getPool());
+    public static Dispatcher dispatcher;
 
-
-    public static Map<Integer, Command_OLD> commandMap = new HashMap<>();
     public static Map<Long,GuildSettings> guildMap = new HashMap<>();
     public static Map<Long, Map<Long, ArrayList<UserRoleReactionObject>>> reactionHandleMap = new HashMap<>();
     //public static SQLHandler database = new SQLHandler(Config.get("Database_Host"),Config.get("Database_User"),Config.get("Database_Pass"));
     public static User bot = null;
     public static String version = "0.6.2";
     public static JDA jda = null;
+    public static Long botOwnerID = Long.valueOf(Config.get("OWNER_ID"));
 
     public static String defaultPrefix = "!sl";
 
@@ -47,12 +45,11 @@ public class SherlockBot {
                 .setChunkingFilter(ChunkingFilter.ALL)
                 .build();
 
-        api.addEventListener(new GuildMessageEvent());
-        api.addEventListener(new JoinGuild());
+        api.addEventListener(new GuildMessageReceived());
+        //api.addEventListener(new JoinGuild());
+        api.addEventListener(dispatcher = new Dispatcher());
 
         try{
-            CommandLoader commandLoader = new CommandLoader();
-
             api.awaitReady();
 
             jda = api;
@@ -61,16 +58,22 @@ public class SherlockBot {
             //Get the data for each guild from the database
             api.getGuilds().forEach(guild -> {
 
-                guildMap.put(guild.getIdLong(),SherlockBot.database.getGuildData(guild.getIdLong()));
+                try {
+                    guildMap.put(guild.getIdLong(),SherlockBot.database.getGuildData(guild.getIdLong()));
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
 
             });
+
+
 
         } catch(InterruptedException e){
             //do nothing
         }
 
         Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new ThreeMinute(), 60*1000,60*1000);
+        //timer.scheduleAtFixedRate(new ThreeMinute(), 60*1000,60*1000);
 
     }
 

@@ -15,7 +15,10 @@ public class DBPool {
             pool.setUser(user);
             pool.setPassword(pass);
             pool.setMaxPoolSize(10);
-            pool.setMinPoolSize(2);
+            pool.setMinPoolSize(4);
+            pool.setMaxIdleTime(60);
+            pool.setLoginTimeout(15);
+            pool.setPoolName("Watson");
 
             pool.initialize();
 

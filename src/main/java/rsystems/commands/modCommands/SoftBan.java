@@ -1,5 +1,6 @@
 package rsystems.commands.modCommands;
 
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -12,6 +13,11 @@ import rsystems.objects.Command;
 import java.util.concurrent.TimeUnit;
 
 public class SoftBan extends Command {
+
+    @Override
+    public Permission getDiscordPermission() {
+        return Permission.KICK_MEMBERS;
+    }
 
     private static final String[] ALIASES = new String[] {"kick"};
 
@@ -26,7 +32,8 @@ public class SoftBan extends Command {
             for(Member member:message.getMentionedMembers()){
                 try{
                     User user = member.getUser();
-                    event.getGuild().ban(member,0,"Softban requested by: " + message.getAuthor().getAsTag()).queueAfter(5, TimeUnit.SECONDS,success -> {
+                    event.getGuild().ban(member,7,"Softban requested by: " + message.getAuthor().getAsTag()).queueAfter(5, TimeUnit.SECONDS, success -> {
+                        message.addReaction("✅").queue();
                         event.getGuild().unban(user).queueAfter(5,TimeUnit.SECONDS);
                     });
                 } catch (PermissionException e){
