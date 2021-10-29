@@ -7,10 +7,7 @@ import rsystems.objects.InfractionObject;
 import rsystems.objects.SelfRole;
 import rsystems.objects.TimedEvent;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -174,17 +171,36 @@ public class SQLHandler {
         return output;
     }
 
-    public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, int value) {
+    public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, int value) throws SQLException {
         int output = 0;
-        try {
-            Connection connection = pool.getConnection();
 
+        Connection connection = pool.getConnection();
+        try {
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
 
             output = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return output;
+    }
+
+    public int putValue(String tableName, String columnName, String firstIdentityCol, Long firstId, String secondIdentityCol, int secondId, Long value) throws SQLException {
+        int output = 0;
+
+        Connection connection = pool.getConnection();
+        try {
+            Statement st = connection.createStatement();
+            st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d AND %s = %d", tableName, columnName, value, firstIdentityCol, firstId, secondIdentityCol, secondId));
+
+            output = st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
         }
         return output;
     }
@@ -375,6 +391,36 @@ public class SQLHandler {
             connection.close();
         }
         return null;
+    }
+
+    public Integer insertCaseEvent(Long guildID, InfractionObject caseObject) throws SQLException {
+
+        int output = 0;
+
+        Connection connection = pool.getConnection();
+        try {
+            Statement st = connection.createStatement();
+            st.execute(String.format("INSERT INTO CaseTable (ChildGuildID,CaseID,SubmissionDate,UserID,UserTag,ModID,ModTag,Reason,LogMessageID,EventType) VALUES (%d,%d,\"%s\",%d,\"%s\",%d,\"%s\",\"%s\",%d,%d)",
+                    guildID,
+                    caseObject.getCaseNumber(),
+                    Timestamp.valueOf(caseObject.getSubmissionDate().toLocalDateTime()),
+                    caseObject.getUserID(),
+                    caseObject.getUserTag(),
+                    caseObject.getModeratorID(),
+                    caseObject.getModeratorTag(),
+                    caseObject.getNote(),
+                    caseObject.getMessageID(),
+                    caseObject.getEventType())
+            );
+
+            output = st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return output;
+
     }
 
     // Add an self role to the database

@@ -32,10 +32,15 @@ public class SoftBan extends Command {
             for(Member member:message.getMentionedMembers()){
                 try{
                     User user = member.getUser();
-                    event.getGuild().ban(member,7,"Softban requested by: " + message.getAuthor().getAsTag()).queueAfter(5, TimeUnit.SECONDS, success -> {
-                        message.addReaction("✅").queue();
-                        event.getGuild().unban(user).queueAfter(5,TimeUnit.SECONDS);
-                    });
+                    if(message.getAuthor() == user){
+                        reply(event,"You cannot call this command on yourself.");
+                        break;
+                    } else {
+                        event.getGuild().ban(member, 7, "Softban requested by: " + message.getAuthor().getAsTag()).queueAfter(5, TimeUnit.SECONDS, success -> {
+                            message.addReaction("✅").queue();
+                            event.getGuild().unban(user).queueAfter(5, TimeUnit.SECONDS);
+                        });
+                    }
                 } catch (PermissionException e){
                     reply(event,"A permission error occurred: " + e.getPermission().toString());
                     break;
