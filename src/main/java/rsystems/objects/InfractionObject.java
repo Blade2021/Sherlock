@@ -35,7 +35,6 @@ public class InfractionObject {
 
     public InfractionObject(Long guildID){
         // Trigger get case number from database
-
         try {
             this.caseNumber = SherlockBot.database.getInt("Guilds","CaseIndex","GuildID",guildID);
             SherlockBot.database.putValue("Guilds","CaseIndex","GuildID",guildID,this.caseNumber+1);
@@ -45,7 +44,22 @@ public class InfractionObject {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
 
+    public InfractionObject(Long guildID, int caseNumber) {
+        this.caseNumber = caseNumber;
+    }
+
+    public InfractionObject(String note, ZonedDateTime submissionDate, Long moderatorID, Long userID, Long messageID, String userTag, String moderatorTag, int caseNumber, int eventType) {
+        this.note = note;
+        this.submissionDate = submissionDate;
+        this.moderatorID = moderatorID;
+        this.userID = userID;
+        this.messageID = messageID;
+        this.userTag = userTag;
+        this.moderatorTag = moderatorTag;
+        this.caseNumber = caseNumber;
+        this.eventType = eventType;
     }
 
     public InfractionObject(String violation, String note, Date submissionDate, Long moderatorID) {
@@ -171,5 +185,9 @@ public class InfractionObject {
 
     public ZonedDateTime getSubmissionDate() {
         return submissionDate;
+    }
+
+    public void setSubmissionDate(ZonedDateTime submissionDate) {
+        this.submissionDate = submissionDate;
     }
 }

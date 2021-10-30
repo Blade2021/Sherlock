@@ -3,6 +3,7 @@ package rsystems.threads;
 import net.dv8tion.jda.api.JDA;
 import rsystems.objects.TimedEvent;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.TimerTask;
@@ -20,7 +21,11 @@ public class ThreeMinute extends TimerTask {
                 System.out.println(String.format("Expiring timed event: EventID:%d | GuildID:%d | EventType:%d",timedEvent.eventUserID,timedEvent.eventGuildID,timedEvent.eventType));
                 switch(timedEvent.eventType){
                     case 1:
-                        unmuteUser(timedEvent.eventGuildID,timedEvent.eventUserID);
+                        try {
+                            unmuteUser(timedEvent.eventGuildID,timedEvent.eventUserID);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
                         break;
                     case 2:
                         System.out.println("blah blah blah");
@@ -33,7 +38,7 @@ public class ThreeMinute extends TimerTask {
         }
     }
 
-    private void unmuteUser(Long guildID, Long userID){
+    private void unmuteUser(Long guildID, Long userID) throws SQLException {
         Long muteRoleID = database.getLong("GuildTable","MuteRoleID","GuildID",guildID);
 
         try{

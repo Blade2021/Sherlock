@@ -20,6 +20,11 @@ public class GiveRole extends Command {
     }
 
     @Override
+    public Integer getPermissionIndex() {
+        return 8;
+    }
+
+    @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {
 
     }

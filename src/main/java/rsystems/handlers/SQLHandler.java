@@ -9,6 +9,8 @@ import rsystems.objects.TimedEvent;
 
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -121,11 +123,12 @@ public class SQLHandler {
         return output;
     }
 
-    public Long getLong(String table, String columnName, String identifierColumn, Long identifier) {
+    public Long getLong(String table, String columnName, String identifierColumn, Long identifier) throws SQLException {
         Long output = null;
 
+        Connection connection = pool.getConnection();
+
         try {
-            Connection connection = pool.getConnection();
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s where %s = %d",columnName,table,identifierColumn,identifier));
 
@@ -135,11 +138,34 @@ public class SQLHandler {
 
         } catch (SQLException throwables) {
             System.out.println(throwables.getMessage());
+        } finally {
+            connection.close();
         }
 
         return output;
     }
 
+    public Long getLong(String table, String columnName, String firstIdentityCol, Long firstId, String secondIdentityCol, int secondId) throws SQLException {
+        Long output = null;
+
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s where %s = %d AND %s = %d",columnName,table,firstIdentityCol,firstId,secondIdentityCol,secondId));
+
+            while (rs.next()) {
+                output = rs.getLong(columnName);
+            }
+
+        } catch (SQLException throwables) {
+            System.out.println(throwables.getMessage());
+        } finally {
+            connection.close();
+        }
+
+        return output;
+    }
 
     public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, Long value) {
         int output = 0;
@@ -195,6 +221,23 @@ public class SQLHandler {
         try {
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d AND %s = %d", tableName, columnName, value, firstIdentityCol, firstId, secondIdentityCol, secondId));
+
+            output = st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return output;
+    }
+
+    public int putValue(String tableName, String columnName, String firstIdentityCol, Long firstId, String secondIdentityCol, int secondId, String value) throws SQLException {
+        int output = 0;
+
+        Connection connection = pool.getConnection();
+        try {
+            Statement st = connection.createStatement();
+            st.execute(String.format("UPDATE %s SET %s = \"%s\" WHERE %s = %d AND %s = %d", tableName, columnName, value, firstIdentityCol, firstId, secondIdentityCol, secondId));
 
             output = st.getUpdateCount();
         } catch (SQLException throwables) {
@@ -420,6 +463,36 @@ public class SQLHandler {
             connection.close();
         }
         return output;
+
+    }
+
+    public InfractionObject getCaseEvent(Long guildID, int caseID) throws SQLException {
+
+        int output = 0;
+        InfractionObject infractionObject = new InfractionObject(guildID,caseID);
+
+        Connection connection = pool.getConnection();
+        try {
+            Statement st = connection.createStatement();
+            ResultSet rs = st.executeQuery(String.format("SELECT ChildGuildID, CaseID,SubmissionDate,UserID,UserTag,ModID,ModTag,Reason,LogMessageID,EventType FROM CaseTable WHERE ChildGuildID = %d AND CaseID = %d",guildID,caseID));
+
+            while(rs.next()){
+                infractionObject.setNote(rs.getString("Reason"));
+                infractionObject.setModeratorTag(rs.getString("ModTag"));
+                infractionObject.setModeratorID(rs.getLong("ModID"));
+                infractionObject.setUserTag(rs.getString("UserTag"));
+                infractionObject.setUserID(rs.getLong("UserID"));
+                infractionObject.setMessageID(rs.getLong("LogMessageID"));
+                infractionObject.setEventType(rs.getInt("EventType"));
+                infractionObject.setSubmissionDate(ZonedDateTime.ofInstant(rs.getTimestamp("Submission Date").toInstant(), ZoneId.of("UTC")));
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return infractionObject;
 
     }
 

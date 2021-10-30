@@ -1,6 +1,7 @@
 package rsystems.handlers;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
@@ -12,10 +13,7 @@ import rsystems.Config;
 import rsystems.SherlockBot;
 import rsystems.commands.guildFunctions.AutoRole;
 import rsystems.commands.guildFunctions.SelfRole;
-import rsystems.commands.modCommands.GiveRole;
-import rsystems.commands.modCommands.Infraction;
-import rsystems.commands.modCommands.SoftBan;
-import rsystems.commands.modCommands.TakeRole;
+import rsystems.commands.modCommands.*;
 import rsystems.objects.Command;
 
 import java.awt.*;
@@ -38,6 +36,7 @@ public class Dispatcher extends ListenerAdapter {
         registerCommand(new TakeRole());
         registerCommand(new SoftBan());
         registerCommand(new Infraction());
+        registerCommand(new Reason());
 
     }
 
@@ -228,6 +227,10 @@ public class Dispatcher extends ListenerAdapter {
 
     public Boolean checkAuthorized(final Command c, final Long guildID, final Member member, final Integer permissionIndex){
         boolean authorized = false;
+
+        if(member.hasPermission(Permission.ADMINISTRATOR)){
+            return true;
+        }
 
         if(c.getDiscordPermission() != null){
             if(member.getPermissions().contains(c.getDiscordPermission())){

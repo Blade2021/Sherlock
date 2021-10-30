@@ -17,6 +17,11 @@ public class Infraction extends Command {
     private static final String[] ALIASES = new String[] {"Warn", "Warning"};
 
     @Override
+    public Integer getPermissionIndex() {
+        return 2;
+    }
+
+    @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {
 
     }
