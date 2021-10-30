@@ -21,7 +21,16 @@ public class InfractionObject {
     private String userTag;
     private String moderatorTag;
     private int caseNumber;
-    private int eventType;
+    private EventType eventType;
+
+    public enum EventType {
+        WARNING,
+        RESERVED,
+        MUTE,
+        KICK,
+        TIMED_BAN,
+        BAN
+    }
 
     /*
     INFRACTION LEVEL:
@@ -50,18 +59,6 @@ public class InfractionObject {
         this.caseNumber = caseNumber;
     }
 
-    public InfractionObject(String note, ZonedDateTime submissionDate, Long moderatorID, Long userID, Long messageID, String userTag, String moderatorTag, int caseNumber, int eventType) {
-        this.note = note;
-        this.submissionDate = submissionDate;
-        this.moderatorID = moderatorID;
-        this.userID = userID;
-        this.messageID = messageID;
-        this.userTag = userTag;
-        this.moderatorTag = moderatorTag;
-        this.caseNumber = caseNumber;
-        this.eventType = eventType;
-    }
-
     public InfractionObject(String violation, String note, Date submissionDate, Long moderatorID) {
         this.note = note;
         //this.submissionDate = submissionDate;
@@ -84,25 +81,20 @@ public class InfractionObject {
     public MessageEmbed createEmbedMessge(){
         EmbedBuilder builder = new EmbedBuilder();
 
-        String eventType = "Mod Action";
         switch(this.eventType){
-            case 0:
+            case WARNING:
                 builder.setColor(Color.yellow);
-                eventType = "Warning";
                 break;
-            case 1:
-            case 2:
+            case RESERVED:
+            case MUTE:
                 builder.setColor(Color.decode("#C133FF"));
-                eventType = "Mute";
                 break;
-            case 3:
+            case KICK:
                 builder.setColor(Color.decode("#FF9C33"));
-                eventType = "Kick";
                 break;
-            case 4:
-            case 5:
+            case TIMED_BAN:
+            case BAN:
                 builder.setColor(Color.RED);
-                eventType = "Ban";
                 break;
 
         }
@@ -151,11 +143,11 @@ public class InfractionObject {
         return caseNumber;
     }
 
-    public int getEventType() {
+    public EventType getEventType() {
         return eventType;
     }
 
-    public void setEventType(int eventType) {
+    public void setEventType(EventType eventType) {
         this.eventType = eventType;
     }
 

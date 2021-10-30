@@ -27,7 +27,7 @@ public class Infraction extends Command {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, GuildMessageReceivedEvent event) throws SQLException {
+    public void dispatch(final User sender, final MessageChannel channel, final Message message, String content, final GuildMessageReceivedEvent event) throws SQLException {
         Member offender = null;
         String[] args = content.split("\\s+");
 
@@ -54,7 +54,7 @@ public class Infraction extends Command {
 
                 InfractionObject infractionObject = new InfractionObject(event.getGuild().getIdLong());
                 infractionObject.setUserID(offender.getIdLong());
-                infractionObject.setEventType(0);
+                infractionObject.setEventType(InfractionObject.EventType.WARNING);
                 infractionObject.setModeratorID(message.getAuthor().getIdLong());
                 infractionObject.setUserTag(offender.getUser().getAsTag());
                 infractionObject.setModeratorTag(message.getAuthor().getAsTag());

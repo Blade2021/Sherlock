@@ -439,6 +439,29 @@ public class SQLHandler {
     public Integer insertCaseEvent(Long guildID, InfractionObject caseObject) throws SQLException {
 
         int output = 0;
+        int eventTypeIdentifier = -1;
+
+        switch(caseObject.getEventType()){
+            case WARNING:
+                eventTypeIdentifier = 0;
+                break;
+            case RESERVED:
+                eventTypeIdentifier = 1;
+                break;
+            case MUTE:
+                eventTypeIdentifier = 2;
+                break;
+            case KICK:
+                eventTypeIdentifier = 3;
+                break;
+            case TIMED_BAN:
+                eventTypeIdentifier = 4;
+                break;
+            case BAN:
+                eventTypeIdentifier = 5;
+                break;
+        }
+
 
         Connection connection = pool.getConnection();
         try {
@@ -453,7 +476,7 @@ public class SQLHandler {
                     caseObject.getModeratorTag(),
                     caseObject.getNote(),
                     caseObject.getMessageID(),
-                    caseObject.getEventType())
+                    eventTypeIdentifier)
             );
 
             output = st.getUpdateCount();
@@ -476,6 +499,8 @@ public class SQLHandler {
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(String.format("SELECT ChildGuildID, CaseID,SubmissionDate,UserID,UserTag,ModID,ModTag,Reason,LogMessageID,EventType FROM CaseTable WHERE ChildGuildID = %d AND CaseID = %d",guildID,caseID));
 
+            int eventTypeIdentifier = -1;
+
             while(rs.next()){
                 infractionObject.setNote(rs.getString("Reason"));
                 infractionObject.setModeratorTag(rs.getString("ModTag"));
@@ -483,8 +508,30 @@ public class SQLHandler {
                 infractionObject.setUserTag(rs.getString("UserTag"));
                 infractionObject.setUserID(rs.getLong("UserID"));
                 infractionObject.setMessageID(rs.getLong("LogMessageID"));
-                infractionObject.setEventType(rs.getInt("EventType"));
+                eventTypeIdentifier = rs.getInt("EventType");
                 infractionObject.setSubmissionDate(ZonedDateTime.ofInstant(rs.getTimestamp("Submission Date").toInstant(), ZoneId.of("UTC")));
+
+                switch(eventTypeIdentifier){
+                    case 0:
+                        infractionObject.setEventType(InfractionObject.EventType.WARNING);
+                        break;
+                    case 1:
+                        infractionObject.setEventType(InfractionObject.EventType.RESERVED);
+                        break;
+                    case 2:
+                        infractionObject.setEventType(InfractionObject.EventType.MUTE);
+                        break;
+                    case 3:
+                        infractionObject.setEventType(InfractionObject.EventType.KICK);
+                        break;
+                    case 4:
+                        infractionObject.setEventType(InfractionObject.EventType.TIMED_BAN);
+                        break;
+                    case 5:
+                        infractionObject.setEventType(InfractionObject.EventType.BAN);
+                        break;
+                }
+
             }
 
         } catch (SQLException throwables) {
