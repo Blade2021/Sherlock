@@ -19,6 +19,11 @@ public class SoftBan extends Command {
         return Permission.KICK_MEMBERS;
     }
 
+    @Override
+    public Integer getPermissionIndex() {
+        return 128;
+    }
+
     private static final String[] ALIASES = new String[] {"kick"};
 
     @Override
