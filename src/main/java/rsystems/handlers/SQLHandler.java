@@ -328,9 +328,10 @@ public class SQLHandler {
         try{
             Statement st = connection.createStatement();
 
-            ResultSet rs = st.executeQuery("SELECT Prefix, LogChannelID, MuteRoleID, EmbedFilter, OwnerID, GrantedSelfRoleCount, GrantedAutoRoleCount, WelcomeMessageSetting FROM Guilds WHERE GuildID = " + guildID);
+            ResultSet rs = st.executeQuery("SELECT Prefix, OwnerID, LogChannelID, MuteRoleID, EmbedFilter, OwnerID, GrantedSelfRoleCount, GrantedAutoRoleCount, WelcomeMessageSetting FROM Guilds WHERE GuildID = " + guildID);
             while (rs.next()) {
                 guildSettings.setPrefix(rs.getString("Prefix"));
+                guildSettings.setOwnerID(rs.getLong("OwnerID"));
                 guildSettings.setLogChannelID(rs.getLong("LogChannelID"));
                 guildSettings.setMuteRoleID(rs.getLong("MuteRoleID"));
                 guildSettings.setEmbedFilterSetting(rs.getInt("EmbedFilter"));
@@ -345,6 +346,25 @@ public class SQLHandler {
         }
 
         return guildSettings;
+    }
+
+    public Integer updateGuild(GuildSettings guildSettings) throws SQLException {
+
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("UPDATE Guilds SET OwnerID=%d, Prefix=\"%s\", LogChannelID=%d, MuteRoleID=%d, EmbedFilter=%d, WelcomeMessageSetting=%d " +
+                    "where GuildID=%d", guildSettings.getOwnerID(),guildSettings.getPrefix(),guildSettings.getLogChannelID(),guildSettings.getMuteRoleID(),
+                    guildSettings.getEmbedFilterSetting(),guildSettings.getWelcomeMessageSetting(),guildSettings.getGuildID()));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return 0;
     }
 
     // Add an self role to the database
