@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.handlers.LogMessage;
 import rsystems.objects.InfractionObject;
 
-public class GuildBanListener extends ListenerAdapter {
+public class GuildBanEventListener extends ListenerAdapter {
 
     public void onGuildBan(final GuildBanEvent event) {
         event.getGuild().retrieveAuditLogs().limit(1).type(ActionType.BAN).queue(success -> {
