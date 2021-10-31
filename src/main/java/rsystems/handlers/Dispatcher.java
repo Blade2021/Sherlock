@@ -11,7 +11,9 @@ import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.Config;
 import rsystems.SherlockBot;
+import rsystems.commands.botManager.Test;
 import rsystems.commands.guildFunctions.AutoRole;
+import rsystems.commands.guildFunctions.GuildSetting;
 import rsystems.commands.guildFunctions.SelfRole;
 import rsystems.commands.modCommands.*;
 import rsystems.objects.Command;
@@ -37,6 +39,8 @@ public class Dispatcher extends ListenerAdapter {
         registerCommand(new SoftBan());
         registerCommand(new Infraction());
         registerCommand(new Reason());
+        registerCommand(new Test());
+        registerCommand(new GuildSetting());
 
     }
 
