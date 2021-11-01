@@ -12,13 +12,13 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.Config;
 import rsystems.SherlockBot;
 import rsystems.commands.botManager.Test;
-import rsystems.commands.guildFunctions.AutoRole;
-import rsystems.commands.guildFunctions.GuildSetting;
-import rsystems.commands.guildFunctions.SelfRole;
+import rsystems.commands.guildFunctions.*;
 import rsystems.commands.modCommands.*;
+import rsystems.commands.subscriberOnly.CopyChannel;
 import rsystems.objects.Command;
 
 import java.awt.*;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -41,6 +41,10 @@ public class Dispatcher extends ListenerAdapter {
         registerCommand(new Reason());
         registerCommand(new Test());
         registerCommand(new GuildSetting());
+        registerCommand(new CopyChannel());
+        registerCommand(new IgnoreChannel());
+        registerCommand(new WatchChannel());
+        registerCommand(new ColorRole());
 
     }
 
@@ -54,10 +58,8 @@ public class Dispatcher extends ListenerAdapter {
             return;
         }
 
-        final Long authorID = event.getAuthor().getIdLong();
         final String defaultPrefix = Config.get("defaultPrefix");
         final String message = event.getMessage().getContentRaw();
-        final MessageChannel channel = event.getChannel();
         final String guildPrefix = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix();
         final boolean defaultPrefixFound = message.toLowerCase().startsWith(SherlockBot.defaultPrefix.toLowerCase());
 
@@ -70,22 +72,26 @@ public class Dispatcher extends ListenerAdapter {
             } else {
                 prefix = guildPrefix;
             }
-        //}
 
+            try {
+                if(SherlockBot.database.getLong("IgnoreChannelTable","ChannelID","ChildGuildID",event.getGuild().getIdLong(),"ChannelID",event.getChannel().getIdLong()) == null) {
 
-        //if (message.toLowerCase().startsWith(prefix.toLowerCase())) {
-            for (final Command c : this.getCommands()) {
-                if (message.toLowerCase().startsWith(prefix.toLowerCase() + c.getName().toLowerCase() + ' ') || message.equalsIgnoreCase(prefix + c.getName())) {
-                    this.executeCommand(c, c.getName(), prefix, message, event);
-                    return;
-                } else {
-                    for (final String alias : c.getAliases()) {
-                        if (message.toLowerCase().startsWith(prefix.toLowerCase() + alias.toLowerCase() + ' ') || message.equalsIgnoreCase(prefix + alias)) {
-                            this.executeCommand(c, alias, prefix, message, event);
+                    for (final Command c : this.getCommands()) {
+                        if (message.toLowerCase().startsWith(prefix.toLowerCase() + c.getName().toLowerCase() + ' ') || message.equalsIgnoreCase(prefix + c.getName())) {
+                            this.executeCommand(c, c.getName(), prefix, message, event);
                             return;
+                        } else {
+                            for (final String alias : c.getAliases()) {
+                                if (message.toLowerCase().startsWith(prefix.toLowerCase() + alias.toLowerCase() + ' ') || message.equalsIgnoreCase(prefix + alias)) {
+                                    this.executeCommand(c, alias, prefix, message, event);
+                                    return;
+                                }
+                            }
                         }
                     }
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
     }

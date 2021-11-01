@@ -12,6 +12,8 @@ import java.util.Iterator;
 
 public class GuildSetting extends Command {
 
+    private static final String[] ALIASES = new String[] {"gs","guild","setting"};
+
 
     @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {
@@ -27,6 +29,7 @@ public class GuildSetting extends Command {
             final String subCommand = args[0];
             boolean pushUpdate = false;
 
+            // LOG CHANNEL
             if((subCommand.equalsIgnoreCase("lc")) || (subCommand.equalsIgnoreCase("logChannel"))){
 
                 Long previousLogChannelID = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getLogChannelID();
@@ -135,5 +138,10 @@ public class GuildSetting extends Command {
     @Override
     public String getHelp() {
         return null;
+    }
+
+    @Override
+    public String[] getAliases(){
+        return ALIASES;
     }
 }

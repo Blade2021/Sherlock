@@ -29,28 +29,30 @@ public class GuildMessageReceived extends ListenerAdapter {
                 content = message.substring(guildPrefix.length());
             }
 
-
-            //SELF ROLES
             try {
-                if (SherlockBot.database.getTableCount(event.getGuild().getIdLong(),"SelfRoles") > 0) {
+                if (SherlockBot.database.getLong("IgnoreChannelTable", "ChannelID", "ChildGuildID", event.getGuild().getIdLong(), "ChannelID", event.getChannel().getIdLong()) == null) {
 
-                    Map<String,Long> guildSelfRoleMap = SherlockBot.database.getGuildSelfRoles(guildID);
 
-                    //ITERATE THROUGH GUILD SELF ROLE MAP
-                    for (Map.Entry<String, Long> entry : guildSelfRoleMap.entrySet()) {
-                        //check content for trigger (Ignoring case)
-                        if (entry.getKey().equalsIgnoreCase(content)) {
-                            //ENTRY FOUND
-                            Long roleID = entry.getValue();
-                            handleSelfRoleEvent(event,roleID);
+                    //SELF ROLES
+                    if (SherlockBot.database.getTableCount(event.getGuild().getIdLong(), "SelfRoles") > 0) {
+
+                        Map<String, Long> guildSelfRoleMap = SherlockBot.database.getGuildSelfRoles(guildID);
+
+                        //ITERATE THROUGH GUILD SELF ROLE MAP
+                        for (Map.Entry<String, Long> entry : guildSelfRoleMap.entrySet()) {
+                            //check content for trigger (Ignoring case)
+                            if (entry.getKey().equalsIgnoreCase(content)) {
+                                //ENTRY FOUND
+                                Long roleID = entry.getValue();
+                                handleSelfRoleEvent(event, roleID);
+                            }
                         }
                     }
                 }
+
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-
-
         }
     }
 
@@ -63,11 +65,11 @@ public class GuildMessageReceived extends ListenerAdapter {
 
                 if (event.getMember().getRoles().contains(role)) {
                     event.getGuild().removeRoleFromMember(event.getMember().getIdLong(), role).reason("Requested via SelfRole").queue(success -> {
-                        event.getMessage().addReaction("✅").queue();
+                        event.getMessage().addReaction("\uD83D\uDC4D ").queue();
                     });
                 } else {
                     event.getGuild().addRoleToMember(event.getMember().getIdLong(), role).reason("Requested via SelfRole").queue(success -> {
-                        event.getMessage().addReaction("✅").queue();
+                        event.getMessage().addReaction("\uD83D\uDC4D ").queue();
                     });
                 }
 

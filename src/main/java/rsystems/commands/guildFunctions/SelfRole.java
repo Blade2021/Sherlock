@@ -113,6 +113,8 @@ public class SelfRole extends Command {
                     } else {
                         reply(event,"No self roles found");
                     }
+                } else {
+                    reply(event,"No self roles found");
                 }
             }
 

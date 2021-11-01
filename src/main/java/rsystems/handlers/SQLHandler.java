@@ -167,6 +167,28 @@ public class SQLHandler {
         return output;
     }
 
+    public Long getLong(String table, String columnName, String firstIdentityCol, Long firstId, String secondIdentityCol, Long secondId) throws SQLException {
+        Long output = null;
+
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s where %s = %d AND %s = %d",columnName,table,firstIdentityCol,firstId,secondIdentityCol,secondId));
+
+            while (rs.next()) {
+                output = rs.getLong(columnName);
+            }
+
+        } catch (SQLException throwables) {
+            System.out.println(throwables.getMessage());
+        } finally {
+            connection.close();
+        }
+
+        return output;
+    }
+
     public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, Long value) {
         int output = 0;
         try {
@@ -347,6 +369,8 @@ public class SQLHandler {
 
         return guildSettings;
     }
+
+
 
     public Integer updateGuild(GuildSettings guildSettings) throws SQLException {
 
@@ -747,6 +771,35 @@ public class SQLHandler {
         }
 
         return false;
+    }
+
+    /**
+     * Handle the ignore Channel function of Sherlock.
+     * @param GuildID
+     * @param ChannelID
+     * @param AddChannel If True, method adds the channel TO the database, if False, method REMOVES the channelID from the database (if found)
+     * @return Number of rows changed
+     * @throws SQLException
+     */
+    public Integer handleIgnoreChannel(Long GuildID, Long ChannelID, Boolean AddChannel) throws SQLException {
+        int output = 0;
+
+        Connection connection = pool.getConnection();
+        try {
+            Statement st = connection.createStatement();
+            if(AddChannel) {
+                st.execute(String.format("INSERT INTO IgnoreChannelTable (ChildGuildID,ChannelID) VALUES (%d,%d)", GuildID, ChannelID));
+            } else {
+                st.execute(String.format("DELETE FROM IgnoreChannelTable WHERE ChildGuildID = %d AND ChannelID = %d", GuildID, ChannelID));
+            }
+
+            output = st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return output;
     }
 
     public HashMap<Long,Integer> retractEvent(Long GuildID, Long EventID){
