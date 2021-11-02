@@ -14,6 +14,8 @@ import rsystems.SherlockBot;
 import rsystems.commands.botManager.Test;
 import rsystems.commands.guildFunctions.*;
 import rsystems.commands.modCommands.*;
+import rsystems.commands.publicCommands.Help;
+import rsystems.commands.subscriberOnly.ColorRole;
 import rsystems.commands.subscriberOnly.CopyChannel;
 import rsystems.objects.Command;
 
@@ -45,6 +47,7 @@ public class Dispatcher extends ListenerAdapter {
         registerCommand(new IgnoreChannel());
         registerCommand(new WatchChannel());
         registerCommand(new ColorRole());
+        registerCommand(new Help());
 
     }
 
@@ -157,7 +160,7 @@ public class Dispatcher extends ListenerAdapter {
                 } catch (final NumberFormatException numberFormatException) {
                     numberFormatException.printStackTrace();
                     event.getMessage().reply("**ERROR:** Bad format received").queue();
-                    //messageOwner(numberFormatException, c, event);
+                    messageOwner(event, c, numberFormatException);
                 } catch (final Exception e) {
                     e.printStackTrace();
                     event.getChannel().sendMessage("**There was an error processing your command!**").queue();
@@ -201,7 +204,7 @@ public class Dispatcher extends ListenerAdapter {
                     //HiveBot.sqlHandler.logCommandUsage(c.getName());
                 } catch (final NumberFormatException numberFormatException) {
                     numberFormatException.printStackTrace();
-                    event.getMessage().reply("**ERROR:** Bad format received").queue();
+                    //event.getMessage().reply("**ERROR:** Bad format received").queue();
                     //messageOwner(numberFormatException, c, event);
                 } catch (final Exception e) {
                     e.printStackTrace();
@@ -298,19 +301,6 @@ public class Dispatcher extends ListenerAdapter {
         return authorized;
     }
 
-    public Map<String, Integer> getCommandMap() {
-
-        Map<String, Integer> commandMap = new HashMap<>();
-
-        for (final Command c : this.getCommands()) {
-
-            commandMap.putIfAbsent(c.getName(), c.getPermissionIndex());
-
-        }
-
-        return commandMap;
-    }
-
     private void messageOwner(final GuildMessageReceivedEvent event, final Command c, final Exception exception){
 
         SherlockBot.jda.getUserById(SherlockBot.botOwnerID).openPrivateChannel().queue((channel) -> {
@@ -320,8 +310,8 @@ public class Dispatcher extends ListenerAdapter {
                     .addField("Command:",c.getName(),true)
                     .addField("Calling User:",event.getMessage().getAuthor().getAsTag(),true)
                     .addBlankField(true)
-                    .addField("Exception:",exception.getMessage(),false)
-                    .setDescription(exception.getStackTrace().toString());
+                    .addField("Exception:",exception.toString(),false)
+                    .setDescription(exception.getCause().getMessage().substring(0,exception.getCause().getMessage().indexOf(":")));
 
             channel.sendMessage(embedBuilder.build()).queue();
 
