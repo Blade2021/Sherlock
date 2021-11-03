@@ -12,7 +12,7 @@ public class GuildChannelEventListener extends ListenerAdapter {
     public void onTextChannelDelete(TextChannelDeleteEvent event) {
         final Long guildID = event.getGuild().getIdLong();
 
-        if(SherlockBot.guildMap.get(guildID).getLogChannelID().equals(event.getChannel().getIdLong())){
+        if((SherlockBot.guildMap.get(guildID).getLogChannelID() != null) && (SherlockBot.guildMap.get(guildID).getLogChannelID().equals(event.getChannel().getIdLong()))){
             SherlockBot.guildMap.get(guildID).setLogChannelID(null);
             try {
                 SherlockBot.database.updateGuild(SherlockBot.guildMap.get(guildID));

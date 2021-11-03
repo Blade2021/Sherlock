@@ -7,9 +7,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import rsystems.events.GuildBanEventListener;
-import rsystems.events.GuildChannelEventListener;
-import rsystems.events.GuildMessageReceived;
+import rsystems.events.*;
 import rsystems.handlers.Dispatcher;
 import rsystems.handlers.SQLHandler;
 import rsystems.objects.DBPool;
@@ -52,6 +50,8 @@ public class SherlockBot {
         api.addEventListener(dispatcher = new Dispatcher());
         api.addEventListener(new GuildBanEventListener());
         api.addEventListener(new GuildChannelEventListener());
+        api.addEventListener(new GuildStateListener());
+        api.addEventListener(new GuildNicknameListener());
 
         try{
             api.awaitReady();

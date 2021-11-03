@@ -118,7 +118,7 @@ public class AutoRole extends Command {
     @Override
     public String getHelp() {
 
-        return "{prefix}{command} [RoleID]\n\n" + "This will add the specified role as an automatic assignment role.  Any new members that join the guild will automatically get assigned this role upon join.";
+        return "{prefix}{command} (RoleID)\n\n" + "This will add the specified role as an automatic assignment role.  Any new members that join the guild will automatically get assigned this role upon join.";
 
     }
 

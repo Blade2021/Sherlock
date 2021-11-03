@@ -43,17 +43,23 @@ public class Help extends Command {
                         builder.setTitle("Help | " + c.getName());
 
                         String helpString = c.getHelp();
-                        helpString = helpString.replaceAll("\\{prefix}",SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix());
-                        helpString = helpString.replaceAll("\\{command}",c.getName());
+                        String prefix = "!sL";
+                        if(SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix() != null){
+                            prefix = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix();
+                        }
+                        helpString = helpString.replaceAll("\\{prefix}",prefix);
+                        helpString = helpString.replaceAll("\\{command}",String.format("%s",c.getName()));
 
                         builder.setDescription(helpString);
 
                         if(c.getDiscordPermission() != null){
-                            builder.addField("Discord Perm:",c.getDiscordPermission().getName(),false);
+                            builder.addField("Discord Perm:",c.getDiscordPermission().getName(),true);
+                        } else {
+                            builder.addBlankField(true);
                         }
 
                         if(c.getPermissionIndex() != null){
-                            builder.addField("Mod Permission:",c.getPermissionIndex().toString(),false);
+                            builder.addField("Mod Permission:",c.getPermissionIndex().toString(),true);
                         }
 
                         if(c.getAliases().length > 0){
@@ -64,7 +70,8 @@ public class Help extends Command {
                         }
                     } else {
                         builder.setTitle("404 - Not Found   :(");
-                        builder.setDescription("Well that's embarrassing.\uD83D\uDE33  Looks like we don't have any documentation setup for that command at this time.\n\nPlease check back later or submit a request.");
+                        builder.setDescription("Well this is embarrassing.\uD83D\uDE33\nLooks like we don't have any documentation setup for that command at this time.");
+                        builder.setFooter("Please check back later or submit a request via GitHub");
                     }
                 }
             }

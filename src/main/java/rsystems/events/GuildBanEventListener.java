@@ -4,13 +4,19 @@ import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.events.guild.GuildBanEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import rsystems.SherlockBot;
 import rsystems.handlers.LogMessage;
 import rsystems.objects.InfractionObject;
+
+import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 
 public class GuildBanEventListener extends ListenerAdapter {
 
     public void onGuildBan(final GuildBanEvent event) {
-        event.getGuild().retrieveAuditLogs().limit(1).type(ActionType.BAN).queue(success -> {
+
+
+        event.getGuild().retrieveAuditLogs().limit(1).type(ActionType.BAN).queueAfter(1, TimeUnit.SECONDS,success -> {
             final AuditLogEntry log = success.get(0);
 
             final Long modID = log.getUser().getIdLong();
@@ -26,6 +32,12 @@ public class GuildBanEventListener extends ListenerAdapter {
 
             if(event.getGuild().getMemberById(modID) != null){
                 infractionObject.setModeratorTag(event.getGuild().getMemberById(modID).getUser().getAsTag());
+            }
+
+            try {
+                SherlockBot.database.insertCaseEvent(event.getGuild().getIdLong(),infractionObject);
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
 
             LogMessage.sendLogMessage(event.getGuild().getIdLong(),infractionObject.createEmbedMessge());

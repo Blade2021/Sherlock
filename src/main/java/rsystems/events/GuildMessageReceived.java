@@ -13,11 +13,15 @@ public class GuildMessageReceived extends ListenerAdapter {
 
     public void onGuildMessageReceived(final GuildMessageReceivedEvent event) {
 
+        if(event.getAuthor().isBot()){
+            return;
+        }
+
         final String guildPrefix = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix();
         String message = event.getMessage().getContentRaw();
 
         final boolean defaultPrefixFound = message.toLowerCase().startsWith(SherlockBot.defaultPrefix.toLowerCase());
-        if (defaultPrefixFound || (message.toLowerCase().startsWith(guildPrefix.toLowerCase()))) {
+        if ((defaultPrefixFound) || ((guildPrefix != null) && (message.toLowerCase().startsWith(guildPrefix.toLowerCase())))) {
             //PREFIX FOUND
 
             Long guildID = event.getGuild().getIdLong();
