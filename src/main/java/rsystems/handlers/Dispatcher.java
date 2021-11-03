@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.Config;
 import rsystems.SherlockBot;
+import rsystems.commands.botManager.ForceDisconnect;
 import rsystems.commands.botManager.Test;
 import rsystems.commands.guildFunctions.*;
 import rsystems.commands.modCommands.*;
