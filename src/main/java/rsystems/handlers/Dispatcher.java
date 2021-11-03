@@ -48,6 +48,7 @@ public class Dispatcher extends ListenerAdapter {
         registerCommand(new WatchChannel());
         registerCommand(new ColorRole());
         registerCommand(new Help());
+        registerCommand(new ForceDisconnect());
 
     }
 
