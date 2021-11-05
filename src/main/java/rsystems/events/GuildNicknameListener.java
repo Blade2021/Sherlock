@@ -16,25 +16,28 @@ public class GuildNicknameListener extends ListenerAdapter {
             if (SherlockBot.database.getInt("SubscriberTable", "SubLevel", "ChildGuildID", event.getGuild().getIdLong()) >= 1) {
                 return;
             } else {
-                event.getGuild().retrieveAuditLogs().limit(5).type(ActionType.MEMBER_UPDATE).queueAfter(1, TimeUnit.SECONDS, success -> {
 
-                    for(AuditLogEntry logEntry:success){
+                if ((event.getUser().getIdLong() == SherlockBot.jda.getSelfUser().getIdLong()) && (!event.getNewNickname().equalsIgnoreCase(SherlockBot.bot.getName()))) {
+                    event.getGuild().retrieveAuditLogs().limit(5).type(ActionType.MEMBER_UPDATE).queueAfter(1, TimeUnit.SECONDS, success -> {
 
-                        if((logEntry.getTargetIdLong() == SherlockBot.jda.getSelfUser().getIdLong()) && (logEntry.getUser().getIdLong() != SherlockBot.bot.getIdLong())){
+                        for (AuditLogEntry logEntry : success) {
 
-                            logEntry.getUser().openPrivateChannel().queue(privateChannel -> {
-                                privateChannel.sendMessage("You cannot change the name of this bot without being a subscriber.\n\nThe bot will automatically leave your server if unable to return its nickname.\n\nMultiple attempts will also go against our TOS and will remove your ability to use our Bot for your server").queue();
+                            if ((logEntry.getTargetIdLong() == SherlockBot.jda.getSelfUser().getIdLong()) && (logEntry.getUser().getIdLong() != SherlockBot.bot.getIdLong())) {
 
-                            });
+                                logEntry.getUser().openPrivateChannel().queue(privateChannel -> {
+                                    privateChannel.sendMessage("You cannot change the name of this bot without being a subscriber.\n\nThe bot will automatically leave your server if unable to return its nickname.\n\nMultiple attempts will also go against our TOS and will remove your ability to use our Bot for your server").queue();
 
-                            break;
+                                });
+
+                                break;
+
+                            }
 
                         }
 
-                    }
-
-                    event.getGuild().getSelfMember().modifyNickname("Watson").reason("Only subscribers are authorized to change this bot's nickname.").queueAfter(10,TimeUnit.SECONDS);
-                });
+                        event.getGuild().getSelfMember().modifyNickname("Watson").reason("Only subscribers are authorized to change this bot's nickname.").queueAfter(10, TimeUnit.SECONDS);
+                    });
+                }
             }
         }
     }
