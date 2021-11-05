@@ -13,6 +13,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SQLHandler {
@@ -178,6 +179,28 @@ public class SQLHandler {
 
             while (rs.next()) {
                 output = rs.getLong(columnName);
+            }
+
+        } catch (SQLException throwables) {
+            System.out.println(throwables.getMessage());
+        } finally {
+            connection.close();
+        }
+
+        return output;
+    }
+
+    public List<Long> getLongMultiple(String table, String columnName, String identifierColumn, Long identifier) throws SQLException {
+        ArrayList<Long> output = new ArrayList<>();
+
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s where %s = %d",columnName,table,identifierColumn,identifier));
+
+            while (rs.next()) {
+                output.add(rs.getLong(columnName));
             }
 
         } catch (SQLException throwables) {
@@ -382,6 +405,23 @@ public class SQLHandler {
             st.execute(String.format("UPDATE Guilds SET OwnerID=%d, Prefix=\"%s\", LogChannelID=%d, MuteRoleID=%d, EmbedFilter=%d, WelcomeMessageSetting=%d " +
                     "where GuildID=%d", guildSettings.getOwnerID(),guildSettings.getPrefix(),guildSettings.getLogChannelID(),guildSettings.getMuteRoleID(),
                     guildSettings.getEmbedFilterSetting(),guildSettings.getWelcomeMessageSetting(),guildSettings.getGuildID()));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return 0;
+    }
+
+    public Integer insertGuild(Long guildID, Long guildOwnerID) throws SQLException {
+
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("INSERT INTO Guilds SET GuildID=%d, OwnerID=%d", guildID,guildOwnerID));
             return st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
