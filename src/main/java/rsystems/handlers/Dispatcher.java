@@ -50,6 +50,7 @@ public class Dispatcher extends ListenerAdapter {
         registerCommand(new ColorRole());
         registerCommand(new Help());
         registerCommand(new ForceDisconnect());
+        registerCommand(new Leave());
 
     }
 
