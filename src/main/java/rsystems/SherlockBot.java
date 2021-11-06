@@ -45,7 +45,7 @@ public class SherlockBot {
                 .setChunkingFilter(ChunkingFilter.ALL)
                 .build();
 
-        api.addEventListener(new GuildMessageReceived());
+        //api.addEventListener(new GuildMessageReceived());
         //api.addEventListener(new JoinGuild());
         api.addEventListener(dispatcher = new Dispatcher());
         api.addEventListener(new GuildBanEventListener());
@@ -55,6 +55,7 @@ public class SherlockBot {
 
         try{
             api.awaitReady();
+            api.awaitStatus(JDA.Status.CONNECTED);
 
             jda = api;
             bot = api.getSelfUser();

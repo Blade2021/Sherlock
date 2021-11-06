@@ -2,13 +2,13 @@ package rsystems.handlers;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.utils.TimeFormat;
 import rsystems.Config;
 import rsystems.SherlockBot;
 import rsystems.commands.botManager.ForceDisconnect;
@@ -22,7 +22,9 @@ import rsystems.objects.Command;
 
 import java.awt.*;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -95,10 +97,30 @@ public class Dispatcher extends ListenerAdapter {
                             }
                         }
                     }
+
+                    //SELF ROLES
+                    if (SherlockBot.database.getTableCount(event.getGuild().getIdLong(), "SelfRoles") > 0) {
+
+                        Map<String, Long> guildSelfRoleMap = SherlockBot.database.getGuildSelfRoles(event.getGuild().getIdLong());
+
+                        //ITERATE THROUGH GUILD SELF ROLE MAP
+                        for (Map.Entry<String, Long> entry : guildSelfRoleMap.entrySet()) {
+
+                            if (entry.getKey().equalsIgnoreCase(message.substring(prefix.length()))) {
+                                //ENTRY FOUND
+                                Long roleID = entry.getValue();
+                                handleSelfRoleEvent(event, roleID);
+                                return;
+                            }
+                        }
+                    }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+        } else {
+
+            executeCommand(message,event);
         }
     }
 
@@ -220,6 +242,110 @@ public class Dispatcher extends ListenerAdapter {
         });
     }
 
+    private void executeCommand(final String message,
+                                final GuildMessageReceivedEvent event) {
+        this.pool.submit(() ->
+        {
+
+            //Check for Guild invites
+            if (event.getMessage().getInvites().size() > 0) {
+                try {
+                    List<Long> whiteListedGuilds = SherlockBot.database.getLongMultiple("InviteWhitelist", "TargetGuildID", "ChildGuildID", event.getGuild().getIdLong());
+
+                    for(String code:event.getMessage().getInvites()){
+                        Invite.resolve(SherlockBot.jda,code).queue(resolvedInvite -> {
+                            Long targetGuildID = resolvedInvite.getGuild().getIdLong();
+                            if((event.getGuild().getIdLong() == targetGuildID) || (whiteListedGuilds.contains(targetGuildID))){
+                                // ID is ok
+                            } else {
+                                EmbedBuilder builder = new EmbedBuilder();
+                                builder.setTitle("Discord Link Detection");
+                                builder.setDescription("User posted unauthorized discord link:\n" + resolvedInvite.getUrl());
+                                builder.setColor(Color.yellow);
+                                if(event.getMessage().getMember().getAsMention() != null){
+                                    builder.addField("User:",String.format(event.getMessage().getMember().getAsMention() + "\n%s\n%s",event.getAuthor().getAsTag(),event.getAuthor().getId()),true);
+                                } else {
+                                    builder.addField("User:", String.format("n%s\n%s", event.getAuthor().getAsTag(), event.getAuthor().getId()), true);
+                                }
+                                builder.addField("Target Guild:",String.format("%s\n%d",resolvedInvite.getGuild().getName(),resolvedInvite.getGuild().getIdLong()),true);
+                                builder.setTimestamp(Instant.now());
+
+                                LogMessage.sendLogMessage(event.getGuild().getIdLong(),builder.build());
+
+                                builder.clear();
+
+                                event.getMessage().delete().reason("User posted discord invite link").queue(DeleteSuccess -> {
+
+                                    EmbedBuilder embedBuilder = new EmbedBuilder();
+                                    embedBuilder.setDescription("Sorry, Only authorized Discord servers can have invite links posted here.  Please refrain from posting any other invite links as an automatic punishment will take place.");
+                                    embedBuilder.setColor(Color.yellow);
+                                    embedBuilder.setFooter("This action has been logged");
+                                    event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
+                                    embedBuilder.clear();
+                                });
+                            }
+                        });
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                return;
+            }
+
+
+            // SPAM MONITORING
+            event.getChannel().getHistoryBefore(event.getMessage(), 12).queue(messageHistory -> {
+
+                ArrayList<String> messages = new ArrayList<>();
+                for (Message m : messageHistory.getRetrievedHistory()) {
+
+                    if (m.getAuthor().isBot()) {
+                        continue;
+                    }
+
+                    if (m.getContentRaw().equalsIgnoreCase(event.getMessage().getContentRaw())) {
+                        if (m.getAuthor().getIdLong() == event.getAuthor().getIdLong()) {
+                            messages.add(m.getId());
+                        }
+                    }
+
+                    if (messages.size() >= 3) {
+                        messages.add(event.getMessageId());
+                        event.getChannel().purgeMessagesById(messages);
+
+                        if (SherlockBot.guildMap.get(event.getGuild().getIdLong()).getLogChannelID() != null) {
+                            EmbedBuilder builder = new EmbedBuilder();
+                            builder.setTitle("Spam Detection - " + event.getAuthor().getAsTag())
+                                    .setDescription(String.format("`Message:`\n%s\n\n" + TimeFormat.RELATIVE.now(), m.getContentRaw()));
+                            builder.addField("User:", event.getAuthor().getAsMention(), false);
+                            builder.setFooter(String.format("Tag: %s | ID: %s", event.getAuthor().getAsTag(), event.getAuthor().getId()));
+                            builder.setColor(Color.decode("#FFCC37"));
+
+                            LogMessage.sendLogMessage(event.getGuild().getIdLong(), builder.build());
+
+                            builder.clear();
+                        }
+
+                        EmbedBuilder notification = new EmbedBuilder();
+                        notification.setTimestamp(Instant.now())
+                                .setTitle("Spam Detection")
+                                .setDescription(String.format("%s has been muted for 1 minute\n\n", event.getMember().getEffectiveName()))
+                                .addField("Reason:", "Similar-Messages / Spam", false)
+                                .setFooter(String.format("%s | %s", event.getAuthor().getAsTag(), event.getAuthor().getId()));
+                        notification.setColor(Color.decode("#9837FF"));
+
+                        event.getChannel().sendMessageEmbeds(notification.build()).queue();
+                        notification.clear();
+                        break;
+                    }
+                }
+            });
+
+        });
+
+        }
+
     private String removePrefix(final String commandName, final String prefix, String content) {
         content = content.substring(commandName.length() + prefix.length());
         if (content.startsWith(" "))
@@ -320,6 +446,30 @@ public class Dispatcher extends ListenerAdapter {
 
             embedBuilder.clear();
         });
+    }
+
+    private void handleSelfRoleEvent(final GuildMessageReceivedEvent event, final Long roleID) {
+
+        Role role = event.getGuild().getRoleById(roleID);
+        if (role != null) {
+
+            try {
+
+                if (event.getMember().getRoles().contains(role)) {
+                    event.getGuild().removeRoleFromMember(event.getMember().getIdLong(), role).reason("Requested via SelfRole").queue(success -> {
+                        event.getMessage().addReaction("\uD83D\uDC4D ").queue();
+                    });
+                } else {
+                    event.getGuild().addRoleToMember(event.getMember().getIdLong(), role).reason("Requested via SelfRole").queue(success -> {
+                        event.getMessage().addReaction("\uD83D\uDC4D ").queue();
+                    });
+                }
+
+            } catch (PermissionException permissionException) {
+                event.getMessage().reply("Missing Permissions: " + permissionException.getPermission().toString()).queue();
+                event.getMessage().addReaction("⚠").queue();
+            }
+        }
     }
 
 }
