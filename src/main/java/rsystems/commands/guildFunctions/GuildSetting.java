@@ -98,8 +98,8 @@ public class GuildSetting extends Command {
 
     private void registerLogChannel(TextChannel previousLogChannel, TextChannel logChannel){
 
-        if(previousLogChannel.getIdLong() != logChannel.getIdLong()) {
-            if (previousLogChannel != null) {
+        if((previousLogChannel != null) && (previousLogChannel.getIdLong() != logChannel.getIdLong())) {
+
                 previousLogChannel.retrieveWebhooks().queue(webhooks -> {
 
                     Iterator it = webhooks.iterator();
