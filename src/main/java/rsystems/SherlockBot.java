@@ -48,10 +48,11 @@ public class SherlockBot {
         //api.addEventListener(new GuildMessageReceived());
         //api.addEventListener(new JoinGuild());
         api.addEventListener(dispatcher = new Dispatcher());
-        api.addEventListener(new GuildBanEventListener());
+        //api.addEventListener(new GuildBanEventListener());
         api.addEventListener(new GuildChannelEventListener());
         api.addEventListener(new GuildStateListener());
         api.addEventListener(new GuildNicknameListener());
+        api.addEventListener(new GuildMemberEvents());
 
         try{
             api.awaitReady();
@@ -80,6 +81,10 @@ public class SherlockBot {
         Timer timer = new Timer();
         //timer.scheduleAtFixedRate(new ThreeMinute(), 60*1000,60*1000);
 
+    }
+
+    public static GuildSettings getGuildSettings(final Long guildID){
+        return guildMap.get(guildID);
     }
 
 }

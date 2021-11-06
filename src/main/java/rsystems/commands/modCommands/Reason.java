@@ -57,7 +57,7 @@ public class Reason extends Command {
                                 if(reasonFieldIndex > 0) {
                                     builder.getFields().set(reasonFieldIndex, new MessageEmbed.Field("Reason", reason, false));
                                 }
-                                success.editMessage(builder.build()).queue();
+                                success.editMessageEmbeds(builder.build()).queue();
                             }
                         });
                     }

@@ -227,6 +227,30 @@ public class SQLHandler {
         return output;
     }
 
+    /**
+     *
+     * @param tableName
+     * @param columnName
+     * @param identifierColumn
+     * @param identifier
+     * @param value
+     * @return
+     */
+    public int putValue(String tableName, String columnName, String identifierColumn, int identifier, Long value) {
+        int output = 0;
+        try {
+            Connection connection = pool.getConnection();
+
+            Statement st = connection.createStatement();
+            st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
+            output = st.getUpdateCount();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return output;
+    }
+
     public int putValueNull(String tableName, String columnName, String identifierColumn, Long identifier) {
         int output = 0;
         try {
