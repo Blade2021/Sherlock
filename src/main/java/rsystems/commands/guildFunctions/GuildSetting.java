@@ -87,6 +87,7 @@ public class GuildSetting extends Command {
             if(pushUpdate) {
                 if (SherlockBot.database.updateGuild(SherlockBot.guildMap.get(event.getGuild().getIdLong())) < 1) {
                     //error
+                    System.out.println("error writing log channel");
                 } else {
                     message.addReaction("\uD83D\uDCE8").queue();
                 }
@@ -112,7 +113,7 @@ public class GuildSetting extends Command {
                         }
                     }
                 });
-            }
+
         }
 
         logChannel.retrieveWebhooks().queue(webhooks -> {
