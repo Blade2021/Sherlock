@@ -37,7 +37,7 @@ public class GuildSetting extends Command {
                 if(message.getMentionedChannels().size() > 0){
                     final TextChannel logChannel = message.getMentionedChannels().get(0);
                     if(logChannel.canTalk()){
-                        SherlockBot.guildMap.get(event.getGuild().getIdLong()).setLogChannelID(event.getChannel().getIdLong());
+                        SherlockBot.guildMap.get(event.getGuild().getIdLong()).setLogChannelID(logChannel.getIdLong());
                         message.addReaction("✅").queue();
 
                         if(event.getGuild().getTextChannelById(previousLogChannelID) != null){
