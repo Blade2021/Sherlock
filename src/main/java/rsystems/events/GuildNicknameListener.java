@@ -17,7 +17,7 @@ public class GuildNicknameListener extends ListenerAdapter {
                 return;
             } else {
 
-                if ((event.getUser().getIdLong() == SherlockBot.jda.getSelfUser().getIdLong()) && (!event.getNewNickname().equalsIgnoreCase(SherlockBot.bot.getName()))) {
+                if ((event.getUser().getIdLong() == SherlockBot.jda.getSelfUser().getIdLong()) && (event.getNewNickname() != null)) {
                     event.getGuild().retrieveAuditLogs().limit(5).type(ActionType.MEMBER_UPDATE).queueAfter(1, TimeUnit.SECONDS, success -> {
 
                         for (AuditLogEntry logEntry : success) {
