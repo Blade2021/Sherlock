@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.TimeFormat;
@@ -23,12 +24,9 @@ import rsystems.objects.Command;
 import java.awt.*;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.*;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class Dispatcher extends ListenerAdapter {
 
@@ -72,7 +70,7 @@ public class Dispatcher extends ListenerAdapter {
         final String guildPrefix = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix();
         final boolean defaultPrefixFound = message.toLowerCase().startsWith(SherlockBot.defaultPrefix.toLowerCase());
 
-        if (defaultPrefixFound || ((guildPrefix != null) && (message.toLowerCase().startsWith(guildPrefix.toLowerCase())))) {
+        if ((defaultPrefixFound) || ((guildPrefix != null) && (message.toLowerCase().startsWith(guildPrefix.toLowerCase())))) {
             //PREFIX FOUND
 
             String prefix;
@@ -311,10 +309,25 @@ public class Dispatcher extends ListenerAdapter {
                         }
                     }
 
+                    //SPAM DETECTED
                     if (messages.size() >= 3) {
                         messages.add(event.getMessageId());
                         event.getChannel().purgeMessagesById(messages);
 
+                        Role muteRole = event.getGuild().getRoleById(SherlockBot.guildMap.get(event.getGuild().getIdLong()).getMuteRoleID());
+                        if(muteRole != null) {
+                            event.getGuild().addRoleToMember(event.getMember(),muteRole).reason("Spam Detected").queue(Success -> {
+                                try {
+                                    event.getGuild().removeRoleFromMember(event.getMember(), muteRole).reason("Mute Expiration").queueAfter(60, TimeUnit.SECONDS,null,failure -> {
+                                        System.out.println("Couldn't unmute user");
+                                    });
+                                } catch(ErrorResponseException e){
+                                    // do nothing
+                                }
+                            });
+                        }
+
+                        // Log message to log channel
                         if (SherlockBot.guildMap.get(event.getGuild().getIdLong()).getLogChannelID() != null) {
                             EmbedBuilder builder = new EmbedBuilder();
                             builder.setTitle("Spam Detection - " + event.getAuthor().getAsTag())
