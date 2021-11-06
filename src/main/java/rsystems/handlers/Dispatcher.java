@@ -53,6 +53,7 @@ public class Dispatcher extends ListenerAdapter {
         registerCommand(new Help());
         registerCommand(new ForceDisconnect());
         registerCommand(new Leave());
+        registerCommand(new Unban());
 
     }
 
