@@ -169,4 +169,16 @@ public abstract class Command {
     public String[] getAliases(){
         return new String[0];
     }
+
+    protected Long getLongFromArgument(String arg){
+        Long output = null;
+
+        try{
+            output = Long.parseLong(arg);
+        }catch(NumberFormatException e){
+            // do nothing
+        }
+
+        return output;
+    }
 }
