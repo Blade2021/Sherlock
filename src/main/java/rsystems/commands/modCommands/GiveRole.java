@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
-import rsystems.handlers.GrabRoleID;
 import rsystems.objects.Command;
 
 import java.util.ArrayList;
@@ -31,41 +30,70 @@ public class GiveRole extends Command {
 
     @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, GuildMessageReceivedEvent event) {
-        if (message.getMentionedMembers().size() == 0) {
-            // DON'T ALLOW COMMAND TO BE USED WITHOUT MENTIONABLES
-            // Mentionables is now a word.  If you ever come across this, let me know.  I'll give you a gold star.
 
-            System.out.println("I do nothing");
+        String[] args = content.split("\\s+");
 
-        } else {
-            // MENTIONABLES WERE FOUND!  HOORAY!
+        if (args.length >= 2) {
 
-            List<Member> memberList = new ArrayList<>(message.getMentionedMembers());
-            Long roleID = GrabRoleID.getRoleIDFromMessage(message, content);
+            List<Member> memberList = new ArrayList<>();
+            String modifiedContent = content;
+            Long roleID = null;
 
-            if ((roleID != null) && (event.getGuild().getRoleById(roleID) != null)) {
+            if (message.getMentionedMembers().size() == 0) {
+                // DON'T ALLOW COMMAND TO BE USED WITHOUT MENTIONABLES
+                // Mentionables is now a word.  If you ever come across this, let me know.  I'll give you a gold star.
+
+                Long memberID = getLongFromArgument(args[0]);
+                if ((memberID != null) && (event.getGuild().getMemberById(memberID) != null)) {
+                    memberList.add(event.getGuild().getMemberById(memberID));
+                } else {
+                    reply(event, "Could not find member with ID: `" + memberID + "`");
+                    //throw new NumberFormatException();
+                }
+
+                roleID = getLongFromArgument(args[1]);
+
+            } else {
+                // MENTIONABLES WERE FOUND!  HOORAY!
+
+                memberList = message.getMentionedMembers();
+                for (Member member : message.getMentionedMembers()) {
+                    modifiedContent = modifiedContent.replaceAll("<@!" + member.getId() + ">", "");
+                }
+
+                modifiedContent = modifiedContent.trim();
+
+                if (modifiedContent.contains(" ")) {
+                    roleID = getLongFromArgument(modifiedContent.substring(0, modifiedContent.indexOf(" ")));
+                } else {
+                    roleID = getLongFromArgument(modifiedContent);
+                }
+
+
+            }
+
+            if ((roleID != null) && (event.getGuild().getRoleById(roleID) != null) && (memberList.size() > 0)) {
                 // Was Role successfully found?
 
                 Role role = event.getGuild().getRoleById(roleID);
 
                 for (Member member : memberList) {
                     try {
-                        event.getGuild().addRoleToMember(member.getId(), role).reason(String.format("Requested by %s", message.getAuthor().getAsTag())).queueAfter(5, TimeUnit.SECONDS, Success -> {
+                        event.getGuild().addRoleToMember(member.getId(), role).reason(String.format("Requested by %s", message.getAuthor().getAsTag())).queueAfter(3, TimeUnit.SECONDS, Success -> {
                             message.addReaction("✅").queue();
                         });
                     } catch (PermissionException e) {
-                        reply(event,String.format("Encountered Permission error: %s while attempting to run command.",e.getPermission()));
+                        reply(event, String.format("Encountered Permission error: %s while attempting to run command.", e.getPermission()));
                         break;
                     }
                 }
-            } else {
-                reply(event,"Role was not found");
             }
         }
+
     }
 
     @Override
     public String getHelp() {
-        return null;
+        return "{prefix}{command} `(Mention Members)` `(RoleID)`\n{prefix}{command} `(MemberID)` `(RoleID)`\n\nGive a role to a member or members of the server.";
     }
 }
