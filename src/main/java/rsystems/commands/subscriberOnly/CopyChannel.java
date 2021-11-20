@@ -1,5 +1,6 @@
 package rsystems.commands.subscriberOnly;
 
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
@@ -9,6 +10,12 @@ import rsystems.objects.Command;
 import java.sql.SQLException;
 
 public class CopyChannel extends Command {
+
+    @Override
+    public Permission getDiscordPermission() {
+        return Permission.MANAGE_CHANNEL;
+    }
+
     @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {
 
