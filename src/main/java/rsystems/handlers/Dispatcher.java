@@ -336,6 +336,17 @@ public class Dispatcher extends ListenerAdapter {
                                     // do nothing
                                 }
                             });
+
+                            EmbedBuilder notification = new EmbedBuilder();
+                            notification.setTimestamp(Instant.now())
+                                    .setTitle("Spam Detection")
+                                    .setDescription(String.format("%s has been muted for 1 minute\n\n", event.getMember().getEffectiveName()))
+                                    .addField("Reason:", "Similar-Messages / Spam", false)
+                                    .setFooter(String.format("%s | %s", event.getAuthor().getAsTag(), event.getAuthor().getId()));
+                            notification.setColor(Color.decode("#9837FF"));
+
+                            event.getChannel().sendMessageEmbeds(notification.build()).queue();
+                            notification.clear();
                         }
 
                         // Log message to log channel
@@ -351,17 +362,6 @@ public class Dispatcher extends ListenerAdapter {
 
                             builder.clear();
                         }
-
-                        EmbedBuilder notification = new EmbedBuilder();
-                        notification.setTimestamp(Instant.now())
-                                .setTitle("Spam Detection")
-                                .setDescription(String.format("%s has been muted for 1 minute\n\n", event.getMember().getEffectiveName()))
-                                .addField("Reason:", "Similar-Messages / Spam", false)
-                                .setFooter(String.format("%s | %s", event.getAuthor().getAsTag(), event.getAuthor().getId()));
-                        notification.setColor(Color.decode("#9837FF"));
-
-                        event.getChannel().sendMessageEmbeds(notification.build()).queue();
-                        notification.clear();
                         break;
                     }
                 }
