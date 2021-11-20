@@ -1,5 +1,6 @@
 package rsystems.commands.guildFunctions;
 
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
@@ -14,6 +15,10 @@ public class GuildSetting extends Command {
 
     private static final String[] ALIASES = new String[] {"gs","guild","setting"};
 
+    @Override
+    public Permission getDiscordPermission() {
+        return Permission.ADMINISTRATOR;
+    }
 
     @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {

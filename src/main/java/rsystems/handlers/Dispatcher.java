@@ -17,6 +17,7 @@ import rsystems.commands.botManager.Test;
 import rsystems.commands.guildFunctions.*;
 import rsystems.commands.modCommands.*;
 import rsystems.commands.publicCommands.Help;
+import rsystems.commands.publicCommands.Info;
 import rsystems.commands.subscriberOnly.ColorRole;
 import rsystems.commands.subscriberOnly.CopyChannel;
 import rsystems.objects.Command;
@@ -32,6 +33,7 @@ public class Dispatcher extends ListenerAdapter {
 
     private final Set<Command> commands = ConcurrentHashMap.newKeySet();
     private final ExecutorService pool = Executors.newCachedThreadPool(newThreadFactory("command-runner", false));
+    private final ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(10);
 
     public Dispatcher() {
 
@@ -52,6 +54,7 @@ public class Dispatcher extends ListenerAdapter {
         registerCommand(new ForceDisconnect());
         registerCommand(new Leave());
         registerCommand(new Unban());
+        registerCommand(new Info());
 
     }
 
@@ -297,6 +300,10 @@ public class Dispatcher extends ListenerAdapter {
             }
 
 
+            if(event.getMessage().getType().equals(MessageType.GUILD_MEMBER_JOIN)){
+                return;
+            }
+
             // SPAM MONITORING
             event.getChannel().getHistoryBefore(event.getMessage(), 12).queue(messageHistory -> {
 
@@ -324,7 +331,7 @@ public class Dispatcher extends ListenerAdapter {
                                 try {
                                     event.getGuild().removeRoleFromMember(event.getMember(), muteRole).reason("Mute Expiration").queueAfter(60, TimeUnit.SECONDS,null,failure -> {
                                         System.out.println("Couldn't unmute user");
-                                    });
+                                    },scheduledExecutorService);
                                 } catch(ErrorResponseException e){
                                     // do nothing
                                 }
@@ -476,7 +483,7 @@ public class Dispatcher extends ListenerAdapter {
                     .addField("Exception:",exception.toString(),false)
                     .setDescription(exception.getCause().getMessage().substring(0,exception.getCause().getMessage().indexOf(":")));
 
-            channel.sendMessage(embedBuilder.build()).queue();
+            channel.sendMessageEmbeds(embedBuilder.build()).queue();
 
             embedBuilder.clear();
         });

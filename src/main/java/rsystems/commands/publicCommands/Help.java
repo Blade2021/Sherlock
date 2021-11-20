@@ -55,7 +55,9 @@ public class Help extends Command {
                         if(c.getDiscordPermission() != null){
                             builder.addField("Discord Perm:",c.getDiscordPermission().getName(),true);
                         } else {
-                            builder.addBlankField(true);
+                            if(c.getPermissionIndex() != null) {
+                                builder.addBlankField(true);
+                            }
                         }
 
                         if(c.getPermissionIndex() != null){
@@ -103,8 +105,8 @@ public class Help extends Command {
     public String getHelp() {
         return "Prints helpful information about a command.\n\n" +
                 "**Helpful Notes**:\n" +
-                "All required arguments to a command are wrapped in \"[ ]\"\n" +
-                "Any \"optional\" arguments are wrapped in \"{ }\"\n\n" +
+                "All required arguments to a command are wrapped in \"( )\"\n" +
+                "Any \"optional\" arguments are wrapped in \"[ ]\"\n\n" +
                 "Please use this help function as needed to understand what each command does.";
     }
 }

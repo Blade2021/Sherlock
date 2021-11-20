@@ -6,7 +6,7 @@ import rsystems.SherlockBot;
 
 import java.sql.SQLException;
 
-public class GuildChannelEventListener extends ListenerAdapter {
+public class GuildChannelEvents extends ListenerAdapter {
 
     @Override
     public void onTextChannelDelete(TextChannelDeleteEvent event) {

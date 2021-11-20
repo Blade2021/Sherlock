@@ -10,6 +10,12 @@ import rsystems.objects.Command;
 import java.sql.SQLException;
 
 public class Reason extends Command {
+
+    @Override
+    public Integer getPermissionIndex() {
+        return 32;
+    }
+
     @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {
 

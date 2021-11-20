@@ -1,5 +1,6 @@
 package rsystems.commands.modCommands;
 
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -10,6 +11,12 @@ import rsystems.objects.Command;
 import java.sql.SQLException;
 
 public class Unban extends Command {
+
+    @Override
+    public Permission getDiscordPermission() {
+        return Permission.BAN_MEMBERS;
+    }
+
     @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {
 

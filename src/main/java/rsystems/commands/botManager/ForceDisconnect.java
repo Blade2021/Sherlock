@@ -12,6 +12,12 @@ import rsystems.objects.Command;
 import java.sql.SQLException;
 
 public class ForceDisconnect extends Command {
+
+    @Override
+    public boolean isOwnerOnly() {
+        return true;
+    }
+
     @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {
         if(sender.getIdLong() == Long.parseLong(Config.get("OWNER_ID"))){

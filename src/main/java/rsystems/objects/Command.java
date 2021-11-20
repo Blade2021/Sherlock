@@ -20,9 +20,11 @@ public abstract class Command {
     public void setPermissionIndex(int permissionIndex) {
         this.permissionIndex = permissionIndex;
     }
-
     public Permission getDiscordPermission(){
         return null;
+    }
+    public boolean isOwnerOnly(){
+        return false;
     }
 
     private static final FixedSizeCache<Long, TLongSet> MESSAGE_LINK_MAP = new FixedSizeCache<>(20);
