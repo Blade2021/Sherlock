@@ -1113,11 +1113,12 @@ public class SQLHandler {
     }
 
     // INSERT A BADWORD INTO THE DATABASE
-    public Map<Long,Integer> getModRoles(Long guildID) {
+    public Map<Long,Integer> getModRoles(Long guildID) throws SQLException {
         Map<Long,Integer> resultSet = new HashMap<>();
 
+        Connection connection = pool.getConnection();
+
         try {
-            Connection connection = pool.getConnection();
             Statement st = connection.createStatement();
 
             ResultSet rs = st.executeQuery("SELECT ModRoleID,Permissions FROM ModRoleTable WHERE ChildGuildID = " + guildID);
@@ -1126,6 +1127,8 @@ public class SQLHandler {
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+        } finally {
+            connection.close();
         }
         return resultSet;
     }
