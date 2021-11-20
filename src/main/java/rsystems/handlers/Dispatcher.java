@@ -172,7 +172,11 @@ public class Dispatcher extends ListenerAdapter {
             if ((c.getPermissionIndex() == null) && (c.getDiscordPermission() == null)) {
                 authorized = true;
             } else {
-                authorized = checkAuthorized(c, event.getGuild().getIdLong(), event.getMember(), c.getPermissionIndex());
+                try {
+                    authorized = isAuthorized(c, event.getGuild().getIdLong(), event.getMember(), c.getPermissionIndex());
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
 
             if (authorized) {
@@ -381,8 +385,20 @@ public class Dispatcher extends ListenerAdapter {
         Command.removeResponses(event.getChannel(), event.getMessageIdLong());
     }
 
-    public Boolean checkAuthorized(final Command c, final Long guildID, final Member member, final Integer permissionIndex){
+    public static Boolean isAuthorized(final Command c, final Long guildID, final Member member, final Integer permissionIndex) throws SQLException {
         boolean authorized = false;
+
+        if(c.isOwnerOnly()){
+            if(member.getIdLong() == SherlockBot.botOwnerID){
+
+                System.out.println(member.getIdLong());
+                System.out.println(SherlockBot.botOwnerID);
+
+                return true;
+            } else {
+                return false;
+            }
+        }
 
         if(member.hasPermission(Permission.ADMINISTRATOR)){
             return true;
@@ -392,6 +408,10 @@ public class Dispatcher extends ListenerAdapter {
             if(member.getPermissions().contains(c.getDiscordPermission())){
                 return true;
             }
+        }
+
+        if ((c.getDiscordPermission() == null) && (c.getPermissionIndex() == null)) {
+            return true;
         }
 
 
