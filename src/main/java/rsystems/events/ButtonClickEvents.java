@@ -24,7 +24,25 @@ public class ButtonClickEvents extends ListenerAdapter {
         } else if (event.getComponentId().equals("previous")){
             event.deferReply(true).queue();
             event.getMessage().delete().queue();
-        }
+        } else if (event.getComponentId().startsWith("unban:")){
+            //event.deferReply(true).queue();
+            event.deferEdit().queue();
+
+            String userID = event.getButton().getId().substring(6);
+
+                    event.getGuild().unban(userID).reason("Requested by " + event.getInteraction().getMember().getUser().getAsTag()).queue(success -> {
+
+                        if(event.isAcknowledged()){
+                            event.getHook().editOriginal(String.format("%s has been unbanned",userID)).queue();
+                        }
+                        event.editButton(event.getButton().asDisabled()).queue();
+                    }, failure -> {
+                        event.getHook().editOriginal("User is not on the ban list").queue();
+                        event.editButton(event.getButton().asDisabled()).queue();
+                    });
+                }
+
+
     }
 
 }

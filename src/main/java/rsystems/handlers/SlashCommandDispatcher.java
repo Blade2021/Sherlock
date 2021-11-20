@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
+import rsystems.commands.slashCommands.Ban;
 import rsystems.commands.slashCommands.Commands;
 import rsystems.objects.Command;
 import rsystems.objects.SlashCommand;
@@ -33,6 +34,7 @@ public class SlashCommandDispatcher extends ListenerAdapter {
         registerCommand(new Apple());
         registerCommand(new CopyChannel());
         registerCommand(new Commands());
+        registerCommand(new Ban());
     }
 
     public Set<SlashCommand> getCommands() {
