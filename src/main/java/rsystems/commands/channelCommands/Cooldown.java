@@ -3,18 +3,12 @@ package rsystems.commands.channelCommands;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import rsystems.objects.Command;
 
 public class Cooldown extends Command {
     @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {
-
-    }
-
-    @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, GuildMessageReceivedEvent event) {
+    public void dispatch(User sender, MessageChannel channel, Message message, String content, MessageReceivedEvent event) {
 
     }
 

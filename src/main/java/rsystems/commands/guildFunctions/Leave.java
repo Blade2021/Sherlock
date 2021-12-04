@@ -4,8 +4,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import rsystems.SherlockBot;
 import rsystems.objects.Command;
 
@@ -19,12 +18,7 @@ public class Leave extends Command {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {
-
-    }
-
-    @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, GuildMessageReceivedEvent event) throws SQLException {
+    public void dispatch(User sender, MessageChannel channel, Message message, String content, MessageReceivedEvent event) throws SQLException {
 
         Long muteRoleID = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getMuteRoleID();
 

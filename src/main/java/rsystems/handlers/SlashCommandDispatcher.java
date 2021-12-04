@@ -5,15 +5,12 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
-import rsystems.commands.slashCommands.Ban;
-import rsystems.commands.slashCommands.Commands;
+import rsystems.commands.slashCommands.*;
 import rsystems.objects.Command;
 import rsystems.objects.SlashCommand;
-import rsystems.commands.slashCommands.Apple;
-import rsystems.commands.slashCommands.CopyChannel;
 
 import java.awt.*;
 import java.sql.SQLException;
@@ -35,6 +32,7 @@ public class SlashCommandDispatcher extends ListenerAdapter {
         registerCommand(new CopyChannel());
         registerCommand(new Commands());
         registerCommand(new Ban());
+        registerCommand(new GuildSetting());
     }
 
     public Set<SlashCommand> getCommands() {
@@ -188,7 +186,7 @@ public class SlashCommandDispatcher extends ListenerAdapter {
         return authorized;
     }
 
-    private void messageOwner(final GuildMessageReceivedEvent event, final Command c, final Exception exception){
+    private void messageOwner(final MessageReceivedEvent event, final Command c, final Exception exception){
 
         SherlockBot.jda.getUserById(SherlockBot.botOwnerID).openPrivateChannel().queue((channel) -> {
             EmbedBuilder embedBuilder = new EmbedBuilder()

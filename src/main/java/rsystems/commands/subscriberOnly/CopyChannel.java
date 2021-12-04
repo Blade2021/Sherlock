@@ -2,8 +2,7 @@ package rsystems.commands.subscriberOnly;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import rsystems.SherlockBot;
 import rsystems.objects.Command;
 
@@ -17,16 +16,11 @@ public class CopyChannel extends Command {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {
-
-    }
-
-    @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, GuildMessageReceivedEvent event) throws SQLException {
+    public void dispatch(User sender, MessageChannel channel, Message message, String content, MessageReceivedEvent event) throws SQLException {
 
         if(SherlockBot.database.getInt("SubscriberTable","SubLevel","ChildGuildID",event.getGuild().getIdLong()) >= 1){
 
-            TextChannel targetChannel = event.getChannel();
+            TextChannel targetChannel = event.getTextChannel();
             if(message.getMentionedChannels().size() > 0){
                 if(message.getMentionedChannels().get(0) != null){
                     targetChannel = message.getMentionedChannels().get(0);
@@ -43,7 +37,7 @@ public class CopyChannel extends Command {
                     for(Webhook hook:webhooks){
                         if(hook.getType().getKey() == 2){
                             TextChannel hookChannel = hook.getGuild().getTextChannelById(hook.getSourceChannel().getIdLong());
-                            hookChannel.follow(success).queue();
+                            //hookChannel.follow(success).queue();
                         }
                     }
                 }));

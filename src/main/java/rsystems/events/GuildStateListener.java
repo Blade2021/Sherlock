@@ -3,12 +3,16 @@ package rsystems.events;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.ThreadChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.UnavailableGuildLeaveEvent;
+import net.dv8tion.jda.api.events.thread.ThreadRevealedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.jetbrains.annotations.NotNull;
 import rsystems.SherlockBot;
 import rsystems.handlers.ErrorReportHandler;
 import rsystems.objects.GuildSettings;
@@ -18,6 +22,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class GuildStateListener extends ListenerAdapter {
+
+    @Override
+    public void onChannelCreate(@NotNull ChannelCreateEvent event) {
+        if(event.getChannelType().isThread()){
+            ThreadChannel channel = (ThreadChannel) event.getChannel();
+            channel.join().queue();
+        }
+    }
+
+    @Override
+    public void onThreadRevealed(@NotNull ThreadRevealedEvent event) {
+        event.getThread().join().queue();
+    }
 
     @Override
     public void onUnavailableGuildLeave(UnavailableGuildLeaveEvent event) {
@@ -48,13 +65,13 @@ public class GuildStateListener extends ListenerAdapter {
                     SherlockBot.database.putValue("Guilds","MuteRoleID","GuildID",event.getGuild().getIdLong(),role.getIdLong());
 
                     ArrayList<Permission> mutePerms = new ArrayList<>();
-                    mutePerms.add(Permission.MESSAGE_WRITE);
+                    mutePerms.add(Permission.MESSAGE_SEND);
                     mutePerms.add(Permission.MESSAGE_ADD_REACTION);
                     mutePerms.add(Permission.VOICE_STREAM);
                     mutePerms.add(Permission.VOICE_SPEAK);
                     mutePerms.add(Permission.CREATE_INSTANT_INVITE);
-                    mutePerms.add(Permission.USE_PRIVATE_THREADS);
-                    mutePerms.add(Permission.USE_PUBLIC_THREADS);
+                    mutePerms.add(Permission.CREATE_PUBLIC_THREADS);
+                    mutePerms.add(Permission.MESSAGE_SEND_IN_THREADS);
 
                     for(Category category : event.getGuild().getCategories()){
                         try{

@@ -3,8 +3,7 @@ package rsystems.commands.modCommands;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import rsystems.SherlockBot;
@@ -29,12 +28,7 @@ public class GiveRole extends Command {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {
-
-    }
-
-    @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, GuildMessageReceivedEvent event) {
+    public void dispatch(User sender, MessageChannel channel, Message message, String content, MessageReceivedEvent event) {
 
         String[] args = content.split("\\s+");
 

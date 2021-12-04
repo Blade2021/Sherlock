@@ -5,8 +5,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import rsystems.handlers.LogMessage;
 import rsystems.objects.Command;
 
@@ -27,12 +26,7 @@ public class GuildSetting extends Command {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {
-
-    }
-
-    @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, GuildMessageReceivedEvent event) throws SQLException {
+    public void dispatch(User sender, MessageChannel channel, Message message, String content, MessageReceivedEvent event) throws SQLException {
         String[] args = content.split("\\s+");
 
         if (args.length >= 2) {
@@ -55,8 +49,8 @@ public class GuildSetting extends Command {
             } else if (args[1].equalsIgnoreCase("here")) {
                 //No verification required.  The channel obviously exists and the bot can obviously see it.
 
-                if (event.getChannel().canTalk()) {
-                    LogMessage.registerLogChannel(event.getGuild(), event.getChannel());
+                if (event.getTextChannel().canTalk()) {
+                    LogMessage.registerLogChannel(event.getGuild(), event.getTextChannel());
                     message.addReaction("✅").queue();
                     return;
                 }

@@ -4,8 +4,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import rsystems.SherlockBot;
 import rsystems.objects.Command;
 import rsystems.objects.InfractionObject;
@@ -22,12 +21,7 @@ public class Infraction extends Command {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {
-
-    }
-
-    @Override
-    public void dispatch(final User sender, final MessageChannel channel, final Message message, String content, final GuildMessageReceivedEvent event) throws SQLException {
+    public void dispatch(final User sender, final MessageChannel channel, final Message message, String content, final MessageReceivedEvent event) throws SQLException {
         Member offender = null;
         String[] args = content.split("\\s+");
 

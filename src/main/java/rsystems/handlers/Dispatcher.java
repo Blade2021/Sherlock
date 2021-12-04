@@ -3,9 +3,8 @@ package rsystems.handlers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -13,6 +12,7 @@ import net.dv8tion.jda.api.utils.TimeFormat;
 import rsystems.Config;
 import rsystems.SherlockBot;
 import rsystems.commands.botManager.ForceDisconnect;
+import rsystems.commands.botManager.Shutdown;
 import rsystems.commands.botManager.Test;
 import rsystems.commands.guildFunctions.*;
 import rsystems.commands.modCommands.*;
@@ -37,6 +37,7 @@ public class Dispatcher extends ListenerAdapter {
 
     public Dispatcher() {
 
+        registerCommand(new Shutdown());
         registerCommand(new SelfRole());
         registerCommand(new AutoRole());
         registerCommand(new GiveRole());
@@ -62,30 +63,32 @@ public class Dispatcher extends ListenerAdapter {
         return Collections.unmodifiableSet(new HashSet<>(this.commands));
     }
 
-    public void onGuildMessageReceived(final GuildMessageReceivedEvent event) {
+    @Override
+    public void onMessageReceived(MessageReceivedEvent event) {
 
+        //Ignore all bots
         if (event.getAuthor().isBot()) {
             return;
         }
 
-        final String defaultPrefix = Config.get("defaultPrefix");
-        final String message = event.getMessage().getContentRaw();
-        final String guildPrefix = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix();
-        final boolean defaultPrefixFound = message.toLowerCase().startsWith(SherlockBot.defaultPrefix.toLowerCase());
+        if(event.isFromGuild()){
+            final String defaultPrefix = Config.get("defaultPrefix");
+            final String message = event.getMessage().getContentRaw();
+            final String guildPrefix = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix();
+            final boolean defaultPrefixFound = message.toLowerCase().startsWith(SherlockBot.defaultPrefix.toLowerCase());
 
-        if ((defaultPrefixFound) || ((guildPrefix != null) && (message.toLowerCase().startsWith(guildPrefix.toLowerCase())))) {
-            //PREFIX FOUND
+            if(!isChannelIgnored(event.getGuild().getIdLong(), event.getChannel().getIdLong())) {
 
-            String prefix;
-            if (defaultPrefixFound) {
-                prefix = defaultPrefix;
-            } else {
-                prefix = guildPrefix;
-            }
+                //Look for a prefix at the BEGINNING of the message
+                if ((defaultPrefixFound) || ((guildPrefix != null) && (message.toLowerCase().startsWith(guildPrefix.toLowerCase())))) {
+                    //PREFIX FOUND
 
-            try {
-                if(SherlockBot.database.getLong("IgnoreChannelTable","ChannelID","ChildGuildID",event.getGuild().getIdLong(),"ChannelID",event.getChannel().getIdLong()) == null) {
-
+                    String prefix;
+                    if (defaultPrefixFound) {
+                        prefix = defaultPrefix;
+                    } else {
+                        prefix = guildPrefix;
+                    }
                     for (final Command c : this.getCommands()) {
                         if (message.toLowerCase().startsWith(prefix.toLowerCase() + c.getName().toLowerCase() + ' ') || message.equalsIgnoreCase(prefix + c.getName())) {
                             this.executeCommand(c, c.getName(), prefix, message, event);
@@ -100,61 +103,47 @@ public class Dispatcher extends ListenerAdapter {
                         }
                     }
 
-                    //SELF ROLES
-                    if (SherlockBot.database.getTableCount(event.getGuild().getIdLong(), "SelfRoles") > 0) {
+                    try {
+                        //SELF ROLES
+                        if (SherlockBot.database.getTableCount(event.getGuild().getIdLong(), "SelfRoles") > 0) {
 
-                        Map<String, Long> guildSelfRoleMap = SherlockBot.database.getGuildSelfRoles(event.getGuild().getIdLong());
+                            Map<String, Long> guildSelfRoleMap = SherlockBot.database.getGuildSelfRoles(event.getGuild().getIdLong());
 
-                        //ITERATE THROUGH GUILD SELF ROLE MAP
-                        for (Map.Entry<String, Long> entry : guildSelfRoleMap.entrySet()) {
+                            //ITERATE THROUGH GUILD SELF ROLE MAP
+                            for (Map.Entry<String, Long> entry : guildSelfRoleMap.entrySet()) {
 
-                            if (entry.getKey().equalsIgnoreCase(message.substring(prefix.length()))) {
-                                //ENTRY FOUND
-                                Long roleID = entry.getValue();
-                                handleSelfRoleEvent(event, roleID);
-                                return;
+                                if (entry.getKey().equalsIgnoreCase(message.substring(prefix.length()))) {
+                                    //ENTRY FOUND
+                                    Long roleID = entry.getValue();
+                                    handleSelfRoleEvent(event, roleID);
+                                    return;
+                                }
                             }
                         }
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
                     }
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        } else {
 
-            executeCommand(message,event);
-        }
-    }
-
-    @Override
-    public void onPrivateMessageReceived(final PrivateMessageReceivedEvent event) {
-
-        if (event.getAuthor().isBot()) {
-            return;
-        }
-
-        final Long authorID = event.getAuthor().getIdLong();
-
-        final String prefix = Config.get("defaultPrefix");
-        String message = event.getMessage().getContentRaw();
-
-        final MessageChannel channel = event.getChannel();
-
-        if (message.toLowerCase().startsWith(prefix.toLowerCase())) {
-            for (final Command c : this.getCommands()) {
-                if (message.toLowerCase().startsWith(prefix.toLowerCase() + c.getName().toLowerCase() + ' ') || message.equalsIgnoreCase(prefix + c.getName())) {
-                    this.executeCommand(c, c.getName(), prefix, message, event);
-                    return;
                 } else {
-                    for (final String alias : c.getAliases()) {
-                        if (message.toLowerCase().startsWith(prefix.toLowerCase() + alias.toLowerCase() + ' ') || message.equalsIgnoreCase(prefix + alias)) {
-                            this.executeCommand(c, alias, prefix, message, event);
-                            return;
-                        }
-                    }
+                    /*
+                    No command was found.
+                    No Self role triggers were found.
+                    Pass the event to the next series.
+                     */
+                    handleEvent(message, event);
                 }
             }
         }
+
+        else {
+
+            // Private Message
+
+            event.getMessage().reply("Sorry I haven't been taught how to reply to direct messages yet.  Try again later").queue();
+
+        }
+
+
     }
 
 
@@ -168,7 +157,7 @@ public class Dispatcher extends ListenerAdapter {
     }
 
     private void executeCommand(final Command c, final String alias, final String prefix, final String message,
-                                final GuildMessageReceivedEvent event) {
+                                final MessageReceivedEvent event) {
         this.pool.submit(() ->
         {
             boolean authorized = false;
@@ -195,17 +184,17 @@ public class Dispatcher extends ListenerAdapter {
                 } catch (final Exception e) {
                     e.printStackTrace();
                     event.getChannel().sendMessage("**There was an error processing your command!**").queue();
-                    messageOwner(event,c,e);
+                    messageOwner(event, c, e);
                 }
             } else {
 
                 StringBuilder errorString = new StringBuilder();
 
-                if(c.getPermissionIndex() != null){
+                if (c.getPermissionIndex() != null) {
                     errorString.append("Permission Index: ").append(c.getPermissionIndex()).append("\n");
                 }
 
-                if(c.getDiscordPermission() != null){
+                if (c.getDiscordPermission() != null) {
                     errorString.append("Discord Permission: ").append(c.getDiscordPermission().getName());
                 }
 
@@ -214,44 +203,15 @@ public class Dispatcher extends ListenerAdapter {
         });
     }
 
-    private void executeCommand(final Command c, final String alias, final String prefix, final String message,
-                                final PrivateMessageReceivedEvent event) {
+    private void handleEvent(final String message,
+                             final MessageReceivedEvent event) {
         this.pool.submit(() ->
         {
-            boolean authorized = false;
 
-            if(c.getPermissionIndex() == null){
-                authorized = true;
-            } else {
-                authorized = false;
+            // Filter out join messages
+            if(event.getMessage().getType().equals(MessageType.GUILD_MEMBER_JOIN)){
+                return;
             }
-
-            if (authorized) {
-
-                try {
-                    final String content = this.removePrefix(alias, prefix, message);
-                    c.dispatch(event.getAuthor(), event.getChannel(), event.getMessage(), content, event);
-
-                    //HiveBot.sqlHandler.logCommandUsage(c.getName());
-                } catch (final NumberFormatException numberFormatException) {
-                    numberFormatException.printStackTrace();
-                    //event.getMessage().reply("**ERROR:** Bad format received").queue();
-                    //messageOwner(numberFormatException, c, event);
-                } catch (final Exception e) {
-                    e.printStackTrace();
-                    event.getChannel().sendMessage("**There was an error processing your command!**").queue();
-                    //messageOwner(e, c, event);
-                }
-            } else {
-                event.getMessage().reply(String.format(event.getAuthor().getAsMention() + " You are not authorized for command: `%s`\nPermission Index: %d", c.getName(), c.getPermissionIndex())).queue();
-            }
-        });
-    }
-
-    private void executeCommand(final String message,
-                                final GuildMessageReceivedEvent event) {
-        this.pool.submit(() ->
-        {
 
             //Check for Guild invites
             if (event.getMessage().getInvites().size() > 0) {
@@ -296,11 +256,6 @@ public class Dispatcher extends ListenerAdapter {
                     e.printStackTrace();
                 }
 
-                return;
-            }
-
-
-            if(event.getMessage().getType().equals(MessageType.GUILD_MEMBER_JOIN)){
                 return;
             }
 
@@ -367,6 +322,34 @@ public class Dispatcher extends ListenerAdapter {
                 }
             });
 
+            // Language Filter
+            ArrayList<String> badWordList = null;
+            try {
+                badWordList = SherlockBot.database.getBadWords(event.getGuild().getIdLong());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            for(String s:badWordList){
+                if(event.getMessage().getContentRaw().toLowerCase().contains(s.toLowerCase())){
+                    // bad word detected
+
+                    String[] args = event.getMessage().getContentRaw().split("\\s+");
+                    for(String arg:args){
+                        if(arg.toLowerCase().contains(s.toLowerCase())){
+                            if(arg.startsWith("https://tenor.com")){
+                                return;
+                            } else {
+                                event.getMessage().reply(String.format("This server does not allow the word || %s || to be used here.\nPlease edit your message accordingly or it will be **deleted** automatically",s)).queue(success -> {
+                                    success.delete().queueAfter(30,TimeUnit.SECONDS);
+                                });
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+
         });
 
         }
@@ -388,8 +371,20 @@ public class Dispatcher extends ListenerAdapter {
     }
 
     @Override
-    public void onGuildMessageDelete(GuildMessageDeleteEvent event) {
+    public void onMessageDelete(MessageDeleteEvent event) {
         Command.removeResponses(event.getChannel(), event.getMessageIdLong());
+    }
+
+    private boolean isChannelIgnored(Long guildID, Long channelID){
+        try {
+            if (SherlockBot.database.getLong("IgnoreChannelTable", "ChannelID", "ChildGuildID", guildID, "ChannelID", channelID) == null) {
+                return false;
+            }
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+            return true;
+        }
+        return true;
     }
 
     public static Boolean isAuthorized(final Command c, final Long guildID, final Member member, final Integer permissionIndex) throws SQLException {
@@ -471,7 +466,7 @@ public class Dispatcher extends ListenerAdapter {
         return authorized;
     }
 
-    private void messageOwner(final GuildMessageReceivedEvent event, final Command c, final Exception exception){
+    private void messageOwner(final MessageReceivedEvent event, final Command c, final Exception exception){
 
         SherlockBot.jda.getUserById(SherlockBot.botOwnerID).openPrivateChannel().queue((channel) -> {
             EmbedBuilder embedBuilder = new EmbedBuilder()
@@ -489,7 +484,7 @@ public class Dispatcher extends ListenerAdapter {
         });
     }
 
-    private void handleSelfRoleEvent(final GuildMessageReceivedEvent event, final Long roleID) {
+    private void handleSelfRoleEvent(final MessageReceivedEvent event, final Long roleID) {
 
         Role role = event.getGuild().getRoleById(roleID);
         if (role != null) {

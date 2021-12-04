@@ -170,7 +170,6 @@ public class SQLHandler {
 
     public Long getLong(String table, String columnName, String firstIdentityCol, Long firstId, String secondIdentityCol, Long secondId) throws SQLException {
         Long output = null;
-
         Connection connection = pool.getConnection();
 
         try {
@@ -595,6 +594,25 @@ public class SQLHandler {
         }
         return output;
 
+    }
+
+    public Integer insertBanEvent(final Long guildID, final Long bannedUserID, final Long moderatorID, final Long repliedMessageID) throws SQLException {
+        int output = 0;
+
+        Connection connection = pool.getConnection();
+        try {
+            Statement st = connection.createStatement();
+            st.execute(String.format("INSERT INTO BanTable (ChildGuildID,BannedUserID,ModeratorID,ReplyMessageID) VALUES (%d, %d, %d, %d)",
+                    guildID,bannedUserID,moderatorID,repliedMessageID
+            ));
+
+            output = st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return output;
     }
 
     public InfractionObject getCaseEvent(Long guildID, int caseID) throws SQLException {

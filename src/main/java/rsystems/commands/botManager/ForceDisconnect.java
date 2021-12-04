@@ -3,13 +3,10 @@ package rsystems.commands.botManager;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import rsystems.Config;
 import rsystems.SherlockBot;
 import rsystems.objects.Command;
-
-import java.sql.SQLException;
 
 public class ForceDisconnect extends Command {
 
@@ -19,16 +16,8 @@ public class ForceDisconnect extends Command {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {
-        if(sender.getIdLong() == Long.parseLong(Config.get("OWNER_ID"))){
-            handleEvent(sender,message,content);
-        } else {
-            reply(event,"You are not authorized for that");
-        }
-    }
+    public void dispatch(User sender, MessageChannel channel, Message message, String content, MessageReceivedEvent event) {
 
-    @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, GuildMessageReceivedEvent event) throws SQLException {
         if(sender.getIdLong() == Long.parseLong(Config.get("OWNER_ID"))){
             handleEvent(sender,message,content);
         } else {

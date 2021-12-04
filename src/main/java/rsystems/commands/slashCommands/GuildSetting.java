@@ -52,6 +52,6 @@ public class GuildSetting extends SlashCommand {
 
     @Override
     public String getDescription() {
-        return null;
+        return "Guild settings";
     }
 }

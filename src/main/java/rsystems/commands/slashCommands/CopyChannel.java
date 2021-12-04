@@ -52,7 +52,7 @@ public class CopyChannel extends SlashCommand {
                             for (Webhook hook : webhooks) {
                                 if (hook.getType().getKey() == 2) {
                                     TextChannel hookChannel = hook.getGuild().getTextChannelById(hook.getSourceChannel().getIdLong());
-                                    hookChannel.follow(success).queue();
+                                    //hookChannel.follow(success).queue();
                                 }
                             }
                         }));

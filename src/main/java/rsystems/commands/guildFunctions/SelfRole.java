@@ -6,8 +6,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import rsystems.SherlockBot;
 import rsystems.objects.Command;
 
@@ -28,11 +27,7 @@ public class SelfRole extends Command {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, PrivateMessageReceivedEvent event) {
-    }
-
-    @Override
-    public void dispatch(User sender, MessageChannel channel, Message message, String content, GuildMessageReceivedEvent event) throws SQLException {
+    public void dispatch(User sender, MessageChannel channel, Message message, String content, MessageReceivedEvent event) throws SQLException {
         String[] args = content.split("\\s+");
 
         if(args.length > 0){
@@ -126,7 +121,7 @@ public class SelfRole extends Command {
         return null;
     }
 
-    private Long extractRoleID(GuildMessageReceivedEvent event, String content){
+    private Long extractRoleID(MessageReceivedEvent event, String content){
 
         String[] args = content.split("\\s+");
 

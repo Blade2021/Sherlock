@@ -52,7 +52,7 @@ public class LogMessage {
                 if (!skipRegister) {
                     System.out.println("not skipping");
                     TextChannel newsChannel = SherlockBot.jda.getGuildById(Config.get("MainGuild")).getTextChannelById(Config.get("AnnouncementChannelID"));
-                    newsChannel.follow(logChannel).queue();
+                    //newsChannel.follow(logChannel).queue();
                 }
 
                 //System.out.println(webhooks);
