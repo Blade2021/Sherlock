@@ -1047,12 +1047,12 @@ public class SQLHandler {
         return infractionObjects;
     }
 
-    public ArrayList<String> getBadWords(Long guildID) {
+    public ArrayList<String> getBadWords(Long guildID) throws SQLException {
         ArrayList<String> badWordsList = new ArrayList<>();
 
-        try {
-            Connection connection = pool.getConnection();
+        Connection connection = pool.getConnection();
 
+        try {
             Statement st = connection.createStatement();
 
             ResultSet rs = st.executeQuery("SELECT Word FROM LanguageFilter WHERE ChildGuildID = " + guildID);
@@ -1062,6 +1062,8 @@ public class SQLHandler {
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+        } finally {
+            connection.close();
         }
 
         return badWordsList;
