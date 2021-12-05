@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 import rsystems.handlers.LogMessage;
 import rsystems.objects.SlashCommand;
 
@@ -18,11 +19,28 @@ public class GuildSetting extends SlashCommand {
     @Override
     public CommandData getCommandData() {
 
-        ArrayList<SubcommandData> subcommandData = new ArrayList<>();
-        subcommandData.add(new SubcommandData("logchan","The Log channel for the BoT").addOption(OptionType.CHANNEL,"channel","The log channel",true));
+        ArrayList<SubcommandGroupData> subCmdGroupData = new ArrayList<>();
 
-        return super.getCommandData().addSubcommands(subcommandData);
+        // Filter Group
+        ArrayList<SubcommandData> filteringCommands = new ArrayList<>();
+        filteringCommands.add(new SubcommandData("add","Enable filtering for a word").addOption(OptionType.STRING,"word","Word to be filterd",true));
+        filteringCommands.add(new SubcommandData("remove","Remove filtering for a word").addOption(OptionType.STRING,"word","Word to be cleared from the filter",true));
 
+
+        subCmdGroupData.add(new SubcommandGroupData("filter","Language filtering commands").addSubcommands(filteringCommands));
+
+        // Logging Group
+        ArrayList<SubcommandData> loggingCommands = new ArrayList<>();
+        loggingCommands.add(new SubcommandData("set","Set the log channel to be used by the BoT").addOption(OptionType.CHANNEL,"channel","The log channel",true));
+        loggingCommands.add(new SubcommandData("clear","Clear the log channel being used by the BoT"));
+
+        subCmdGroupData.add(new SubcommandGroupData("logging","Set/Clear Logging Channel commands").addSubcommands(loggingCommands));
+
+
+
+        super.getCommandData().addSubcommandGroups(subCmdGroupData);
+
+        return super.getCommandData();
     }
 
     @Override
@@ -37,15 +55,47 @@ public class GuildSetting extends SlashCommand {
 
     @Override
     public void dispatch(User sender, MessageChannel channel, String content, SlashCommandEvent event) {
-        if (event.getSubcommandName().equalsIgnoreCase("logchan")) {
 
-            if (event.getOption("channel").getAsMessageChannel() != null) {
-                Long channelID = event.getOption("channel").getAsMessageChannel().getIdLong();
+        if(event.getSubcommandGroup().equalsIgnoreCase("logging")) {
 
-                if (event.getGuild().getTextChannelById(channelID) != null) {
-                    TextChannel logChannel = event.getGuild().getTextChannelById(channelID);
-                    LogMessage.registerLogChannel(event.getGuild(),logChannel);
+            event.deferReply().setEphemeral(false).queue();
+
+            if (event.getSubcommandName().equalsIgnoreCase("set")) {
+
+                if (event.getOption("channel").getAsMessageChannel() != null) {
+                    Long channelID = event.getOption("channel").getAsMessageChannel().getIdLong();
+
+                    if (event.getGuild().getTextChannelById(channelID) != null) {
+                        TextChannel logChannel = event.getGuild().getTextChannelById(channelID);
+                        LogMessage.registerLogChannel(event.getGuild(), logChannel);
+
+                        event.getHook().editOriginal(String.format("%s has been registered as the Log Channel going forward", logChannel.getAsMention())).queue();
+                        return;
+                    }
+                } else if (event.getOption("channel").getAsGuildChannel() != null) {
+                    event.getHook().editOriginal("Categories cannot be registered as a Log Channel").queue();
+                    return;
                 }
+
+                event.getHook().editOriginal("Channel not found").queue();
+            } else if (event.getSubcommandName().equalsIgnoreCase("clear")) {
+
+                LogMessage.clearLogChannel(event.getGuild().getIdLong());
+
+                event.getHook().editOriginal("Log Channel cleared.").queue();
+            }
+        }
+
+        if(event.getSubcommandGroup().equalsIgnoreCase("filter")){
+
+            event.deferReply().setEphemeral(true).queue();
+
+            String word = event.getOption("word").getAsString();
+
+            if(event.getSubcommandName().equalsIgnoreCase("add")){
+                event.getHook().editOriginal(String.format("I have added `%s` to the filter.",word)).queue();
+            } else if(event.getSubcommandName().equalsIgnoreCase("remove")){
+                event.getHook().editOriginal(String.format("I have removed `%s` from the filter.",word)).queue();
             }
         }
     }

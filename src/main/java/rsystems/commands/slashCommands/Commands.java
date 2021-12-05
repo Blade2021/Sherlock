@@ -46,7 +46,7 @@ public class Commands extends SlashCommand {
             }
         }
 
-        //Sort commands into alphabetical order.  Your welcome SG.
+        //Sort commands into alphabetical order.  You're welcome SG.
         commandList.sort(Comparator.naturalOrder());
         slashCMDList.sort(Comparator.naturalOrder());
 

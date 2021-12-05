@@ -1200,12 +1200,12 @@ public class SQLHandler {
     }
 
 
-    private boolean checkSize(Long guildID, String tableName){
+    private boolean checkSize(Long guildID, String tableName) throws SQLException {
         int rowCount = 0;
 
-        try {
-            Connection connection = pool.getConnection();
+        Connection connection = pool.getConnection();
 
+        try {
             Statement st = connection.createStatement();
 
             ResultSet rs = st.executeQuery(String.format("SELECT Count(ChildGuildID) from %s where ChildGuildID = %d", tableName, guildID));
@@ -1219,6 +1219,8 @@ public class SQLHandler {
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+        } finally {
+            connection.close();
         }
 
         return false;

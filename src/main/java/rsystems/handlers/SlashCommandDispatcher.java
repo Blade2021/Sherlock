@@ -33,6 +33,8 @@ public class SlashCommandDispatcher extends ListenerAdapter {
         registerCommand(new Commands());
         registerCommand(new Ban());
         registerCommand(new GuildSetting());
+        registerCommand(new SelfRole());
+        registerCommand(new AutoRole());
     }
 
     public Set<SlashCommand> getCommands() {
@@ -93,17 +95,20 @@ public class SlashCommandDispatcher extends ListenerAdapter {
                 }
             } else {
 
-                StringBuilder errorString = new StringBuilder();
+                EmbedBuilder embedBuilder = new EmbedBuilder();
+                embedBuilder.setColor(Color.decode("#F5661A"));
+                embedBuilder.setTitle("Unauthorized Request");
+                embedBuilder.setDescription(String.format(" You are not authorized for command: `%s`", c.getName()));
 
                 if (c.getPermissionIndex() != null) {
-                    errorString.append("Permission Index: ").append(c.getPermissionIndex()).append("\n");
+                    embedBuilder.addField("Mod Permission",c.getPermissionIndex().toString(),true);
                 }
 
                 if (c.getDiscordPermission() != null) {
-                    errorString.append("Discord Permission: ").append(c.getDiscordPermission().getName());
+                    embedBuilder.addField("Discord Permission",c.getDiscordPermission().getName(),true);
                 }
 
-                event.reply(String.format(" You are not authorized for command: `%s`\n%s", c.getName(), errorString)).setEphemeral(c.isEphemeral()).queue();
+                event.replyEmbeds(embedBuilder.build()).setEphemeral(false).queue();
             }
         });
     }

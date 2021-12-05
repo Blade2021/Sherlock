@@ -1,9 +1,6 @@
 package rsystems.handlers;
 
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.Webhook;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import rsystems.Config;
 import rsystems.SherlockBot;
@@ -31,7 +28,6 @@ public class LogMessage {
                         Webhook hook = (Webhook) it.next();
                         if (hook.getSourceChannel().getId().equalsIgnoreCase(Config.get("AnnouncementChannelID"))) {
                             previousLogChannel.deleteWebhookById(hook.getId()).queue();
-                            System.out.println("Webhook removed from previous channel");
                             break;
                         }
                     }
@@ -50,12 +46,9 @@ public class LogMessage {
                 }
 
                 if (!skipRegister) {
-                    System.out.println("not skipping");
-                    TextChannel newsChannel = SherlockBot.jda.getGuildById(Config.get("MainGuild")).getTextChannelById(Config.get("AnnouncementChannelID"));
-                    //newsChannel.follow(logChannel).queue();
+                    NewsChannel newsChannel = SherlockBot.jda.getGuildById(Config.get("MainGuild")).getNewsChannelById(Config.get("AnnouncementChannelID"));
+                    newsChannel.follow(logChannel).queue();
                 }
-
-                //System.out.println(webhooks);
             });
 
             try {
@@ -66,6 +59,10 @@ public class LogMessage {
             }
         }
         return false;
+    }
+
+    public static void clearLogChannel(final Long guildID){
+        // do something here
     }
 
     public static void sendLogMessage(Long guildID, MessageEmbed embed){

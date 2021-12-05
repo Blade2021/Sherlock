@@ -21,6 +21,7 @@ import rsystems.commands.publicCommands.Info;
 import rsystems.commands.subscriberOnly.ColorRole;
 import rsystems.commands.subscriberOnly.CopyChannel;
 import rsystems.objects.Command;
+import rsystems.objects.InfractionObject;
 
 import java.awt.*;
 import java.sql.SQLException;
@@ -276,33 +277,11 @@ public class Dispatcher extends ListenerAdapter {
                     }
 
                     //SPAM DETECTED
-                    if (messages.size() >= 3) {
+                    if (messages.size() >= Integer.parseInt(Config.get("spamLimit"))) {
                         messages.add(event.getMessageId());
                         event.getChannel().purgeMessagesById(messages);
 
-                        Role muteRole = event.getGuild().getRoleById(SherlockBot.guildMap.get(event.getGuild().getIdLong()).getMuteRoleID());
-                        if(muteRole != null) {
-                            event.getGuild().addRoleToMember(event.getMember(),muteRole).reason("Spam Detected").queue(Success -> {
-                                try {
-                                    event.getGuild().removeRoleFromMember(event.getMember(), muteRole).reason("Mute Expiration").queueAfter(60, TimeUnit.SECONDS,null,failure -> {
-                                        System.out.println("Couldn't unmute user");
-                                    },scheduledExecutorService);
-                                } catch(ErrorResponseException e){
-                                    // do nothing
-                                }
-                            });
-
-                            EmbedBuilder notification = new EmbedBuilder();
-                            notification.setTimestamp(Instant.now())
-                                    .setTitle("Spam Detection")
-                                    .setDescription(String.format("%s has been muted for 1 minute\n\n", event.getMember().getEffectiveName()))
-                                    .addField("Reason:", "Similar-Messages / Spam", false)
-                                    .setFooter(String.format("%s | %s", event.getAuthor().getAsTag(), event.getAuthor().getId()));
-                            notification.setColor(Color.decode("#9837FF"));
-
-                            event.getChannel().sendMessageEmbeds(notification.build()).queue();
-                            notification.clear();
-                        }
+                        muteUser(event,"Similar-Message Spam",1);
 
                         // Log message to log channel
                         if (SherlockBot.guildMap.get(event.getGuild().getIdLong()).getLogChannelID() != null) {
@@ -321,6 +300,31 @@ public class Dispatcher extends ListenerAdapter {
                     }
                 }
             });
+
+            // EVERYONE MONITORING
+            if((event.getMessage().getContentRaw().contains("@everyone")) || (event.getMessage().getContentRaw().contains("@here"))){
+                if(event.getMessage().getMember() != null) {
+                    if (!event.getMessage().getMember().hasPermission(Permission.MESSAGE_MENTION_EVERYONE)) {
+
+                        InfractionObject infractionObject = new InfractionObject(event.getGuild().getIdLong());
+                        infractionObject.setEventType(InfractionObject.EventType.WARNING);
+                        infractionObject.setUserID(event.getAuthor().getIdLong());
+                        infractionObject.setUserTag(event.getAuthor().getAsTag());
+                        infractionObject.setModeratorID(SherlockBot.botOwnerID);
+                        infractionObject.setModeratorTag(SherlockBot.jda.getSelfUser().getAsTag());
+                        infractionObject.setNote("*Original Message:*\n" +
+                                "```" +
+                                event.getMessage().getContentRaw() +
+                                "```"
+                        );
+
+                        muteUser(event,"User mentioned @everyone or @here without authorization",5);
+
+                        LogMessage.sendLogMessage(event.getGuild().getIdLong(),infractionObject);
+                        event.getMessage().delete().reason("Message contained broad mention without authorization").queue();
+                    }
+                }
+            }
 
             // Language Filter
             ArrayList<String> badWordList = null;
@@ -505,6 +509,32 @@ public class Dispatcher extends ListenerAdapter {
                 event.getMessage().reply("Missing Permissions: " + permissionException.getPermission().toString()).queue();
                 event.getMessage().addReaction("⚠").queue();
             }
+        }
+    }
+
+    private void muteUser(final MessageReceivedEvent event, String reason, int minutes){
+        Role muteRole = event.getGuild().getRoleById(SherlockBot.guildMap.get(event.getGuild().getIdLong()).getMuteRoleID());
+        if(muteRole != null) {
+            event.getGuild().addRoleToMember(event.getMember(),muteRole).reason("Spam Detected").queue(Success -> {
+                try {
+                    event.getGuild().removeRoleFromMember(event.getMember(), muteRole).reason("Mute Expiration").queueAfter(minutes, TimeUnit.MINUTES,null,failure -> {
+                        System.out.println("Couldn't unmute user");
+                    },scheduledExecutorService);
+                } catch(ErrorResponseException e){
+                    // do nothing
+                }
+            });
+
+            EmbedBuilder notification = new EmbedBuilder();
+            notification.setTimestamp(Instant.now())
+                    .setTitle("Spam Detection")
+                    .setDescription(String.format("%s has been muted for %d minute(s)\n\n", event.getMember().getEffectiveName(),minutes))
+                    .addField("Reason:", reason, false)
+                    .setFooter(String.format("%s | %s", event.getAuthor().getAsTag(), event.getAuthor().getId()));
+            notification.setColor(Color.decode("#9837FF"));
+
+            event.getChannel().sendMessageEmbeds(notification.build()).queue();
+            notification.clear();
         }
     }
 

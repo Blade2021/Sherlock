@@ -7,13 +7,16 @@ public class ButtonClickEvents extends ListenerAdapter {
 
     @Override
     public void onButtonClick(ButtonClickEvent event) {
+
         if (event.getComponentId().equals("hello")) {
             event.reply("Hello :)").queue(); // send a message in the channel
             event.editButton(event.getButton().asDisabled()).queue();
-        } else if (event.getComponentId().equals("noclick")) {
+        }
+        else if (event.getComponentId().equals("noclick")) {
             event.editMessage("That button didn't say click me").queue(); // update the message
             event.editButton(event.getButton().asDisabled()).queue();
-        } else if (event.getComponentId().equals("test")){
+        }
+        else if (event.getComponentId().equals("test")){
             event.deferEdit().queue();
             if(event.isAcknowledged()){
                 event.getHook().editOriginal("You clicked " + event.getButton().getLabel()).queue();
@@ -21,10 +24,20 @@ public class ButtonClickEvents extends ListenerAdapter {
                 event.reply("You clicked " + event.getButton().getLabel()).setEphemeral(true).queue();
             }
             event.editButton(event.getButton().asDisabled()).queue();
-        } else if (event.getComponentId().equals("previous")){
+        }
+        else if (event.getComponentId().equals("listar")){
+            event.deferEdit().queue();
+            event.editButton(event.getButton().asDisabled()).queue();
+
+
+
+            event.getHook().getInteraction().getMessageChannel().sendMessage("auto roles here").queue();
+        }
+        else if (event.getComponentId().equals("previous")){
             event.deferReply(true).queue();
             event.getMessage().delete().queue();
-        } else if (event.getComponentId().startsWith("unban:")){
+        }
+        else if (event.getComponentId().startsWith("unban:")){
             //event.deferReply(true).queue();
             event.deferEdit().queue();
 
