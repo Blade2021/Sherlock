@@ -9,9 +9,11 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
+import rsystems.SherlockBot;
 import rsystems.handlers.LogMessage;
 import rsystems.objects.SlashCommand;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class GuildSetting extends SlashCommand {
@@ -25,7 +27,7 @@ public class GuildSetting extends SlashCommand {
         ArrayList<SubcommandData> filteringCommands = new ArrayList<>();
         filteringCommands.add(new SubcommandData("add","Enable filtering for a word").addOption(OptionType.STRING,"word","Word to be filterd",true));
         filteringCommands.add(new SubcommandData("remove","Remove filtering for a word").addOption(OptionType.STRING,"word","Word to be cleared from the filter",true));
-
+        filteringCommands.add(new SubcommandData("list","List all filtered words"));
 
         subCmdGroupData.add(new SubcommandGroupData("filter","Language filtering commands").addSubcommands(filteringCommands));
 
@@ -90,12 +92,26 @@ public class GuildSetting extends SlashCommand {
 
             event.deferReply().setEphemeral(true).queue();
 
-            String word = event.getOption("word").getAsString();
+            String word = null;
+            if(event.getOption("word") != null){
+                word = event.getOption("word").getAsString();
+            }
 
             if(event.getSubcommandName().equalsIgnoreCase("add")){
-                event.getHook().editOriginal(String.format("I have added `%s` to the filter.",word)).queue();
+                if(SherlockBot.database.addFilterWord(event.getGuild().getIdLong(),word) > 0) {
+                    event.getHook().editOriginal(String.format("I have added `%s` to the filter.", word)).queue();
+                }
             } else if(event.getSubcommandName().equalsIgnoreCase("remove")){
-                event.getHook().editOriginal(String.format("I have removed `%s` from the filter.",word)).queue();
+                if(SherlockBot.database.removeFilterWord(event.getGuild().getIdLong(),word) > 0) {
+                    event.getHook().editOriginal(String.format("I have removed `%s` from the filter.", word)).queue();
+                }
+            } else if(event.getSubcommandName().equalsIgnoreCase("list")){
+                try {
+                    ArrayList<String> filterWordList = SherlockBot.database.getFilterWords(event.getGuild().getIdLong());
+                    event.getHook().editOriginal(filterWordList.toString()).queue();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

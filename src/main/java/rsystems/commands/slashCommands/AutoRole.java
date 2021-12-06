@@ -15,8 +15,10 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import rsystems.SherlockBot;
 import rsystems.objects.SlashCommand;
 
+import java.awt.*;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.List;
 
 public class AutoRole extends SlashCommand {
 
@@ -51,7 +53,7 @@ public class AutoRole extends SlashCommand {
 
                 //Query Database for current auto role count
                 try {
-                    if(SherlockBot.database.getTableCount(event.getGuild().getIdLong(),"AutoRole") < SherlockBot.database.getGuildData(event.getGuild().getIdLong()).getGrantedAutoRoleCount()){
+                    if(SherlockBot.database.getTableCount(event.getGuild().getIdLong(),"AutoRoles") < SherlockBot.database.getGuildData(event.getGuild().getIdLong()).getGrantedAutoRoleCount()){
                         if(SherlockBot.database.insertAutoRole(event.getGuild().getIdLong(),role.getIdLong()) == 200){
 
                             MessageBuilder mb = new MessageBuilder();
@@ -90,6 +92,12 @@ public class AutoRole extends SlashCommand {
                 }
             }
         }
+
+        else if(event.getSubcommandName().equalsIgnoreCase("list")){
+            event.deferReply().queue();
+
+            event.getHook().editOriginalEmbeds(listAutoRoles(event.getGuild().getIdLong())).queue();
+        }
     }
 
     @Override
@@ -99,12 +107,12 @@ public class AutoRole extends SlashCommand {
 
     public static MessageEmbed listAutoRoles(Long guildID){
         EmbedBuilder eb = new EmbedBuilder();
+        eb.setColor(Color.cyan);
 
         ArrayList<Long> roleIDList = new ArrayList<>();
 
         try {
             roleIDList = SherlockBot.database.getAutoRoles(guildID);
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -127,7 +135,13 @@ public class AutoRole extends SlashCommand {
                 }
             }
         }
-        //if(roleIDString.)
+
+        if(roleIDString.length() > 0){
+            eb.addField("Role Name:", roleNameString.toString(),true);
+            eb.addField("Role ID",roleIDString.toString(),true);
+        } else {
+            eb.setDescription("No AutoRoles found");
+        }
 
         return eb.build();
     }

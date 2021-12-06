@@ -65,6 +65,20 @@ public class LogMessage {
         // do something here
     }
 
+    public static boolean hasLogChannel(final Long guildID){
+        if(SherlockBot.guildMap.get(guildID).getLogChannelID() != null){
+            Long channelID = SherlockBot.guildMap.get(guildID).getLogChannelID();
+            if(SherlockBot.jda.getGuildById(guildID).getTextChannelById(channelID) != null){
+                TextChannel logChannel = SherlockBot.jda.getGuildById(guildID).getTextChannelById(channelID);
+
+                if(logChannel.canTalk()){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static void sendLogMessage(Long guildID, MessageEmbed embed){
 
         if(SherlockBot.getGuildSettings(guildID).getLogChannelID() != null){

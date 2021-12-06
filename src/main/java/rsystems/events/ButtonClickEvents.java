@@ -2,6 +2,7 @@ package rsystems.events;
 
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import rsystems.commands.slashCommands.AutoRole;
 
 public class ButtonClickEvents extends ListenerAdapter {
 
@@ -28,10 +29,7 @@ public class ButtonClickEvents extends ListenerAdapter {
         else if (event.getComponentId().equals("listar")){
             event.deferEdit().queue();
             event.editButton(event.getButton().asDisabled()).queue();
-
-
-
-            event.getHook().getInteraction().getMessageChannel().sendMessage("auto roles here").queue();
+            event.getHook().getInteraction().getMessageChannel().sendMessageEmbeds(AutoRole.listAutoRoles(event.getGuild().getIdLong())).queue();
         }
         else if (event.getComponentId().equals("previous")){
             event.deferReply(true).queue();

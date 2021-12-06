@@ -4,7 +4,6 @@ import org.mariadb.jdbc.MariaDbPoolDataSource;
 import rsystems.Config;
 import rsystems.objects.GuildSettings;
 import rsystems.objects.InfractionObject;
-import rsystems.objects.SelfRole;
 import rsystems.objects.TimedEvent;
 
 import java.sql.*;
@@ -521,26 +520,24 @@ public class SQLHandler {
     }
 
     //Get self Roles - Called by GuildLoader
-    public ArrayList<SelfRole> getSelfRoles(Long guildID) throws SQLException {
-        ArrayList<SelfRole> output = new ArrayList<>();
+    public ArrayList<Long> getSelfRoles(Long guildID) throws SQLException {
+        ArrayList<Long> output = new ArrayList<>();
         Connection connection = pool.getConnection();
 
         try {
             Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT RoleCommand, RoleID FROM SelfRoles WHERE ChildGuildID = " + guildID);
+            ResultSet rs = statement.executeQuery("SELECT RoleID FROM SelfRoles WHERE ChildGuildID = " + guildID);
 
             while (rs.next()) {
-                output.add(new SelfRole(guildID, rs.getString("RoleCommand"), rs.getLong("RoleID")));
+                output.add(rs.getLong("RoleID"));
             }
-
-            return output;
 
         } catch (SQLException throwables) {
             System.out.println(throwables.getMessage());
         } finally {
             connection.close();
         }
-        return null;
+        return output;
     }
 
     public Integer insertCaseEvent(Long guildID, InfractionObject caseObject) throws SQLException {
@@ -672,14 +669,14 @@ public class SQLHandler {
     // Add an self role to the database
     public Integer insertAutoRole(Long guildID, Long roleID) throws SQLException {
 
-        if(checkSize(guildID,"AutoRole")) {
+        if(checkSize(guildID,"AutoRoles")) {
 
             Connection connection = pool.getConnection();
 
             try {
                 Statement st = connection.createStatement();
 
-                ResultSet rs = st.executeQuery(String.format("SELECT RoleID FROM AutoRole WHERE ChildGuildID = %d AND RoleID = %d", guildID, roleID));
+                ResultSet rs = st.executeQuery(String.format("SELECT RoleID FROM AutoRoles WHERE ChildGuildID = %d AND RoleID = %d", guildID, roleID));
                 int results = 0;
                 while(rs.next()){
                     results++;
@@ -687,7 +684,7 @@ public class SQLHandler {
                 if(results > 0) {
                     return 400;
                 } else {
-                    st.execute(String.format("INSERT INTO AutoRole (ChildGuildID, RoleID) VALUES (%d, %d)", guildID, roleID));
+                    st.execute(String.format("INSERT INTO AutoRoles (ChildGuildID, RoleID) VALUES (%d, %d)", guildID, roleID));
                     return 200;
                 }
             } catch (SQLException throwables) {
@@ -710,7 +707,7 @@ public class SQLHandler {
         try {
             Statement st = connection.createStatement();
 
-            st.execute(String.format("DELETE FROM AutoRole WHERE (ChildGuildID = %d) AND (RoleID = %d)", guildID, roleID));
+            st.execute(String.format("DELETE FROM AutoRoles WHERE (ChildGuildID = %d) AND (RoleID = %d)", guildID, roleID));
             return st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -723,25 +720,24 @@ public class SQLHandler {
     //Get self Roles - Called by GuildLoader
     public ArrayList<Long> getAutoRoles(Long guildID) throws SQLException{
         ArrayList<Long> output = new ArrayList<>();
-
         Connection connection = pool.getConnection();
 
         try {
+
             Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT RoleID FROM AutoRole WHERE ChildGuildID = " + guildID);
+            ResultSet rs = statement.executeQuery("SELECT RoleID FROM AutoRoles WHERE ChildGuildID = " + guildID);
 
             while (rs.next()) {
-                output.add(rs.getLong("RoleID"));
+                Long nextInput = rs.getLong("RoleID");
+                output.add(nextInput);
             }
-
-            return output;
 
         } catch (SQLException throwables) {
             System.out.println(throwables.getMessage());
         } finally {
             connection.close();
         }
-        return null;
+        return output;
     }
 
     public boolean insertTimedEvent(Long GuildID, Long UserID, int EventType, String reason, Long EventKey, int EventValue){
@@ -1065,7 +1061,7 @@ public class SQLHandler {
         return infractionObjects;
     }
 
-    public ArrayList<String> getBadWords(Long guildID) throws SQLException {
+    public ArrayList<String> getFilterWords(Long guildID) throws SQLException {
         ArrayList<String> badWordsList = new ArrayList<>();
 
         Connection connection = pool.getConnection();
@@ -1088,7 +1084,7 @@ public class SQLHandler {
     }
 
     // INSERT A BADWORD INTO THE DATABASE
-    public Integer insertBadWord(Long guildID, String badWord) {
+    public Integer addFilterWord(Long guildID, String badWord) {
         try {
             Connection connection = pool.getConnection();
 
@@ -1103,7 +1099,7 @@ public class SQLHandler {
     }
 
     // REMOVE A BLACKLISTED WORD FROM THE DATABASE
-    public Integer removeBadWord(Long guildID, String badWord) {
+    public Integer removeFilterWord(Long guildID, String badWord) {
         try {
             Connection connection = pool.getConnection();
 

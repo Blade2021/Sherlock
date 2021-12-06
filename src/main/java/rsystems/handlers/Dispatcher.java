@@ -5,10 +5,12 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.TimeFormat;
+import org.jetbrains.annotations.NotNull;
 import rsystems.Config;
 import rsystems.SherlockBot;
 import rsystems.commands.botManager.ForceDisconnect;
@@ -35,6 +37,8 @@ public class Dispatcher extends ListenerAdapter {
     private final Set<Command> commands = ConcurrentHashMap.newKeySet();
     private final ExecutorService pool = Executors.newCachedThreadPool(newThreadFactory("command-runner", false));
     private final ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(10);
+
+    private Map<String, Future<?>> futures = new HashMap<>();
 
     public Dispatcher() {
 
@@ -72,13 +76,42 @@ public class Dispatcher extends ListenerAdapter {
             return;
         }
 
-        if(event.isFromGuild()){
+        if (event.isFromGuild()) {
             final String defaultPrefix = Config.get("defaultPrefix");
             final String message = event.getMessage().getContentRaw();
             final String guildPrefix = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix();
             final boolean defaultPrefixFound = message.toLowerCase().startsWith(SherlockBot.defaultPrefix.toLowerCase());
 
-            if(!isChannelIgnored(event.getGuild().getIdLong(), event.getChannel().getIdLong())) {
+            //Is channel set to be ignored ( not monitored )?
+            if (!isChannelIgnored(event.getGuild().getIdLong(), event.getChannel().getIdLong())) {
+
+                // EVERYONE MONITORING
+                if ((event.getMessage().getContentRaw().contains("@everyone")) || (event.getMessage().getContentRaw().contains("@here"))) {
+                    if (event.getMessage().getMember() != null) {
+                        if (!event.getMessage().getMember().hasPermission(Permission.MESSAGE_MENTION_EVERYONE)) {
+
+                            InfractionObject infractionObject = new InfractionObject(event.getGuild().getIdLong());
+                            infractionObject.setEventType(InfractionObject.EventType.WARNING);
+                            infractionObject.setUserID(event.getAuthor().getIdLong());
+                            infractionObject.setUserTag(event.getAuthor().getAsTag());
+                            infractionObject.setModeratorID(SherlockBot.botOwnerID);
+                            infractionObject.setModeratorTag(SherlockBot.jda.getSelfUser().getAsTag());
+                            infractionObject.setNote("*Original Message:*\n" +
+                                    "```" +
+                                    event.getMessage().getContentRaw() +
+                                    "```"
+                            );
+
+                            muteUser(event, "User mentioned @everyone or @here without authorization", 5);
+
+                            LogMessage.sendLogMessage(event.getGuild().getIdLong(), infractionObject);
+                            event.getMessage().delete().reason("Message contained broad mention without authorization").queue();
+
+                            return;
+                        }
+                    }
+                }
+
 
                 //Look for a prefix at the BEGINNING of the message
                 if ((defaultPrefixFound) || ((guildPrefix != null) && (message.toLowerCase().startsWith(guildPrefix.toLowerCase())))) {
@@ -104,8 +137,8 @@ public class Dispatcher extends ListenerAdapter {
                         }
                     }
 
+                    //SELF ROLES
                     try {
-                        //SELF ROLES
                         if (SherlockBot.database.getTableCount(event.getGuild().getIdLong(), "SelfRoles") > 0) {
 
                             Map<String, Long> guildSelfRoleMap = SherlockBot.database.getGuildSelfRoles(event.getGuild().getIdLong());
@@ -134,12 +167,8 @@ public class Dispatcher extends ListenerAdapter {
                     handleEvent(message, event);
                 }
             }
-        }
-
-        else {
-
+        } else {
             // Private Message
-
             event.getMessage().reply("Sorry I haven't been taught how to reply to direct messages yet.  Try again later").queue();
 
         }
@@ -210,7 +239,7 @@ public class Dispatcher extends ListenerAdapter {
         {
 
             // Filter out join messages
-            if(event.getMessage().getType().equals(MessageType.GUILD_MEMBER_JOIN)){
+            if (event.getMessage().getType().equals(MessageType.GUILD_MEMBER_JOIN)) {
                 return;
             }
 
@@ -219,25 +248,25 @@ public class Dispatcher extends ListenerAdapter {
                 try {
                     List<Long> whiteListedGuilds = SherlockBot.database.getLongMultiple("InviteWhitelist", "TargetGuildID", "ChildGuildID", event.getGuild().getIdLong());
 
-                    for(String code:event.getMessage().getInvites()){
-                        Invite.resolve(SherlockBot.jda,code).queue(resolvedInvite -> {
+                    for (String code : event.getMessage().getInvites()) {
+                        Invite.resolve(SherlockBot.jda, code).queue(resolvedInvite -> {
                             Long targetGuildID = resolvedInvite.getGuild().getIdLong();
-                            if((event.getGuild().getIdLong() == targetGuildID) || (whiteListedGuilds.contains(targetGuildID))){
+                            if ((event.getGuild().getIdLong() == targetGuildID) || (whiteListedGuilds.contains(targetGuildID))) {
                                 // ID is ok
                             } else {
                                 EmbedBuilder builder = new EmbedBuilder();
                                 builder.setTitle("Discord Link Detection");
                                 builder.setDescription("User posted unauthorized discord link:\n" + resolvedInvite.getUrl());
                                 builder.setColor(Color.yellow);
-                                if(event.getMessage().getMember().getAsMention() != null){
-                                    builder.addField("User:",String.format(event.getMessage().getMember().getAsMention() + "\n%s\n%s",event.getAuthor().getAsTag(),event.getAuthor().getId()),true);
+                                if (event.getMessage().getMember().getAsMention() != null) {
+                                    builder.addField("User:", String.format(event.getMessage().getMember().getAsMention() + "\n%s\n%s", event.getAuthor().getAsTag(), event.getAuthor().getId()), true);
                                 } else {
                                     builder.addField("User:", String.format("n%s\n%s", event.getAuthor().getAsTag(), event.getAuthor().getId()), true);
                                 }
-                                builder.addField("Target Guild:",String.format("%s\n%d",resolvedInvite.getGuild().getName(),resolvedInvite.getGuild().getIdLong()),true);
+                                builder.addField("Target Guild:", String.format("%s\n%d", resolvedInvite.getGuild().getName(), resolvedInvite.getGuild().getIdLong()), true);
                                 builder.setTimestamp(Instant.now());
 
-                                LogMessage.sendLogMessage(event.getGuild().getIdLong(),builder.build());
+                                LogMessage.sendLogMessage(event.getGuild().getIdLong(), builder.build());
 
                                 builder.clear();
 
@@ -281,7 +310,7 @@ public class Dispatcher extends ListenerAdapter {
                         messages.add(event.getMessageId());
                         event.getChannel().purgeMessagesById(messages);
 
-                        muteUser(event,"Similar-Message Spam",1);
+                        muteUser(event, "Similar-Message Spam", 1);
 
                         // Log message to log channel
                         if (SherlockBot.guildMap.get(event.getGuild().getIdLong()).getLogChannelID() != null) {
@@ -301,62 +330,32 @@ public class Dispatcher extends ListenerAdapter {
                 }
             });
 
-            // EVERYONE MONITORING
-            if((event.getMessage().getContentRaw().contains("@everyone")) || (event.getMessage().getContentRaw().contains("@here"))){
-                if(event.getMessage().getMember() != null) {
-                    if (!event.getMessage().getMember().hasPermission(Permission.MESSAGE_MENTION_EVERYONE)) {
-
-                        InfractionObject infractionObject = new InfractionObject(event.getGuild().getIdLong());
-                        infractionObject.setEventType(InfractionObject.EventType.WARNING);
-                        infractionObject.setUserID(event.getAuthor().getIdLong());
-                        infractionObject.setUserTag(event.getAuthor().getAsTag());
-                        infractionObject.setModeratorID(SherlockBot.botOwnerID);
-                        infractionObject.setModeratorTag(SherlockBot.jda.getSelfUser().getAsTag());
-                        infractionObject.setNote("*Original Message:*\n" +
-                                "```" +
-                                event.getMessage().getContentRaw() +
-                                "```"
-                        );
-
-                        muteUser(event,"User mentioned @everyone or @here without authorization",5);
-
-                        LogMessage.sendLogMessage(event.getGuild().getIdLong(),infractionObject);
-                        event.getMessage().delete().reason("Message contained broad mention without authorization").queue();
-                    }
-                }
-            }
-
             // Language Filter
-            ArrayList<String> badWordList = null;
-            try {
-                badWordList = SherlockBot.database.getBadWords(event.getGuild().getIdLong());
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            String filterWord = filterWordFound(event.getMessage(), event.getGuild().getIdLong());
+            if (filterWord != null) {
 
-            for(String s:badWordList){
-                if(event.getMessage().getContentRaw().toLowerCase().contains(s.toLowerCase())){
-                    // bad word detected
+                // TRIGGER DELETION AND NOTIFICATION
+                event.getMessage().addReaction("⚠").queue();
+                event.getMessage().reply(String.format("This server does not allow the word || %s || to be used here.\nPlease edit your message accordingly or it will be **deleted** automatically", filterWord)).queue(success -> {
+                    success.delete().queueAfter(60, TimeUnit.SECONDS);
+                });
 
-                    String[] args = event.getMessage().getContentRaw().split("\\s+");
-                    for(String arg:args){
-                        if(arg.toLowerCase().contains(s.toLowerCase())){
-                            if(arg.startsWith("https://tenor.com")){
-                                return;
-                            } else {
-                                event.getMessage().reply(String.format("This server does not allow the word || %s || to be used here.\nPlease edit your message accordingly or it will be **deleted** automatically",s)).queue(success -> {
-                                    success.delete().queueAfter(30,TimeUnit.SECONDS);
-                                });
-                                return;
-                            }
-                        }
-                    }
+                futures.put(event.getMessageId(), event.getMessage().delete().submitAfter(60, TimeUnit.SECONDS));
+
+                if (LogMessage.hasLogChannel(event.getGuild().getIdLong())) {
+                    InfractionObject infractionObject = new InfractionObject(event.getGuild().getIdLong());
+                    infractionObject.setModeratorTag(SherlockBot.jda.getSelfUser().getAsTag());
+                    infractionObject.setModeratorID(SherlockBot.jda.getSelfUser().getIdLong());
+                    infractionObject.setEventType(InfractionObject.EventType.WARNING);
+                    infractionObject.setUserTag(event.getAuthor().getAsTag());
+                    infractionObject.setUserID(event.getAuthor().getIdLong());
+                    infractionObject.setNote(String.format("Filter word detected! \n||%s||", filterWord));
+
+                    LogMessage.sendLogMessage(event.getGuild().getIdLong(), infractionObject);
                 }
             }
-
         });
-
-        }
+    }
 
     private String removePrefix(final String commandName, final String prefix, String content) {
         content = content.substring(commandName.length() + prefix.length());
@@ -379,7 +378,7 @@ public class Dispatcher extends ListenerAdapter {
         Command.removeResponses(event.getChannel(), event.getMessageIdLong());
     }
 
-    private boolean isChannelIgnored(Long guildID, Long channelID){
+    private boolean isChannelIgnored(Long guildID, Long channelID) {
         try {
             if (SherlockBot.database.getLong("IgnoreChannelTable", "ChannelID", "ChildGuildID", guildID, "ChannelID", channelID) == null) {
                 return false;
@@ -394,8 +393,8 @@ public class Dispatcher extends ListenerAdapter {
     public static Boolean isAuthorized(final Command c, final Long guildID, final Member member, final Integer permissionIndex) throws SQLException {
         boolean authorized = false;
 
-        if(c.isOwnerOnly()){
-            if(member.getIdLong() == SherlockBot.botOwnerID){
+        if (c.isOwnerOnly()) {
+            if (member.getIdLong() == SherlockBot.botOwnerID) {
 
                 System.out.println(member.getIdLong());
                 System.out.println(SherlockBot.botOwnerID);
@@ -406,12 +405,12 @@ public class Dispatcher extends ListenerAdapter {
             }
         }
 
-        if(member.hasPermission(Permission.ADMINISTRATOR)){
+        if (member.hasPermission(Permission.ADMINISTRATOR)) {
             return true;
         }
 
-        if(c.getDiscordPermission() != null){
-            if(member.getPermissions().contains(c.getDiscordPermission())){
+        if (c.getDiscordPermission() != null) {
+            if (member.getPermissions().contains(c.getDiscordPermission())) {
                 return true;
             }
         }
@@ -470,17 +469,17 @@ public class Dispatcher extends ListenerAdapter {
         return authorized;
     }
 
-    private void messageOwner(final MessageReceivedEvent event, final Command c, final Exception exception){
+    private void messageOwner(final MessageReceivedEvent event, final Command c, final Exception exception) {
 
         SherlockBot.jda.getUserById(SherlockBot.botOwnerID).openPrivateChannel().queue((channel) -> {
             EmbedBuilder embedBuilder = new EmbedBuilder()
                     .setTitle("System Exception Encountered")
                     .setColor(Color.RED)
-                    .addField("Command:",c.getName(),true)
-                    .addField("Calling User:",event.getMessage().getAuthor().getAsTag(),true)
+                    .addField("Command:", c.getName(), true)
+                    .addField("Calling User:", event.getMessage().getAuthor().getAsTag(), true)
                     .addBlankField(true)
-                    .addField("Exception:",exception.toString(),false)
-                    .setDescription(exception.getCause().getMessage().substring(0,exception.getCause().getMessage().indexOf(":")));
+                    .addField("Exception:", exception.toString(), false)
+                    .setDescription(exception.getCause().getMessage().substring(0, exception.getCause().getMessage().indexOf(":")));
 
             channel.sendMessageEmbeds(embedBuilder.build()).queue();
 
@@ -512,15 +511,15 @@ public class Dispatcher extends ListenerAdapter {
         }
     }
 
-    private void muteUser(final MessageReceivedEvent event, String reason, int minutes){
+    private void muteUser(final MessageReceivedEvent event, String reason, int minutes) {
         Role muteRole = event.getGuild().getRoleById(SherlockBot.guildMap.get(event.getGuild().getIdLong()).getMuteRoleID());
-        if(muteRole != null) {
-            event.getGuild().addRoleToMember(event.getMember(),muteRole).reason("Spam Detected").queue(Success -> {
+        if (muteRole != null) {
+            event.getGuild().addRoleToMember(event.getMember(), muteRole).reason("Spam Detected").queue(Success -> {
                 try {
-                    event.getGuild().removeRoleFromMember(event.getMember(), muteRole).reason("Mute Expiration").queueAfter(minutes, TimeUnit.MINUTES,null,failure -> {
+                    event.getGuild().removeRoleFromMember(event.getMember(), muteRole).reason("Mute Expiration").queueAfter(minutes, TimeUnit.MINUTES, null, failure -> {
                         System.out.println("Couldn't unmute user");
-                    },scheduledExecutorService);
-                } catch(ErrorResponseException e){
+                    }, scheduledExecutorService);
+                } catch (ErrorResponseException e) {
                     // do nothing
                 }
             });
@@ -528,13 +527,95 @@ public class Dispatcher extends ListenerAdapter {
             EmbedBuilder notification = new EmbedBuilder();
             notification.setTimestamp(Instant.now())
                     .setTitle("Spam Detection")
-                    .setDescription(String.format("%s has been muted for %d minute(s)\n\n", event.getMember().getEffectiveName(),minutes))
+                    .setDescription(String.format("%s has been muted for %d minute(s)\n\n", event.getMember().getEffectiveName(), minutes))
                     .addField("Reason:", reason, false)
                     .setFooter(String.format("%s | %s", event.getAuthor().getAsTag(), event.getAuthor().getId()));
             notification.setColor(Color.decode("#9837FF"));
 
             event.getChannel().sendMessageEmbeds(notification.build()).queue();
             notification.clear();
+        }
+    }
+
+    private String filterWordFound(final Message message, final Long guildID) {
+        // Language Filter
+        ArrayList<String> filterWordList = null;
+        try {
+            filterWordList = SherlockBot.database.getFilterWords(guildID);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        for (String s : filterWordList) {
+            if (message.getContentRaw().toLowerCase().contains(s.toLowerCase())) {
+                // bad word detected
+
+                String[] args = message.getContentRaw().split("\\s+");
+                for (String arg : args) {
+                    if (arg.toLowerCase().contains(s.toLowerCase())) {
+                        if (arg.startsWith("https://tenor.com")) {
+                            return null;
+                        } else {
+                            return s;
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public void onMessageUpdate(@NotNull MessageUpdateEvent event) {
+        if (event.isFromGuild()) {
+            if (filterWordFound(event.getMessage(), event.getGuild().getIdLong()) != null) {
+                boolean futureFound = false;
+
+                for (Map.Entry<String, Future<?>> entry : futures.entrySet()) {
+                    String key = entry.getKey();
+                    if (key.equalsIgnoreCase(event.getMessageId())) {
+                        entry.getValue().cancel(true);
+                        futureFound = true;
+                    }
+                }
+                if (!futureFound) {
+                    futures.put(event.getMessageId(), event.getMessage().delete().submitAfter(30, TimeUnit.SECONDS));
+                    try {
+                        event.getMessage().addReaction("⁉").queue();
+                    } catch (NullPointerException e) {
+
+                    }
+                }
+            } else {
+                try {
+                    String messageid = "";
+
+                    // Cancel the future
+                    for (Map.Entry<String, Future<?>> entry : futures.entrySet()) {
+                        String key = entry.getKey();
+                        if (key.equalsIgnoreCase(event.getMessageId())) {
+                            entry.getValue().cancel(true);
+                            System.out.println("Removing future for message: " + entry.getKey());
+                            messageid = entry.getKey();
+                        }
+                    }
+
+
+                    //Remove the entry from the HashMap
+                    Iterator it = futures.entrySet().iterator();
+                    while (it.hasNext()) {
+                        Map.Entry pair = (Map.Entry) it.next();
+                        if (pair.getKey().toString().equalsIgnoreCase(messageid)) {
+                            it.remove();
+                        }
+                    }
+
+                    event.getMessage().removeReaction("⚠").queue();
+                    event.getMessage().removeReaction("⁉").queue();
+                } catch (NullPointerException ignored) {
+                }
+            }
         }
     }
 
