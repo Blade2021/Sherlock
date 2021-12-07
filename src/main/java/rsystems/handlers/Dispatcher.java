@@ -308,9 +308,10 @@ public class Dispatcher extends ListenerAdapter {
                     //SPAM DETECTED
                     if (messages.size() >= Integer.parseInt(Config.get("spamLimit"))) {
                         messages.add(event.getMessageId());
-                        event.getChannel().purgeMessagesById(messages);
 
                         muteUser(event, "Similar-Message Spam", 1);
+
+                        event.getChannel().purgeMessagesById(messages);
 
                         // Log message to log channel
                         if (SherlockBot.guildMap.get(event.getGuild().getIdLong()).getLogChannelID() != null) {
@@ -511,7 +512,7 @@ public class Dispatcher extends ListenerAdapter {
         }
     }
 
-    private void muteUser(final MessageReceivedEvent event, String reason, int minutes) {
+    private void muteUser(final MessageReceivedEvent event, final String reason, final int minutes) {
         Role muteRole = event.getGuild().getRoleById(SherlockBot.guildMap.get(event.getGuild().getIdLong()).getMuteRoleID());
         if (muteRole != null) {
             event.getGuild().addRoleToMember(event.getMember(), muteRole).reason("Spam Detected").queue(Success -> {
@@ -520,7 +521,7 @@ public class Dispatcher extends ListenerAdapter {
                         System.out.println("Couldn't unmute user");
                     }, scheduledExecutorService);
                 } catch (ErrorResponseException e) {
-                    // do nothing
+                    System.out.println(String.format("An error occured for guild: %d",event.getGuild().getIdLong()));
                 }
             });
 
