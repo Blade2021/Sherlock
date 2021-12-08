@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import rsystems.SherlockBot;
 import rsystems.handlers.ErrorReportHandler;
+import rsystems.handlers.LogMessage;
 import rsystems.objects.GuildSettings;
 
 import java.awt.*;
@@ -104,6 +105,12 @@ public class GuildStateListener extends ListenerAdapter {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+
+        //Join all current threads
+        for(ThreadChannel thread:event.getGuild().getThreadChannels()){
+            thread.join().queue();
+        }
     }
 
     @Override
@@ -113,12 +120,7 @@ public class GuildStateListener extends ListenerAdapter {
 
             // Update logChannel
             if((SherlockBot.guildMap.get(guildID).getLogChannelID() != null) && (SherlockBot.guildMap.get(guildID).getLogChannelID().equals(event.getChannel().getIdLong()))){
-                SherlockBot.guildMap.get(guildID).setLogChannelID(null);
-                try {
-                    SherlockBot.database.updateGuild(SherlockBot.guildMap.get(guildID));
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                LogMessage.clearLogChannel(guildID);
             }
         }
     }
