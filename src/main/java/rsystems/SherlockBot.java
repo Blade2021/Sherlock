@@ -48,7 +48,6 @@ public class SherlockBot {
 
         api.addEventListener(dispatcher = new Dispatcher());
         api.addEventListener(slashCommandDispatcher = new SlashCommandDispatcher());
-        api.addEventListener(new GuildChannelEvents());
         api.addEventListener(new GuildStateListener());
         api.addEventListener(new GuildNicknameListener());
         api.addEventListener(new GuildMemberEvents());

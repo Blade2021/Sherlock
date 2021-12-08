@@ -1,11 +1,9 @@
 package rsystems.events;
 
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Category;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.ThreadChannel;
-import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;
+import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.UnavailableGuildLeaveEvent;
@@ -32,7 +30,7 @@ public class GuildStateListener extends ListenerAdapter {
     }
 
     @Override
-    public void onThreadRevealed(@NotNull ThreadRevealedEvent event) {
+    public void onThreadRevealed(ThreadRevealedEvent event) {
         event.getThread().join().queue();
     }
 
@@ -105,6 +103,23 @@ public class GuildStateListener extends ListenerAdapter {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onChannelDelete(ChannelDeleteEvent event) {
+        if((event.isFromGuild()) && (event.isFromType(ChannelType.TEXT))){
+            Long guildID = event.getGuild().getIdLong();
+
+            // Update logChannel
+            if((SherlockBot.guildMap.get(guildID).getLogChannelID() != null) && (SherlockBot.guildMap.get(guildID).getLogChannelID().equals(event.getChannel().getIdLong()))){
+                SherlockBot.guildMap.get(guildID).setLogChannelID(null);
+                try {
+                    SherlockBot.database.updateGuild(SherlockBot.guildMap.get(guildID));
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }
