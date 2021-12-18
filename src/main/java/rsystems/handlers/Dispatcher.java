@@ -568,19 +568,17 @@ public class Dispatcher extends ListenerAdapter {
     }
 
     @Override
-    public void onMessageUpdate(@NotNull MessageUpdateEvent event) {
+    public void onMessageUpdate(MessageUpdateEvent event) {
         if (event.isFromGuild()) {
-            if (filterWordFound(event.getMessage(), event.getGuild().getIdLong()) != null) {
-                boolean futureFound = false;
 
-                for (Map.Entry<String, Future<?>> entry : futures.entrySet()) {
-                    String key = entry.getKey();
-                    if (key.equalsIgnoreCase(event.getMessageId())) {
-                        entry.getValue().cancel(true);
-                        futureFound = true;
-                    }
-                }
-                if (!futureFound) {
+            final boolean futureFound = futures.containsKey(event.getMessageId());
+
+            String filterWordFound = filterWordFound(event.getMessage(), event.getGuild().getIdLong());
+
+            if (filterWordFound != null) {
+                // Filtered word found on message
+
+                if(!futureFound){
                     futures.put(event.getMessageId(), event.getMessage().delete().submitAfter(30, TimeUnit.SECONDS));
                     try {
                         event.getMessage().addReaction("⁉").queue();
@@ -588,9 +586,10 @@ public class Dispatcher extends ListenerAdapter {
 
                     }
                 }
-            } else {
+
+            } else if(futureFound){
                 try {
-                    String messageid = "";
+                    String messageid = event.getMessageId();
 
                     // Cancel the future
                     for (Map.Entry<String, Future<?>> entry : futures.entrySet()) {
@@ -615,6 +614,7 @@ public class Dispatcher extends ListenerAdapter {
                     event.getMessage().removeReaction("⚠").queue();
                     event.getMessage().removeReaction("⁉").queue();
                 } catch (NullPointerException ignored) {
+
                 }
             }
         }
