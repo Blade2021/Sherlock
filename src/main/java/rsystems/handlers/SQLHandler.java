@@ -83,21 +83,23 @@ public class SQLHandler {
         return output;
     }
 
-    public String getString(String table, String columnID, String identfierColumn, Long identfier) {
-        String output = "";
+    public String getString(String table, String columnName, String identifierColumn, Long identifier) throws SQLException {
+        String output = null;
+
+        Connection connection = pool.getConnection();
 
         try {
-            Connection connection = pool.getConnection();
-
             Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery(String.format("SELECT"));
+            ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %d",columnName,table,identifierColumn,identifier));
 
             while (rs.next()) {
-                output = rs.getString(columnID.toUpperCase());
+                output = rs.getString(columnName.toUpperCase());
             }
 
         } catch (SQLException throwables) {
             System.out.println(throwables.getMessage());
+        } finally {
+            connection.close();
         }
 
         return output;
@@ -373,16 +375,19 @@ public class SQLHandler {
         }
     }
 
-    public boolean addWelcomeRow(String guildID) {
-        try {
-            Connection connection = pool.getConnection();
+    public void addWelcomeRow(Long guildID, String message) throws SQLException {
 
+        Connection connection = pool.getConnection();
+
+        try {
             Statement st = connection.createStatement();
-            st.execute("INSERT INTO WelcomeTable (ChildGuildID) VALUES (" + Long.valueOf(guildID) + ")");
-            return true;
+            st.execute(String.format("INSERT INTO WelcomeTable (ChildGuildID, WelcomeMessage) VALUES (%d, '%s')",guildID,message));
+            //return true;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-            return false;
+            //return false;
+        } finally {
+            connection.close();
         }
     }
 
@@ -404,6 +409,7 @@ public class SQLHandler {
                 guildSettings.setEmbedFilterSetting(rs.getInt("EmbedFilter"));
                 guildSettings.setGrantedSelfRoleCount(rs.getInt("GrantedSelfRoleCount"));
                 guildSettings.setGrantedAutoRoleCount(rs.getInt("GrantedAutoRoleCount"));
+                guildSettings.setWelcomeMessageSetting(rs.getInt("WelcomeMessageSetting"));
             }
 
         } catch (SQLException throwables) {
