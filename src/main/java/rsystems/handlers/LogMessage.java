@@ -11,9 +11,9 @@ import java.util.Iterator;
 
 public class LogMessage {
 
-    public static boolean registerLogChannel(final Guild guild, final TextChannel logChannel){
+    public static boolean registerLogChannel(final Guild guild, final TextChannel logChannel) {
 
-        if(logChannel.canTalk()) {
+        if (logChannel.canTalk()) {
 
             SherlockBot.guildMap.get(guild.getIdLong()).setLogChannelID(logChannel.getIdLong());
 
@@ -61,17 +61,24 @@ public class LogMessage {
         return false;
     }
 
-    public static void clearLogChannel(final Long guildID){
-        // do something here
+    public static void clearLogChannel(final Long guildID) {
+        // Update logChannel
+        SherlockBot.guildMap.get(guildID).setLogChannelID(null);
+        try {
+            SherlockBot.database.updateGuild(SherlockBot.guildMap.get(guildID));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
-    public static boolean hasLogChannel(final Long guildID){
-        if(SherlockBot.guildMap.get(guildID).getLogChannelID() != null){
+    public static boolean hasLogChannel(final Long guildID) {
+        if (SherlockBot.guildMap.get(guildID).getLogChannelID() != null) {
             Long channelID = SherlockBot.guildMap.get(guildID).getLogChannelID();
-            if(SherlockBot.jda.getGuildById(guildID).getTextChannelById(channelID) != null){
+            if (SherlockBot.jda.getGuildById(guildID).getTextChannelById(channelID) != null) {
                 TextChannel logChannel = SherlockBot.jda.getGuildById(guildID).getTextChannelById(channelID);
 
-                if(logChannel.canTalk()){
+                if (logChannel.canTalk()) {
                     return true;
                 }
             }
@@ -79,20 +86,20 @@ public class LogMessage {
         return false;
     }
 
-    public static void sendLogMessage(Long guildID, MessageEmbed embed){
+    public static void sendLogMessage(Long guildID, MessageEmbed embed) {
 
-        if(SherlockBot.getGuildSettings(guildID).getLogChannelID() != null){
+        if (SherlockBot.getGuildSettings(guildID).getLogChannelID() != null) {
             final Long logChannelID = SherlockBot.guildMap.get(guildID).getLogChannelID();
 
-            if(SherlockBot.jda.getGuildById(guildID).getTextChannelById(logChannelID) != null){
+            if (SherlockBot.jda.getGuildById(guildID).getTextChannelById(logChannelID) != null) {
 
                 final TextChannel logChannel = SherlockBot.jda.getGuildById(guildID).getTextChannelById(logChannelID);
-                try{
+                try {
                     logChannel.sendMessageEmbeds(embed).queue();
-                } catch(NullPointerException | PermissionException e){
+                } catch (NullPointerException | PermissionException e) {
                     // REMOVE LOG CHANNEL COMPLETELY FROM PREVIOUS DATA
 
-                    SherlockBot.database.putValueNull("Guilds","LogChannelID","GuildID",guildID);
+                    SherlockBot.database.putValueNull("Guilds", "LogChannelID", "GuildID", guildID);
                     SherlockBot.guildMap.get(guildID).setLogChannelID(null);
                 }
 
@@ -101,22 +108,22 @@ public class LogMessage {
 
     }
 
-    public static void sendLogMessage(Long guildID, InfractionObject infractionObject){
+    public static void sendLogMessage(Long guildID, InfractionObject infractionObject) {
 
-        if(SherlockBot.getGuildSettings(guildID).getLogChannelID() != null){
+        if (SherlockBot.getGuildSettings(guildID).getLogChannelID() != null) {
             final Long logChannelID = SherlockBot.guildMap.get(guildID).getLogChannelID();
 
-            if(SherlockBot.jda.getGuildById(guildID).getTextChannelById(logChannelID) != null){
+            if (SherlockBot.jda.getGuildById(guildID).getTextChannelById(logChannelID) != null) {
 
                 final TextChannel logChannel = SherlockBot.jda.getGuildById(guildID).getTextChannelById(logChannelID);
-                try{
+                try {
                     logChannel.sendMessageEmbeds(infractionObject.createEmbedMessge()).queue((message -> {
-                        SherlockBot.database.putValue("CaseTable","LogMessageID","CaseID",infractionObject.getCaseNumber(),message.getIdLong());
+                        SherlockBot.database.putValue("CaseTable", "LogMessageID", "CaseID", infractionObject.getCaseNumber(), message.getIdLong());
                     }));
-                } catch(NullPointerException | PermissionException e){
+                } catch (NullPointerException | PermissionException e) {
                     // REMOVE LOG CHANNEL COMPLETELY FROM PREVIOUS DATA
 
-                    SherlockBot.database.putValueNull("Guilds","LogChannelID","GuildID",guildID);
+                    SherlockBot.database.putValueNull("Guilds", "LogChannelID", "GuildID", guildID);
                     SherlockBot.guildMap.get(guildID).setLogChannelID(null);
                 }
 
@@ -125,20 +132,20 @@ public class LogMessage {
 
     }
 
-    public static void sendLogMessage(Long guildID, String message){
+    public static void sendLogMessage(Long guildID, String message) {
 
-        if(SherlockBot.getGuildSettings(guildID).getLogChannelID() != null){
+        if (SherlockBot.getGuildSettings(guildID).getLogChannelID() != null) {
             final Long logChannelID = SherlockBot.guildMap.get(guildID).getLogChannelID();
 
-            if(SherlockBot.jda.getGuildById(guildID).getTextChannelById(logChannelID) != null){
+            if (SherlockBot.jda.getGuildById(guildID).getTextChannelById(logChannelID) != null) {
 
                 final TextChannel logChannel = SherlockBot.jda.getGuildById(guildID).getTextChannelById(logChannelID);
-                try{
+                try {
                     logChannel.sendMessage(message).queue();
-                } catch(NullPointerException | PermissionException e){
+                } catch (NullPointerException | PermissionException e) {
                     // REMOVE LOG CHANNEL COMPLETELY FROM PREVIOUS DATA
 
-                    SherlockBot.database.putValueNull("Guilds","LogChannelID","GuildID",guildID);
+                    SherlockBot.database.putValueNull("Guilds", "LogChannelID", "GuildID", guildID);
                     SherlockBot.guildMap.get(guildID).setLogChannelID(null);
                 }
 

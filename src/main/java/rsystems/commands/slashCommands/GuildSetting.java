@@ -23,6 +23,13 @@ public class GuildSetting extends SlashCommand {
 
         ArrayList<SubcommandGroupData> subCmdGroupData = new ArrayList<>();
 
+        // Prefix Group
+        ArrayList<SubcommandData> prefixCommands = new ArrayList<>();
+        prefixCommands.add(new SubcommandData("set","Set a custom prefix for the bot on this server").addOption(OptionType.STRING,"prefix","The prefix to be set",true));
+        prefixCommands.add(new SubcommandData("clear","Return to the default prefix only"));
+
+        subCmdGroupData.add(new SubcommandGroupData("prefix","Prefix Set/Clear commands").addSubcommands(prefixCommands));
+
         // Filter Group
         ArrayList<SubcommandData> filteringCommands = new ArrayList<>();
         filteringCommands.add(new SubcommandData("add","Enable filtering for a word").addOption(OptionType.STRING,"word","Word to be filterd",true));
@@ -38,6 +45,12 @@ public class GuildSetting extends SlashCommand {
 
         subCmdGroupData.add(new SubcommandGroupData("logging","Set/Clear Logging Channel commands").addSubcommands(loggingCommands));
 
+        // Welcome Message Group
+        ArrayList<SubcommandData> welcomeCommands = new ArrayList<>();
+        welcomeCommands.add(new SubcommandData("set","Set a welcome message for joining members on your server").addOption(OptionType.STRING,"message","The message to be sent to the user",true));
+        welcomeCommands.add(new SubcommandData("clear","Clear the welcome message for this server."));
+
+        subCmdGroupData.add(new SubcommandGroupData("welcome","Welcome Message Commands").addSubcommands(welcomeCommands));
 
 
         super.getCommandData().addSubcommandGroups(subCmdGroupData);
@@ -57,6 +70,40 @@ public class GuildSetting extends SlashCommand {
 
     @Override
     public void dispatch(User sender, MessageChannel channel, String content, SlashCommandEvent event) {
+
+        if(event.getSubcommandGroup().equalsIgnoreCase("prefix")){
+
+            event.deferReply().setEphemeral(false).queue();
+
+            if(event.getSubcommandName().equalsIgnoreCase("set")){
+
+                String prefix = null;
+                if(event.getOption("prefix") != null){
+                    prefix = event.getOption("prefix").getAsString();
+                }
+
+                SherlockBot.guildMap.get(event.getGuild().getIdLong()).setPrefix(prefix);
+                try{
+                    if(SherlockBot.database.updateGuild(SherlockBot.getGuildSettings(event.getGuild().getIdLong())) > 0) {
+                        event.getHook().editOriginal(String.format("Your prefix `%s` has been set.", prefix)).queue();
+                    }
+                } catch (SQLException e) {
+                    event.getHook().editOriginal("Failed to update the database.  Contact Support").queue();
+                }
+
+
+            } else if(event.getSubcommandName().equalsIgnoreCase("clear")){
+                SherlockBot.guildMap.get(event.getGuild().getIdLong()).setPrefix(null);
+                try{
+                    if(SherlockBot.database.updateGuild(SherlockBot.getGuildSettings(event.getGuild().getIdLong())) > 0) {
+                        event.getHook().editOriginal("Your prefix has been cleared").queue();
+                    }
+                } catch (SQLException e) {
+                    event.getHook().editOriginal("Failed to update the database.  Contact Support").queue();
+                }
+            }
+
+        }
 
         if(event.getSubcommandGroup().equalsIgnoreCase("logging")) {
 
@@ -88,6 +135,33 @@ public class GuildSetting extends SlashCommand {
             }
         }
 
+        if(event.getSubcommandGroup().equalsIgnoreCase("welcome")) {
+
+            event.deferReply().setEphemeral(false).queue();
+
+            if (event.getSubcommandName().equalsIgnoreCase("set")) {
+                if (!event.getOption("message").getAsString().isEmpty()) {
+                    try {
+                        SherlockBot.database.addWelcomeRow(event.getGuild().getIdLong(), event.getOption("message").getAsString());
+                        SherlockBot.database.putValue("Guilds", "WelcomeMessageSetting", "GuildID", event.getGuild().getIdLong(), 1);
+                        event.getHook().editOriginal("Welcome message was set").queue();
+                    } catch(SQLException e){
+                        event.getHook().editOriginal("An error occured").queue();
+                    }
+                }
+            } else if (event.getSubcommandName().equalsIgnoreCase("clear")) {
+
+                try {
+                    SherlockBot.database.putValueNull("WelcomeTable", "WelcomeMessage", "ChildGuildID", event.getGuild().getIdLong());
+                    SherlockBot.database.putValue("Guilds", "WelcomeMessageSetting", "GuildID", event.getGuild().getIdLong(), 0);
+
+                    event.getHook().editOriginal("Welcome message cleared.").queue();
+                } catch(SQLException e){
+                    event.getHook().editOriginal("An error occured").queue();
+                }
+            }
+        }
+
         if(event.getSubcommandGroup().equalsIgnoreCase("filter")){
 
             event.deferReply().setEphemeral(true).queue();
@@ -113,6 +187,12 @@ public class GuildSetting extends SlashCommand {
                     e.printStackTrace();
                 }
             }
+        }
+
+        try {
+            SherlockBot.guildMap.put(event.getGuild().getIdLong(),SherlockBot.database.getGuildData(event.getGuild().getIdLong()));
+        } catch (SQLException e) {
+
         }
     }
 

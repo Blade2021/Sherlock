@@ -64,41 +64,25 @@ public class SherlockBot {
             //Get the data for each guild from the database
             api.getGuilds().forEach(guild -> {
 
-                if(guild.getId().equals("386701951662030858")){
+                if(guild.getId().equals("386701951662030858") || guild.getId().equals("905507142570741822")){
+
+                    System.out.println("Upserting interactions for Guild: " + guild.getId());
 
                     guild.retrieveCommands().queue(list -> {
 
                         for(SlashCommand slashCommand: slashCommandDispatcher.getCommands()){
-                            /*
-                            for(Command c: list){
-                                if(c.getName().equalsIgnoreCase(slashCommand.getName())){
-                                    continue;
-                                }
+                            try {
+                                guild.upsertCommand(slashCommand.getCommandData()).queue(null,failure -> {
+                                    System.out.println("Error loading slash command: " + slashCommand.getName());
+                                    //failure.printStackTrace();
+                                });
+                            } catch(Exception e){
+                                System.out.println("Error loading slash command: " + slashCommand.getName());
+                                e.printStackTrace();
                             }
-
-                             */
-                            guild.upsertCommand(slashCommand.getCommandData()).queue();
                         }
                     });
 
-                    /*guild.upsertCommand("hello","Say Hello World").queue();
-
-                    CommandData guildSetting = new CommandData("gs", "Control guild settings for the bot");
-                    SubcommandData logChannel = new SubcommandData("logchannel","Set a log channel for the bot");
-                    logChannel.addOption(OptionType.CHANNEL,"channel","The channel to be set as the log channel of the bot",false);
-
-                    guildSetting.addSubcommands(logChannel);
-
-                    guild.upsertCommand(guildSetting).queue();
-
-                    CommandData reasonCommandData = new CommandData("activity","Set a reason for a moderation action");
-                    reasonCommandData.addOption(OptionType.INTEGER,"id","The ID # of the case event");
-                    reasonCommandData.addOption(OptionType.STRING,"reason","The reason to set");
-
-                    guild.upsertCommand(reasonCommandData).queue();
-
-
-                     */
                     guild.retrieveCommands().queue(list -> {
                         for(Command command:list){
                             System.out.println(String.format("CMD: %s  | ID: %s",command.getName(),command.getId()));

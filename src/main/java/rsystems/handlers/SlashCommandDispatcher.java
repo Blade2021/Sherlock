@@ -35,6 +35,8 @@ public class SlashCommandDispatcher extends ListenerAdapter {
         registerCommand(new GuildSetting());
         registerCommand(new SelfRole());
         registerCommand(new AutoRole());
+        registerCommand(new Verify());
+        registerCommand(new Unban());
     }
 
     public Set<SlashCommand> getCommands() {

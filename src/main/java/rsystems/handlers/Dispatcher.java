@@ -10,14 +10,15 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.TimeFormat;
-import org.jetbrains.annotations.NotNull;
 import rsystems.Config;
 import rsystems.SherlockBot;
 import rsystems.commands.botManager.ForceDisconnect;
 import rsystems.commands.botManager.Shutdown;
 import rsystems.commands.botManager.Test;
+import rsystems.commands.channelCommands.Topic;
 import rsystems.commands.guildFunctions.*;
 import rsystems.commands.modCommands.*;
+import rsystems.commands.publicCommands.Commands;
 import rsystems.commands.publicCommands.Help;
 import rsystems.commands.publicCommands.Info;
 import rsystems.commands.subscriberOnly.ColorRole;
@@ -61,6 +62,8 @@ public class Dispatcher extends ListenerAdapter {
         registerCommand(new Leave());
         registerCommand(new Unban());
         registerCommand(new Info());
+        registerCommand(new Commands());
+        registerCommand(new Topic());
 
     }
 
@@ -91,18 +94,26 @@ public class Dispatcher extends ListenerAdapter {
                         if (!event.getMessage().getMember().hasPermission(Permission.MESSAGE_MENTION_EVERYONE)) {
 
                             InfractionObject infractionObject = new InfractionObject(event.getGuild().getIdLong());
-                            infractionObject.setEventType(InfractionObject.EventType.WARNING);
+                            infractionObject.setEventType(InfractionObject.EventType.MUTE);
                             infractionObject.setUserID(event.getAuthor().getIdLong());
                             infractionObject.setUserTag(event.getAuthor().getAsTag());
                             infractionObject.setModeratorID(SherlockBot.botOwnerID);
                             infractionObject.setModeratorTag(SherlockBot.jda.getSelfUser().getAsTag());
+
+                            try {
+                                infractionObject.setNote("User used @everyone or @here");
+                                SherlockBot.database.insertCaseEvent(event.getGuild().getIdLong(),infractionObject);
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+
                             infractionObject.setNote("*Original Message:*\n" +
                                     "```" +
                                     event.getMessage().getContentRaw() +
                                     "```"
                             );
 
-                            muteUser(event, "User mentioned @everyone or @here without authorization", 5);
+                            muteUser(event, "User mentioned @everyone or @here without authorization", 60);
 
                             LogMessage.sendLogMessage(event.getGuild().getIdLong(), infractionObject);
                             event.getMessage().delete().reason("Message contained broad mention without authorization").queue();
@@ -290,46 +301,49 @@ public class Dispatcher extends ListenerAdapter {
             }
 
             // SPAM MONITORING
-            event.getChannel().getHistoryBefore(event.getMessage(), 12).queue(messageHistory -> {
+            if((!event.getMember().isOwner()) || (!event.getMember().hasPermission(Permission.ADMINISTRATOR) || (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)))) {
 
-                ArrayList<String> messages = new ArrayList<>();
-                for (Message m : messageHistory.getRetrievedHistory()) {
+                event.getChannel().getHistoryBefore(event.getMessage(), 12).queue(messageHistory -> {
 
-                    if (m.getAuthor().isBot()) {
-                        continue;
-                    }
+                    ArrayList<String> messages = new ArrayList<>();
+                    for (Message m : messageHistory.getRetrievedHistory()) {
 
-                    if (m.getContentRaw().equalsIgnoreCase(event.getMessage().getContentRaw())) {
-                        if (m.getAuthor().getIdLong() == event.getAuthor().getIdLong()) {
-                            messages.add(m.getId());
+                        if (m.getAuthor().isBot()) {
+                            continue;
+                        }
+
+                        if (m.getContentRaw().equalsIgnoreCase(event.getMessage().getContentRaw())) {
+                            if (m.getAuthor().getIdLong() == event.getAuthor().getIdLong()) {
+                                messages.add(m.getId());
+                            }
+                        }
+
+                        //SPAM DETECTED
+                        if (messages.size() >= Integer.parseInt(Config.get("spamLimit"))) {
+                            messages.add(event.getMessageId());
+
+                            muteUser(event, "Similar-Message Spam", 1);
+
+                            event.getChannel().purgeMessagesById(messages);
+
+                            // Log message to log channel
+                            if (SherlockBot.guildMap.get(event.getGuild().getIdLong()).getLogChannelID() != null) {
+                                EmbedBuilder builder = new EmbedBuilder();
+                                builder.setTitle("Spam Detection - " + event.getAuthor().getAsTag())
+                                        .setDescription(String.format("`Message:`\n%s\n\n" + TimeFormat.RELATIVE.now(), m.getContentRaw()));
+                                builder.addField("User:", event.getAuthor().getAsMention(), false);
+                                builder.setFooter(String.format("Tag: %s | ID: %s", event.getAuthor().getAsTag(), event.getAuthor().getId()));
+                                builder.setColor(Color.decode("#FFCC37"));
+
+                                LogMessage.sendLogMessage(event.getGuild().getIdLong(), builder.build());
+
+                                builder.clear();
+                            }
+                            break;
                         }
                     }
-
-                    //SPAM DETECTED
-                    if (messages.size() >= Integer.parseInt(Config.get("spamLimit"))) {
-                        messages.add(event.getMessageId());
-
-                        muteUser(event, "Similar-Message Spam", 1);
-
-                        event.getChannel().purgeMessagesById(messages);
-
-                        // Log message to log channel
-                        if (SherlockBot.guildMap.get(event.getGuild().getIdLong()).getLogChannelID() != null) {
-                            EmbedBuilder builder = new EmbedBuilder();
-                            builder.setTitle("Spam Detection - " + event.getAuthor().getAsTag())
-                                    .setDescription(String.format("`Message:`\n%s\n\n" + TimeFormat.RELATIVE.now(), m.getContentRaw()));
-                            builder.addField("User:", event.getAuthor().getAsMention(), false);
-                            builder.setFooter(String.format("Tag: %s | ID: %s", event.getAuthor().getAsTag(), event.getAuthor().getId()));
-                            builder.setColor(Color.decode("#FFCC37"));
-
-                            LogMessage.sendLogMessage(event.getGuild().getIdLong(), builder.build());
-
-                            builder.clear();
-                        }
-                        break;
-                    }
-                }
-            });
+                });
+            }
 
             // Language Filter
             String filterWord = filterWordFound(event.getMessage(), event.getGuild().getIdLong());
@@ -521,7 +535,7 @@ public class Dispatcher extends ListenerAdapter {
                         System.out.println("Couldn't unmute user");
                     }, scheduledExecutorService);
                 } catch (ErrorResponseException e) {
-                    System.out.println(String.format("An error occured for guild: %d",event.getGuild().getIdLong()));
+                    System.out.println(String.format("An error occurred for guild: %d", event.getGuild().getIdLong()));
                 }
             });
 
