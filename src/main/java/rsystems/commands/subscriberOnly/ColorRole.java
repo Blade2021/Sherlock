@@ -51,6 +51,7 @@ public class ColorRole extends Command {
 
     @Override
     public String getHelp() {
+        //todo help docs
         return null;
     }
 }

@@ -10,6 +10,7 @@ import rsystems.SherlockBot;
 import rsystems.objects.Command;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class WatchChannel extends Command {
 
@@ -25,20 +26,25 @@ public class WatchChannel extends Command {
 
         String[] args = content.split("\\s+");
 
-        if(args.length >= 1) {
-            TextChannel targetChannel = null;
+        if (args.length >= 1) {
+            ArrayList<TextChannel> requestedIgnoreList = new ArrayList<>();
 
             if (message.getMentionedChannels().size() >= 1) {
-                targetChannel = message.getMentionedChannels().get(0);
+                for (TextChannel requestedChannel : message.getMentionedChannels()) {
+                    //Don't allow other guild channels to be put into database
+                    if (requestedChannel.getGuild().getIdLong() == event.getGuild().getIdLong()) {
+                        requestedIgnoreList.add(requestedChannel);
+                    }
+                }
             } else {
-                if(event.getGuild().getTextChannelById(args[1]) != null){
-                    targetChannel = event.getGuild().getTextChannelById(args[1]);
+                if (event.getGuild().getTextChannelById(args[1]) != null) {
+                    requestedIgnoreList.add(event.getGuild().getTextChannelById(args[1]));
                 }
             }
 
-            if(targetChannel != null){
-                if(SherlockBot.database.getLong("IgnoreChannelTable","ChannelID","ChildGuildID",event.getGuild().getIdLong(),"ChannelID",targetChannel.getIdLong()) != null) {
-                    if(SherlockBot.database.handleIgnoreChannel(event.getGuild().getIdLong(),targetChannel.getIdLong(),false) >= 1){
+            if (requestedIgnoreList.size() > 0) {
+                for (TextChannel targetChannel : requestedIgnoreList) {
+                    if (SherlockBot.database.handleIgnoreChannel(event.getGuild().getIdLong(), targetChannel.getIdLong(), false) >= 1) {
                         message.addReaction("✅").queue();
                     }
                 }
@@ -49,6 +55,9 @@ public class WatchChannel extends Command {
 
     @Override
     public String getHelp() {
-        return null;
+        return "Set a channel(s) to be watched by Sherlock.\n" +
+                "This will remove any ignore configurations from said channel\n\n" +
+                "{prefix}{command} [Mention Channel(s)]\n" +
+                "{prefix}{command} [ChannelID]";
     }
 }

@@ -857,24 +857,23 @@ public class SQLHandler {
         return false;
     }
 
-    /**
-     * Handle the ignore Channel function of Sherlock.
-     * @param GuildID
-     * @param ChannelID
-     * @param AddChannel If True, method adds the channel TO the database, if False, method REMOVES the channelID from the database (if found)
-     * @return Number of rows changed
-     * @throws SQLException
-     */
+
     public Integer handleIgnoreChannel(Long GuildID, Long ChannelID, Boolean AddChannel) throws SQLException {
         int output = 0;
 
         Connection connection = pool.getConnection();
+
         try {
             Statement st = connection.createStatement();
-            if(AddChannel) {
-                st.execute(String.format("INSERT INTO IgnoreChannelTable (ChildGuildID,ChannelID) VALUES (%d,%d)", GuildID, ChannelID));
-            } else {
+
+            Long channelFound = this.getLong("IgnoreChannelTable","ChannelID","ChannelID",ChannelID);
+
+            //ResultSet rs = st.executeQuery(String.format("SELECT %s FROM %s where %s = %d",columnName,table,identifierColumn,identifier)); ")
+
+            if((channelFound != null) && (!AddChannel)){
                 st.execute(String.format("DELETE FROM IgnoreChannelTable WHERE ChildGuildID = %d AND ChannelID = %d", GuildID, ChannelID));
+            } else if((channelFound == null) && (AddChannel)){
+                st.execute(String.format("INSERT INTO IgnoreChannelTable (ChildGuildID,ChannelID) VALUES (%d,%d)", GuildID, ChannelID));
             }
 
             output = st.getUpdateCount();

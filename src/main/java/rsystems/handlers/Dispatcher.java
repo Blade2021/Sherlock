@@ -22,7 +22,6 @@ import rsystems.commands.publicCommands.Commands;
 import rsystems.commands.publicCommands.Help;
 import rsystems.commands.publicCommands.Info;
 import rsystems.commands.subscriberOnly.ColorRole;
-import rsystems.commands.subscriberOnly.CopyChannel;
 import rsystems.objects.Command;
 import rsystems.objects.InfractionObject;
 
@@ -52,8 +51,8 @@ public class Dispatcher extends ListenerAdapter {
         registerCommand(new Infraction());
         registerCommand(new Reason());
         registerCommand(new Test());
-        registerCommand(new GuildSetting());
-        registerCommand(new CopyChannel());
+        //registerCommand(new GuildSetting());
+        //registerCommand(new CopyChannel());
         registerCommand(new IgnoreChannel());
         registerCommand(new WatchChannel());
         registerCommand(new ColorRole());
@@ -411,8 +410,8 @@ public class Dispatcher extends ListenerAdapter {
         if (c.isOwnerOnly()) {
             if (member.getIdLong() == SherlockBot.botOwnerID) {
 
-                System.out.println(member.getIdLong());
-                System.out.println(SherlockBot.botOwnerID);
+                //System.out.println(member.getIdLong());
+                //System.out.println(SherlockBot.botOwnerID);
 
                 return true;
             } else {
@@ -584,6 +583,10 @@ public class Dispatcher extends ListenerAdapter {
     @Override
     public void onMessageUpdate(MessageUpdateEvent event) {
         if (event.isFromGuild()) {
+
+            if(event.getAuthor().isBot()){
+                return;
+            }
 
             final boolean futureFound = futures.containsKey(event.getMessageId());
 

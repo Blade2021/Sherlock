@@ -29,7 +29,6 @@ public class SlashCommandDispatcher extends ListenerAdapter {
     public SlashCommandDispatcher() {
 
         registerCommand(new Apple());
-        registerCommand(new CopyChannel());
         registerCommand(new Commands());
         registerCommand(new Ban());
         registerCommand(new GuildSetting());
