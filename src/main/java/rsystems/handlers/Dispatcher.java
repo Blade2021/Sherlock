@@ -259,7 +259,7 @@ public class Dispatcher extends ListenerAdapter {
             }
 
             // SPAM MONITORING
-            if((!event.getMember().isOwner()) || (!event.getMember().hasPermission(Permission.ADMINISTRATOR) || (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)))) {
+            if((!event.getMember().isOwner()) && (!event.getMember().hasPermission(Permission.ADMINISTRATOR) && (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)))) {
 
                 event.getChannel().getHistoryBefore(event.getMessage(), 12).queue(messageHistory -> {
 
