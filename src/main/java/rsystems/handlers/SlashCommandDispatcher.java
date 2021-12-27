@@ -31,12 +31,13 @@ public class SlashCommandDispatcher extends ListenerAdapter {
 
         registerCommand(new Apple());
         registerCommand(new Commands());
-        //registerCommand(new Ban());
+        registerCommand(new Ban());
         registerCommand(new GuildSetting());
         registerCommand(new SelfRole());
         registerCommand(new AutoRole());
         registerCommand(new Verify());
-        //registerCommand(new Unban());
+        registerCommand(new Unban());
+        registerCommand(new Moderator());
     }
 
     public Set<SlashCommand> getCommands() {
@@ -216,8 +217,6 @@ public class SlashCommandDispatcher extends ListenerAdapter {
         final Guild guild = SherlockBot.jda.getGuildById(guildID);
         if(guild != null){
 
-            guild.updateCommands().queue();
-
             guild.retrieveCommands().queue(commands -> {
 
                 for(SlashCommand slashCommand: this.slashCommands){
@@ -229,26 +228,17 @@ public class SlashCommandDispatcher extends ListenerAdapter {
                         }
                     }
 
-                    if(!commandFound){
-                        System.out.println(String.format("DIDN'T FIND COMMAND: %s FOR GUILD: %d",slashCommand.getName(),guildID));
-                    }
+                    if(!commandFound) {
+                        System.out.println(String.format("DIDN'T FIND COMMAND: %s FOR GUILD: %d", slashCommand.getName(), guildID));
 
-                    guild.upsertCommand(slashCommand.getCommandData()).queueAfter(5,TimeUnit.SECONDS,success -> {
-                        System.out.println(String.format("UPSERTED COMMAND: %s FOR GUILD: %d",success.getName(),guild.getIdLong()));
-                    });
+                        guild.upsertCommand(slashCommand.getCommandData()).queueAfter(5, TimeUnit.SECONDS, success -> {
+                            System.out.println(String.format("UPSERTED COMMAND: %s FOR GUILD: %d", success.getName(), guild.getIdLong()));
+                        });
+                    }
                 }
 
             });
         }
-
-        /*for(SlashCommand slashCommand: this.getCommands()){
-            SherlockBot.jda.getGuildById(guildID).upsertCommand(slashCommand.getCommandData()).queueAfter(10,TimeUnit.SECONDS,null,failure -> {
-                System.out.println("Error loading slash command: " + slashCommand.getName());
-                failure.printStackTrace();
-            });
-        }
-
-         */
     }
 
 }

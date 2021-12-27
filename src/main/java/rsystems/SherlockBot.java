@@ -123,6 +123,7 @@ public class SherlockBot {
     private static void loadColorMap(){
         colorMap.putIfAbsent("warn","#F5741A");
         colorMap.putIfAbsent("quarantine","#AF1AF5");
+        colorMap.putIfAbsent("generic","#1ABDF5");
     }
 
 }

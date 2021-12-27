@@ -49,7 +49,7 @@ public class Dispatcher extends ListenerAdapter {
         registerCommand(new GiveRole());
         registerCommand(new TakeRole());
         registerCommand(new SoftBan());
-        registerCommand(new Infraction());
+        //registerCommand(new Infraction());
         registerCommand(new Reason());
         registerCommand(new Test());
         //registerCommand(new GuildSetting());
@@ -94,7 +94,7 @@ public class Dispatcher extends ListenerAdapter {
                         if (!event.getMessage().getMember().hasPermission(Permission.MESSAGE_MENTION_EVERYONE)) {
 
                             InfractionObject infractionObject = new InfractionObject(event.getGuild().getIdLong());
-                            infractionObject.setEventType(InfractionObject.EventType.MUTE);
+                            infractionObject.setEventType(InfractionObject.EventType.WARNING);
                             infractionObject.setUserID(event.getAuthor().getIdLong());
                             infractionObject.setUserTag(event.getAuthor().getAsTag());
                             infractionObject.setModeratorID(SherlockBot.botOwnerID);
@@ -113,9 +113,20 @@ public class Dispatcher extends ListenerAdapter {
                                     "```"
                             );
 
-                            muteUser(event, "User mentioned @everyone or @here without authorization", 60);
+                            //muteUser(event, "User mentioned @everyone or @here without authorization", 60);
+                            SherlockBot.overseer.submitTracker(event.getGuild().getIdLong(),event.getAuthor().getIdLong(),2,"Mass Mention");
 
                             LogMessage.sendLogMessage(event.getGuild().getIdLong(), infractionObject);
+
+                            EmbedBuilder builder = new EmbedBuilder();
+                            builder.setTitle("Mass Mention Detected");
+                            builder.setDescription(String.format("%s\nMentioning `@here` or `@everyone` is not allowed here.  Please refrain doing this as it will lead to repercussions.",event.getMember().getAsMention()));
+                            builder.setColor(SherlockBot.getColor("warn"));
+                            builder.setThumbnail(SherlockBot.bot.getEffectiveAvatarUrl());
+                            builder.setTimestamp(Instant.now());
+                            event.getMessage().replyEmbeds(builder.build()).queue();
+
+                            builder.clear();
                             event.getMessage().delete().reason("Message contained broad mention without authorization").queue();
 
                             return;
@@ -281,7 +292,9 @@ public class Dispatcher extends ListenerAdapter {
                         if (messages.size() >= Integer.parseInt(Config.get("spamLimit"))) {
                             messages.add(event.getMessageId());
 
-                            muteUser(event, "Similar-Message Spam", 1);
+                            //muteUser(event, "Similar-Message Spam", 1);
+
+                            SherlockBot.overseer.submitTracker(event.getGuild().getIdLong(),event.getAuthor().getIdLong(),1,"Spam Detected");
 
                             event.getChannel().purgeMessagesById(messages);
 
@@ -330,6 +343,8 @@ public class Dispatcher extends ListenerAdapter {
 
                     LogMessage.sendLogMessage(event.getGuild().getIdLong(), infractionObject);
                 }
+
+                SherlockBot.overseer.submitTracker(event.getGuild().getIdLong(),event.getAuthor().getIdLong(),0,"Word Filter");
             }
         });
     }
@@ -601,6 +616,7 @@ public class Dispatcher extends ListenerAdapter {
         }
     }
 
+    //Tracker type 2
     private void handleDiscordInvite(final MessageReceivedEvent event){
         try {
             List<Long> whiteListedGuilds = SherlockBot.database.getLongMultiple("InviteWhitelist", "TargetGuildID", "ChildGuildID", event.getGuild().getIdLong());
@@ -640,7 +656,7 @@ public class Dispatcher extends ListenerAdapter {
                             embedBuilder.clear();
                         });
 
-                        SherlockBot.overseer.submitTracker(event.getGuild().getIdLong(),event.getAuthor().getIdLong(),1);
+                        SherlockBot.overseer.submitTracker(event.getGuild().getIdLong(),event.getAuthor().getIdLong(),2,"Unauthorized Discord Invite");
                     }
                 });
             }

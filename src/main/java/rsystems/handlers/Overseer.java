@@ -15,9 +15,15 @@ import java.util.ArrayList;
 
 public class Overseer {
 
-    public void submitTracker(final Long guildID, final Long userID, final Integer type) {
+    public void submitTracker(final Long guildID, final Long userID, final Integer type, final String note) {
         try {
-            SherlockBot.database.insertTracker(guildID, userID, type);
+            if(type==0){
+                SherlockBot.database.insertTracker(guildID, userID, type,1,note);
+            } else if(type==1){
+                SherlockBot.database.insertTracker(guildID, userID, type,2,note);
+            } else {
+                SherlockBot.database.insertTracker(guildID, userID, type,4,note);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -29,9 +35,24 @@ public class Overseer {
         try {
             trackers = SherlockBot.database.getTrackers(guildID, userID);
 
-            if (trackers.size() > 2) {
-                quarantineUser(guildID, userID);
+            int heatLevel = 0;
+
+            for(TrackerObject trackerObject:trackers){
+
+                Integer type = trackerObject.getType();
+                if(type == 2){
+                    heatLevel = heatLevel + 9;
+                } else if(type == 1){
+                    heatLevel = heatLevel + 7;
+                } else {
+                    heatLevel = heatLevel + 5;
+                }
             }
+
+            if(heatLevel >= 18){
+                quarantineUser(guildID,userID);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

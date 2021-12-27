@@ -44,7 +44,7 @@ public class SQLHandler {
     }
 
     public Integer getInt(String table, String columnName, String identifierColumn, Long identifier) throws SQLException {
-        int output = 0;
+        Integer output = null;
 
         Connection connection = pool.getConnection();
 
@@ -312,8 +312,6 @@ public class SQLHandler {
         return guildSettings;
     }
 
-
-
     public Integer updateGuild(GuildSettings guildSettings) throws SQLException {
 
         Connection connection = pool.getConnection();
@@ -348,72 +346,6 @@ public class SQLHandler {
             connection.close();
         }
         return 0;
-    }
-
-    // Add an self role to the database
-    public Integer insertSelfRole(Long guildID, String command, Long roleID) throws SQLException {
-
-        if(checkSize(guildID,"SelfRoles")) {
-
-            Connection connection = pool.getConnection();
-
-            try {
-                Statement st = connection.createStatement();
-
-                st.execute(String.format("INSERT INTO SelfRoles (ChildGuildID, RoleCommand, RoleID) VALUES (%d, \"%s\", %d)", guildID, command, roleID));
-                return 200;
-            } catch (SQLException throwables) {
-                System.out.println("SQL Error");
-                throwables.printStackTrace();
-            } finally {
-                connection.close();
-            }
-        } else {
-            //DB Row Max limit reached
-            return 201;
-        }
-        return 0;
-    }
-
-    // Remove an self role to the database
-    public Integer removeSelfRole(Long guildID, String command) throws SQLException {
-
-        Connection connection = pool.getConnection();
-
-        try {
-            Statement st = connection.createStatement();
-
-            st.execute(String.format("DELETE FROM SelfRoles WHERE (ChildGuildID = %d) AND (RoleCommand = \"%s\")", guildID, command));
-            return st.getUpdateCount();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } finally {
-            connection.close();
-        }
-        return 0;
-    }
-
-    public Map<String,Long> getGuildSelfRoles(Long guildID) throws SQLException {
-
-        Connection connection = pool.getConnection();
-
-        Map<String,Long> selfRoleMap = new HashMap<>();
-        try {
-
-            Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT RoleCommand, RoleID FROM SelfRoles WHERE ChildGuildID = " + guildID);
-
-            while (rs.next()) {
-                selfRoleMap.putIfAbsent(rs.getString("RoleCommand"),rs.getLong("RoleID"));
-            }
-
-        } catch (SQLException throwables) {
-            System.out.println(throwables.getMessage());
-        }finally {
-            connection.close();
-        }
-
-        return selfRoleMap;
     }
 
     public Integer insertCaseEvent(Long guildID, InfractionObject caseObject) throws SQLException {
@@ -488,6 +420,12 @@ public class SQLHandler {
         return output;
     }
 
+    /*
+            *******************************************
+            ************** AUTO ROLES *****************
+            *******************************************
+     */
+
     // Add an self role to the database
     public Integer insertAutoRole(Long guildID, Long roleID) throws SQLException {
 
@@ -561,6 +499,86 @@ public class SQLHandler {
         }
         return output;
     }
+
+
+    /*
+     *******************************************
+     ************** SELF ROLES *****************
+     *******************************************
+     */
+
+    // Add an self role to the database
+    public Integer insertSelfRole(Long guildID, String command, Long roleID) throws SQLException {
+
+        if(checkSize(guildID,"SelfRoles")) {
+
+            Connection connection = pool.getConnection();
+
+            try {
+                Statement st = connection.createStatement();
+
+                st.execute(String.format("INSERT INTO SelfRoles (ChildGuildID, RoleCommand, RoleID) VALUES (%d, \"%s\", %d)", guildID, command, roleID));
+                return 200;
+            } catch (SQLException throwables) {
+                System.out.println("SQL Error");
+                throwables.printStackTrace();
+            } finally {
+                connection.close();
+            }
+        } else {
+            //DB Row Max limit reached
+            return 201;
+        }
+        return 0;
+    }
+
+    // Remove an self role to the database
+    public Integer removeSelfRole(Long guildID, String command) throws SQLException {
+
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("DELETE FROM SelfRoles WHERE (ChildGuildID = %d) AND (RoleCommand = \"%s\")", guildID, command));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return 0;
+    }
+
+    public Map<String,Long> getGuildSelfRoles(Long guildID) throws SQLException {
+
+        Connection connection = pool.getConnection();
+
+        Map<String,Long> selfRoleMap = new HashMap<>();
+        try {
+
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT RoleCommand, RoleID FROM SelfRoles WHERE ChildGuildID = " + guildID);
+
+            while (rs.next()) {
+                selfRoleMap.putIfAbsent(rs.getString("RoleCommand"),rs.getLong("RoleID"));
+            }
+
+        } catch (SQLException throwables) {
+            System.out.println(throwables.getMessage());
+        }finally {
+            connection.close();
+        }
+
+        return selfRoleMap;
+    }
+
+
+    /*
+     *******************************************
+     ************** OTHER FUNCTIONS *****************
+     *******************************************
+     */
 
     public ArrayList<TimedEvent> timedEventList() throws SQLException {
         ArrayList<TimedEvent> events = new ArrayList<>();
@@ -689,27 +707,6 @@ public class SQLHandler {
         return 0;
     }
 
-    // INSERT A BADWORD INTO THE DATABASE
-    public Map<Long,Integer> getModRoles(Long guildID) throws SQLException {
-        Map<Long,Integer> resultSet = new HashMap<>();
-
-        Connection connection = pool.getConnection();
-
-        try {
-            Statement st = connection.createStatement();
-
-            ResultSet rs = st.executeQuery("SELECT ModRoleID,Permissions FROM ModRoleTable WHERE ChildGuildID = " + guildID);
-            while (rs.next()) {
-                resultSet.put(rs.getLong("ModRoleID"),rs.getInt("Permissions"));
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } finally {
-            connection.close();
-        }
-        return resultSet;
-    }
-
     private boolean checkSize(Long guildID, String tableName) throws SQLException {
         int rowCount = 0;
 
@@ -800,17 +797,17 @@ public class SQLHandler {
         return trackers;
     }
 
-    public void insertTracker(final Long guildID, final Long userID, final Integer type) throws SQLException {
+    public void insertTracker(final Long guildID, final Long userID, final Integer type, final Integer expireHoursOffset, final String note) throws SQLException {
 
         final LocalDateTime currentDateTime = LocalDateTime.now();
-        final LocalDateTime expireDateTime = currentDateTime.plusHours(1);
+        final LocalDateTime expireDateTime = currentDateTime.plusHours(expireHoursOffset);
 
         Connection connection = pool.getConnection();
 
         try{
             Statement st = connection.createStatement();
 
-            st.executeUpdate(String.format("INSERT INTO Tracker (ChildGuildID, UserID, StartDateTime, ExpireDateTime, Type) VALUES (%d, %d, '%s', '%s', %d)",guildID,userID,currentDateTime,expireDateTime,type));
+            st.executeUpdate(String.format("INSERT INTO Tracker (ChildGuildID, UserID, StartDateTime, ExpireDateTime, Type, Note) VALUES (%d, %d, '%s', '%s', %d, '%s')",guildID,userID,currentDateTime,expireDateTime,type,note));
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -833,5 +830,47 @@ public class SQLHandler {
             connection.close();
         }
 
+    }
+
+    public Integer submitModeratorRole(final Long guildID, final Long roleID, final Integer permLevel) throws SQLException {
+        Integer updateCount = 0;
+
+        if(this.getInt("ModRoleTable","Permissions","ModRoleID",roleID) == null) {
+
+            Connection connection = pool.getConnection();
+            try {
+
+                    Statement st = connection.createStatement();
+
+                    st.executeUpdate(String.format("INSERT INTO ModRoleTable (ChildGuildID, ModRoleID, Permissions) VALUES (%d, %d, %d)", guildID, roleID, permLevel));
+                    updateCount = st.getUpdateCount();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                connection.close();
+            }
+        }
+        return  updateCount;
+    }
+
+    public Map<Long,Integer> getModRoles(Long guildID) throws SQLException {
+        Map<Long,Integer> resultSet = new HashMap<>();
+
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery("SELECT ModRoleID,Permissions FROM ModRoleTable WHERE ChildGuildID = " + guildID);
+            while (rs.next()) {
+                resultSet.put(rs.getLong("ModRoleID"),rs.getInt("Permissions"));
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return resultSet;
     }
 }
