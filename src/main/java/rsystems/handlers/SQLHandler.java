@@ -18,75 +18,14 @@ public class SQLHandler {
 
     protected static MariaDbPoolDataSource pool = null;
 
-    public SQLHandler(String URL, String user, String pass) {
-
-        try {
-            pool = new MariaDbPoolDataSource(URL);
-            pool.setUser(user);
-            pool.setPassword(pass);
-            pool.setMaxPoolSize(10);
-            pool.setMinPoolSize(4);
-
-            pool.initialize();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-    }
-
     public SQLHandler(MariaDbPoolDataSource pool) {
         SQLHandler.pool = pool;
-    }
-
-    /*
-
-                    GENERALIZED METHODS FOR SQL INTERACTION
-
-     */
-    public ArrayList<String> getStringList(String table, String columnName) {
-        ArrayList<String> output = new ArrayList<>();
-
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            ResultSet rs = st.executeQuery("SELECT " + columnName + " FROM " + table);
-            while (rs.next()) {
-                output.add(rs.getString(columnName));
-            }
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
-        return output;
-    }
-
-    public String getString(String table, String columnID, Integer rowID) {
-        String output = "";
-
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT " + columnID.toUpperCase() + " FROM " + table.toUpperCase() + " WHERE ID = " + rowID);
-
-            while (rs.next()) {
-                output = rs.getString(columnID.toUpperCase());
-            }
-
-        } catch (SQLException throwables) {
-            System.out.println(throwables.getMessage());
-        }
-
-        return output;
     }
 
     public String getString(String table, String columnName, String identifierColumn, Long identifier) throws SQLException {
         String output = null;
 
         Connection connection = pool.getConnection();
-
         try {
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %d",columnName,table,identifierColumn,identifier));
@@ -104,12 +43,12 @@ public class SQLHandler {
         return output;
     }
 
-    public Integer getInt(String table, String columnName, String identifierColumn, Long identifier) {
+    public Integer getInt(String table, String columnName, String identifierColumn, Long identifier) throws SQLException {
         int output = 0;
 
-        try {
-            Connection connection = pool.getConnection();
+        Connection connection = pool.getConnection();
 
+        try {
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s where %s = %d",columnName,table,identifierColumn,identifier));
 
@@ -119,6 +58,8 @@ public class SQLHandler {
 
         } catch (SQLException throwables) {
             System.out.println(throwables.getMessage());
+        } finally {
+            connection.close();
         }
 
         return output;
@@ -211,17 +152,20 @@ public class SQLHandler {
         return output;
     }
 
-    public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, Long value) {
+    public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, Long value) throws SQLException {
         int output = 0;
-        try {
-            Connection connection = pool.getConnection();
 
+        Connection connection = pool.getConnection();
+
+        try {
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
             output = st.getUpdateCount();
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+        } finally {
+            connection.close();
         }
         return output;
     }
@@ -235,10 +179,11 @@ public class SQLHandler {
      * @param value
      * @return
      */
-    public int putValue(String tableName, String columnName, String identifierColumn, int identifier, Long value) {
+    public int putValue(String tableName, String columnName, String identifierColumn, int identifier, Long value) throws SQLException {
         int output = 0;
+        Connection connection = pool.getConnection();
+
         try {
-            Connection connection = pool.getConnection();
 
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
@@ -246,21 +191,26 @@ public class SQLHandler {
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+        } finally {
+            connection.close();
         }
         return output;
     }
 
-    public int putValueNull(String tableName, String columnName, String identifierColumn, Long identifier) {
+    public int putValueNull(String tableName, String columnName, String identifierColumn, Long identifier) throws SQLException {
         int output = 0;
-        try {
-            Connection connection = pool.getConnection();
 
+        Connection connection = pool.getConnection();
+
+        try {
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = null WHERE %s = %d", tableName, columnName, identifierColumn, identifier));
             output = st.getUpdateCount();
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+        } finally {
+            connection.close();
         }
         return output;
     }
@@ -314,64 +264,6 @@ public class SQLHandler {
             connection.close();
         }
         return output;
-    }
-
-    public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, String value) {
-        int output = 0;
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-            st.execute(String.format("UPDATE %s SET %s = \"%s\" WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
-            output = st.getUpdateCount();
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return output;
-    }
-
-    public void putString(String tableName, Long GuildID, String event, Long senderColumn, Long receiverColumn) {
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-            st.execute(String.format("INSERT INTO %s (ChildGuildID, Event, ReceivingUserID, SendingUserID) VALUES (%d %s, %d, %d)",tableName, Long.valueOf(GuildID),event,senderColumn,receiverColumn));
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-    }
-
-    /*
-
-                    GUILD RELATED INTERACTIONS
-
-     */
-    public boolean addGuild(String guildID, String ownerID) {
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-            st.execute("INSERT INTO GuildTable (GuildID, OwnerID) VALUES (" + Long.valueOf(guildID) + ", " + Long.valueOf(ownerID) + ")");
-            st.execute("INSERT INTO WelcomeTable (ChildGuildID) VALUES (" + Long.valueOf(guildID) + ")");
-            return true;
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean removeGuild(String guildID) {
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-            st.execute("DELETE FROM GuildTable WHERE GuildID = " + Long.valueOf(guildID));
-            return true;
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            return false;
-        }
     }
 
     public void addWelcomeRow(Long guildID, String message) throws SQLException {
@@ -524,27 +416,6 @@ public class SQLHandler {
         return selfRoleMap;
     }
 
-    //Get self Roles - Called by GuildLoader
-    public ArrayList<Long> getSelfRoles(Long guildID) throws SQLException {
-        ArrayList<Long> output = new ArrayList<>();
-        Connection connection = pool.getConnection();
-
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT RoleID FROM SelfRoles WHERE ChildGuildID = " + guildID);
-
-            while (rs.next()) {
-                output.add(rs.getLong("RoleID"));
-            }
-
-        } catch (SQLException throwables) {
-            System.out.println(throwables.getMessage());
-        } finally {
-            connection.close();
-        }
-        return output;
-    }
-
     public Integer insertCaseEvent(Long guildID, InfractionObject caseObject) throws SQLException {
 
         int output = 0;
@@ -615,60 +486,6 @@ public class SQLHandler {
             connection.close();
         }
         return output;
-    }
-
-    public InfractionObject getCaseEvent(Long guildID, int caseID) throws SQLException {
-
-        int output = 0;
-        InfractionObject infractionObject = new InfractionObject(guildID,caseID);
-
-        Connection connection = pool.getConnection();
-        try {
-            Statement st = connection.createStatement();
-            ResultSet rs = st.executeQuery(String.format("SELECT ChildGuildID, CaseID,SubmissionDate,UserID,UserTag,ModID,ModTag,Reason,LogMessageID,EventType FROM CaseTable WHERE ChildGuildID = %d AND CaseID = %d",guildID,caseID));
-
-            int eventTypeIdentifier = -1;
-
-            while(rs.next()){
-                infractionObject.setNote(rs.getString("Reason"));
-                infractionObject.setModeratorTag(rs.getString("ModTag"));
-                infractionObject.setModeratorID(rs.getLong("ModID"));
-                infractionObject.setUserTag(rs.getString("UserTag"));
-                infractionObject.setUserID(rs.getLong("UserID"));
-                infractionObject.setMessageID(rs.getLong("LogMessageID"));
-                eventTypeIdentifier = rs.getInt("EventType");
-                infractionObject.setSubmissionDate(ZonedDateTime.ofInstant(rs.getTimestamp("Submission Date").toInstant(), ZoneId.of("UTC")));
-
-                switch(eventTypeIdentifier){
-                    case 0:
-                        infractionObject.setEventType(InfractionObject.EventType.WARNING);
-                        break;
-                    case 1:
-                        infractionObject.setEventType(InfractionObject.EventType.RESERVED);
-                        break;
-                    case 2:
-                        infractionObject.setEventType(InfractionObject.EventType.MUTE);
-                        break;
-                    case 3:
-                        infractionObject.setEventType(InfractionObject.EventType.KICK);
-                        break;
-                    case 4:
-                        infractionObject.setEventType(InfractionObject.EventType.TIMED_BAN);
-                        break;
-                    case 5:
-                        infractionObject.setEventType(InfractionObject.EventType.BAN);
-                        break;
-                }
-
-            }
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } finally {
-            connection.close();
-        }
-        return infractionObject;
-
     }
 
     // Add an self role to the database
@@ -745,83 +562,12 @@ public class SQLHandler {
         return output;
     }
 
-    public boolean insertTimedEvent(Long GuildID, Long UserID, int EventType, String reason, Long EventKey, int EventValue){
-
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            st.execute(String.format("INSERT INTO TimedEvents (ChildGuildID, EventID, EventType, Reason, Event_SubKey, Event_SubValue) VALUES (%d, %d, %d, \"%s\", %d, %d)", GuildID, UserID, EventType, reason, EventKey, EventValue));
-            return true;
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            throwables.getErrorCode();
-        }
-
-        return false;
-    }
-
-    public boolean insertTimedEvent(Long GuildID, Long UserID, int EventType, String reason, LocalDateTime startDatetime, LocalDateTime endDateTime){
-
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            st.execute(String.format("INSERT INTO TimedEvents (ChildGuildID, EventID, EventType, Reason, StartDate, EndDate) VALUES (%d, %d, %d, \"%s\", \"%s\", \"%s\")", GuildID, UserID, EventType, reason, startDatetime.toString(), endDateTime.toString()));
-            return true;
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            throwables.getErrorCode();
-        }
-
-        return false;
-    }
-
-    public boolean insertTimedEvent(Long GuildID, Long UserID, int EventType, String reason, Long EventKey, int EventValue, LocalDateTime startDatetime, LocalDateTime endDateTime){
-
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            st.execute(String.format("INSERT INTO TimedEvents (ChildGuildID, EventID, EventType, Reason, Event_SubKey, Event_SubValue, StartDate, EndDate) VALUES (%d, %d, %d, \"%s\", %d, %d, \"%s\", \"%s\")", GuildID, UserID, EventType, reason, EventKey, EventValue, startDatetime.toString(), endDateTime.toString()));
-            return true;
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            throwables.getErrorCode();
-        }
-
-        return false;
-    }
-
-    public int getTimedEventsQuantity(Long GuildID, Long UserID){
-
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            ResultSet rs = st.executeQuery(String.format("SELECT EventType FROM TimedEvents WHERE (ChildGuildID = %d) and (EventID = %d) and (EndDate < NOW())", GuildID, UserID));
-            int rowCount = 0;
-            while(rs.next()){
-                rowCount++;
-            }
-            return rowCount;
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            throwables.getErrorCode();
-        }
-        return 0;
-    }
-
-    public ArrayList<TimedEvent> timedEventList(){
+    public ArrayList<TimedEvent> timedEventList() throws SQLException {
         ArrayList<TimedEvent> events = new ArrayList<>();
 
-        try{
-            Connection connection = pool.getConnection();
+        Connection connection = pool.getConnection();
 
+        try{
             Statement st = connection.createStatement();
 
             ResultSet rs = st.executeQuery("SELECT EventType, ChildGuildID, EventID, EndDate FROM TimedEvents WHERE Expired = 0");
@@ -834,6 +580,8 @@ public class SQLHandler {
             throwables.printStackTrace();
             throwables.getErrorCode();
 
+        } finally {
+            connection.close();
         }
 
         return events;
@@ -884,190 +632,8 @@ public class SQLHandler {
         return output;
     }
 
-    public HashMap<Long,Integer> retractEvent(Long GuildID, Long EventID){
-        HashMap<Long,Integer> output = new HashMap<>();
-
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            ResultSet rs = st.executeQuery(String.format("SELECT Event_SubKey, Event_SubValue FROM TimedEvents WHERE (ChildGuildID = %d) and (EventID = %d) and (Expired=0)", GuildID, EventID));
-            while(rs.next()){
-                output.put(rs.getLong("Event_SubKey"),rs.getInt("Event_SubValue"));
-            }
-
-            st.executeUpdate(String.format("DELETE FROM TimedEvents WHERE (ChildGuildID = %d) AND (EventID = %d)",GuildID,EventID));
-
-            return output;
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            throwables.getErrorCode();
-        }
-
-        return null;
-    }
-
-    public int setArchiveCategory(Long GuildID, Long CategoryID){
-
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            st.execute(String.format("UPDATE GuildTable SET ArchiveCat = %d WHERE GuildID = %d",CategoryID, GuildID));
-
-            return st.getUpdateCount();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            throwables.getErrorCode();
-        }
-
-        return 0;
-    }
-
-    public Long getArchiveCategory(Long GuildID){
-        Long output = null;
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            ResultSet rs = st.executeQuery(String.format("SELECT ArchiveCat FROM GuildTable WHERE GuildID = %d",GuildID));
-            while(rs.next()){
-                output = rs.getLong("ArchiveCat");
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            throwables.getErrorCode();
-        }
-
-        return output;
-    }
-
-    public int storeArchiveChannel(Long GuildID, Long ChannelID, Long ParentCategory, int ChannelPosition){
-
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            st.execute(String.format("INSERT INTO ArchiveTable (ChildGuildID, ChannelID, PreviousCategory, PreviousPosition) VALUES (%d, %d, %d, %d)",GuildID,ChannelID,ParentCategory,ChannelPosition));
-            return st.getUpdateCount();
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            throwables.getErrorCode();
-        }
-
-        return 0;
-    }
-
-    public int insertReactionRole(Long guildID, Long messageID, String reactionID, Long roleID){
-
-        try{
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            st.execute(String.format("INSERT INTO ReactionTable (ChildGuildID, MessageID, ReactionID, RoleID) VALUES (%d, %d, \"%s\", %d)",guildID, messageID, reactionID, roleID));
-            return st.getUpdateCount();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return 0;
-    }
-
-    public int removeReactionRole(Long guildID, Long messageID, String reactionID){
-
-        try{
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            st.execute(String.format("DELETE FROM ReactionTable WHERE (ChildGuildID = %d) AND (MessageID = %d) AND (ReactionID = \"%s\")",guildID, messageID, reactionID));
-            return st.getUpdateCount();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return 0;
-    }
-
-    /*
-
-    OTHER METHODS....
-
-     */
-
-    public void logError(String guildID, String event){
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-            st.execute("INSERT INTO FaultTable (ChildGuildID, Event) VALUES (" + Long.valueOf(guildID) + ", \"" + event + "\")");
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-    }
-
-    public void logError(String guildID, String event, int errorCode){
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-            st.execute(String.format("INSERT INTO FaultTable (ChildGuildID, Event, ErrorCode) VALUES (%d, \"%s\", %d)",Long.valueOf(guildID),event,errorCode));
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-    }
-
-    public void logError(String guildID, String event, Long relateable){
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-            st.execute("INSERT INTO FaultTable (ChildGuildID, Event, Relateables) VALUES (" + Long.valueOf(guildID) + ", \"" + event + "\", " + relateable + ")");
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-    }
-
-    public boolean insertInfraction(String guildID, Long violatorID, String violation, Long submitter) {
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-            st.execute("INSERT INTO InfractionTable (ChildGuildID, ViolatorID, Violation, Submitter) VALUES (" + Long.valueOf(guildID) + ", " + violatorID + ", \"" + violation + "\", " + submitter + ")");
-            return true;
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            return false;
-        }
-    }
-
-    public ArrayList<InfractionObject> getInfractionList(String guildID, String violatorID) {
-        ArrayList<InfractionObject> infractionObjects = new ArrayList<>();
-
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            ResultSet rs = st.executeQuery(String.format("SELECT Violation, UserNote, DateSubmitted, Submitter FROM InfractionTable WHERE ChildGuildID = %d AND ViolatorID = %d order by DateSubmitted desc LIMIT 10",Long.valueOf(guildID),Long.valueOf(violatorID)));
-            while (rs.next()) {
-                infractionObjects.add(new InfractionObject(rs.getString("Violation"), rs.getString("UserNote"), rs.getDate("DateSubmitted"), rs.getLong("Submitter")));
-            }
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
-        return infractionObjects;
-    }
-
     public ArrayList<String> getFilterWords(Long guildID) throws SQLException {
         ArrayList<String> badWordsList = new ArrayList<>();
-
         Connection connection = pool.getConnection();
 
         try {
@@ -1088,46 +654,37 @@ public class SQLHandler {
     }
 
     // INSERT A BADWORD INTO THE DATABASE
-    public Integer addFilterWord(Long guildID, String badWord) {
+    public Integer addFilterWord(Long guildID, String filterWord) throws SQLException {
+
+        Connection connection = pool.getConnection();
         try {
-            Connection connection = pool.getConnection();
 
             Statement st = connection.createStatement();
 
-            st.execute(String.format("INSERT INTO LanguageFilter (ChildGuildID, Word) VALUES (%d, \"%s\")", guildID, badWord));
+            st.execute(String.format("INSERT INTO LanguageFilter (ChildGuildID, Word) VALUES (%d, \"%s\")", guildID, filterWord));
             return st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+        } finally {
+            connection.close();
         }
         return 0;
     }
 
     // REMOVE A BLACKLISTED WORD FROM THE DATABASE
-    public Integer removeFilterWord(Long guildID, String badWord) {
-        try {
-            Connection connection = pool.getConnection();
+    public Integer removeFilterWord(Long guildID, String badWord) throws SQLException {
 
+        Connection connection = pool.getConnection();
+
+        try {
             Statement st = connection.createStatement();
 
             st.execute(String.format("DELETE FROM LanguageFilter WHERE (ChildGuildID = %d) AND (Word = \"%s\")", guildID, badWord));
             return st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        }
-        return 0;
-    }
-
-    // INSERT A BADWORD INTO THE DATABASE
-    public Integer insertModRole(Long guildID, Long roleID, int permissionLevel) {
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            st.execute(String.format("INSERT INTO ModRoleTable (ChildGuildID, ModRoleID, Permissions) VALUES (%d, %d, %d)", guildID, roleID, permissionLevel));
-            return st.getUpdateCount();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } finally {
+            connection.close();
         }
         return 0;
     }
@@ -1152,53 +709,6 @@ public class SQLHandler {
         }
         return resultSet;
     }
-
-
-    // REMOVE MOD ROLE
-    public Integer removeModRole(Long guildID, Long roleID) {
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            st.execute(String.format("DELETE FROM ModRoleTable WHERE (ChildGuildID = %d) AND (ModRoleID = %d)", guildID, roleID));
-            return st.getUpdateCount();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return 0;
-    }
-
-    // INSERT A CHANNEL EXCEPTION INTO DATABASE
-    public Integer insertException(Long guildID, Long channelID, int type) {
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            st.execute(String.format("INSERT INTO ExceptionTable (ChildGuildID, ChannelID, Type) VALUES (%d, %d, %d)", guildID, channelID, type));
-            return st.getUpdateCount();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return 0;
-    }
-
-    // REMOVE MOD ROLE
-    public Integer removeException(Long guildID, Long channelID) {
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            st.execute(String.format("DELETE FROM ExceptionTable WHERE (ChildGuildID = %d) AND (ChannelID = %d)", guildID, channelID));
-            return st.getUpdateCount();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return 0;
-    }
-
 
     private boolean checkSize(Long guildID, String tableName) throws SQLException {
         int rowCount = 0;
@@ -1250,85 +760,21 @@ public class SQLHandler {
         return rowCount;
     }
 
-    public Integer insertAutoTriggerDelete(Long guildID, Long triggerMessageID, Long responseMessageID) {
+    public Integer deleteRow(String TableName, String IdentifierColumn, Long Identifier) throws SQLException {
+
+        Integer output = null;
+        Connection connection = pool.getConnection();
+
         try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            st.execute(String.format("INSERT INTO TriggerTable (ChildGuildID, TriggerMessageID, ResponseMessageID) VALUES (%d, %d, %d)", guildID, triggerMessageID, responseMessageID));
-            return st.getUpdateCount();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return 0;
-    }
-
-    public Integer deleteRow(String TableName, String IdentifierColumn, Long Identifier) {
-        try {
-            Connection connection = pool.getConnection();
-
             Statement st = connection.createStatement();
 
             st.execute(String.format("DELETE FROM %s WHERE %s = %d", TableName, IdentifierColumn, Identifier));
-            return st.getUpdateCount();
+            output = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+        } finally {
+            connection.close();
         }
-        return 0;
-    }
-
-    public Integer deleteRow(String TableName, String IdentifierColumn, String Identifier) {
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            st.execute(String.format("DELETE FROM %s WHERE %s = \"%s\"", TableName, IdentifierColumn, Identifier));
-            return st.getUpdateCount();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return 0;
-    }
-
-    public ArrayList<Long> archiveChannelList(Long categoryID, Long guildID){
-        ArrayList<Long> output = new ArrayList<>();
-
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            ResultSet rs = st.executeQuery(String.format("SELECT ChannelID FROM ArchiveTable WHERE PreviousCategory = %d AND ChildGuildID = %d", categoryID, guildID));
-            while(rs.next()){
-                output.add(rs.getLong("ChannelID"));
-            }
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
-        return output;
-    }
-
-
-    public Long triggerMessageLookup(Long guildID, Long messageID){
-        Long output = null;
-
-        try {
-            Connection connection = pool.getConnection();
-
-            Statement st = connection.createStatement();
-
-            ResultSet rs = st.executeQuery(String.format("SELECT ResponseMessageID FROM TriggerTable WHERE ChildGuildID = %d AND TriggerMessageID = %d",guildID, messageID));
-            while(rs.next()){
-                output = rs.getLong("ResponseMessageID");
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
         return output;
     }
 
@@ -1365,6 +811,22 @@ public class SQLHandler {
             Statement st = connection.createStatement();
 
             st.executeUpdate(String.format("INSERT INTO Tracker (ChildGuildID, UserID, StartDateTime, ExpireDateTime, Type) VALUES (%d, %d, '%s', '%s', %d)",guildID,userID,currentDateTime,expireDateTime,type));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            connection.close();
+        }
+
+    }
+
+    public void checkForExpiredTrackers() throws SQLException {
+
+        Connection connection = pool.getConnection();
+
+        try{
+            Statement st = connection.createStatement();
+
+            st.executeUpdate("DELETE FROM Tracker WHERE ExpireDatetime < (DATE_SUB(NOW(), INTERVAL 1 HOUR))");
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
