@@ -5,11 +5,10 @@ import rsystems.Config;
 import rsystems.objects.GuildSettings;
 import rsystems.objects.InfractionObject;
 import rsystems.objects.TimedEvent;
+import rsystems.objects.TrackerObject;
 
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1331,5 +1330,46 @@ public class SQLHandler {
         }
 
         return output;
+    }
+
+    public ArrayList<TrackerObject> getTrackers(final Long guildID, final Long userID) throws SQLException {
+        ArrayList<TrackerObject> trackers = new ArrayList<>();
+
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("SELECT StartDateTime, ExpireDatetime, Type FROM Tracker where ChildGuildID = %d AND UserID = %d", guildID, userID));
+            while(rs.next()){
+                trackers.add(new TrackerObject(rs.getTimestamp("StartDateTime").toLocalDateTime(),rs.getTimestamp("ExpireDateTime").toLocalDateTime(),rs.getInt("Type")));
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+
+        return trackers;
+    }
+
+    public void insertTracker(final Long guildID, final Long userID, final Integer type) throws SQLException {
+
+        final LocalDateTime currentDateTime = LocalDateTime.now();
+        final LocalDateTime expireDateTime = currentDateTime.plusHours(1);
+
+        Connection connection = pool.getConnection();
+
+        try{
+            Statement st = connection.createStatement();
+
+            st.executeUpdate(String.format("INSERT INTO Tracker (ChildGuildID, UserID, StartDateTime, ExpireDateTime, Type) VALUES (%d, %d, '%s', '%s', %d)",guildID,userID,currentDateTime,expireDateTime,type));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            connection.close();
+        }
+
     }
 }

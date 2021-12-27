@@ -122,6 +122,11 @@ public class Dispatcher extends ListenerAdapter {
                     }
                 }
 
+                //Check for Guild invites
+                if (event.getMessage().getInvites().size() > 0) {
+                    handleDiscordInvite(event);
+                }
+
 
                 //Look for a prefix at the BEGINNING of the message
                 if ((defaultPrefixFound) || ((guildPrefix != null) && (message.toLowerCase().startsWith(guildPrefix.toLowerCase())))) {
@@ -250,52 +255,6 @@ public class Dispatcher extends ListenerAdapter {
 
             // Filter out join messages
             if (event.getMessage().getType().equals(MessageType.GUILD_MEMBER_JOIN)) {
-                return;
-            }
-
-            //Check for Guild invites
-            if (event.getMessage().getInvites().size() > 0) {
-                try {
-                    List<Long> whiteListedGuilds = SherlockBot.database.getLongMultiple("InviteWhitelist", "TargetGuildID", "ChildGuildID", event.getGuild().getIdLong());
-
-                    for (String code : event.getMessage().getInvites()) {
-                        Invite.resolve(SherlockBot.jda, code).queue(resolvedInvite -> {
-                            Long targetGuildID = resolvedInvite.getGuild().getIdLong();
-                            if ((event.getGuild().getIdLong() == targetGuildID) || (whiteListedGuilds.contains(targetGuildID))) {
-                                // ID is ok
-                            } else {
-                                EmbedBuilder builder = new EmbedBuilder();
-                                builder.setTitle("Discord Link Detection");
-                                builder.setDescription("User posted unauthorized discord link:\n" + resolvedInvite.getUrl());
-                                builder.setColor(Color.yellow);
-                                if (event.getMessage().getMember().getAsMention() != null) {
-                                    builder.addField("User:", String.format(event.getMessage().getMember().getAsMention() + "\n%s\n%s", event.getAuthor().getAsTag(), event.getAuthor().getId()), true);
-                                } else {
-                                    builder.addField("User:", String.format("n%s\n%s", event.getAuthor().getAsTag(), event.getAuthor().getId()), true);
-                                }
-                                builder.addField("Target Guild:", String.format("%s\n%d", resolvedInvite.getGuild().getName(), resolvedInvite.getGuild().getIdLong()), true);
-                                builder.setTimestamp(Instant.now());
-
-                                LogMessage.sendLogMessage(event.getGuild().getIdLong(), builder.build());
-
-                                builder.clear();
-
-                                event.getMessage().delete().reason("User posted discord invite link").queue(DeleteSuccess -> {
-
-                                    EmbedBuilder embedBuilder = new EmbedBuilder();
-                                    embedBuilder.setDescription("Sorry, Only authorized Discord servers can have invite links posted here.  Please refrain from posting any other invite links as an automatic punishment will take place.");
-                                    embedBuilder.setColor(Color.yellow);
-                                    embedBuilder.setFooter("This action has been logged");
-                                    event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
-                                    embedBuilder.clear();
-                                });
-                            }
-                        });
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-
                 return;
             }
 
@@ -634,6 +593,53 @@ public class Dispatcher extends ListenerAdapter {
 
                 }
             }
+        }
+    }
+
+    private void handleDiscordInvite(final MessageReceivedEvent event){
+        try {
+            List<Long> whiteListedGuilds = SherlockBot.database.getLongMultiple("InviteWhitelist", "TargetGuildID", "ChildGuildID", event.getGuild().getIdLong());
+
+            for (String code : event.getMessage().getInvites()) {
+                Invite.resolve(SherlockBot.jda, code).queue(resolvedInvite -> {
+                    Long targetGuildID = resolvedInvite.getGuild().getIdLong();
+                    if ((event.getGuild().getIdLong() == targetGuildID) || (whiteListedGuilds.contains(targetGuildID))) {
+                        // ID is ok
+                    } else {
+
+                        //Build Log message
+                        EmbedBuilder builder = new EmbedBuilder();
+                        builder.setTitle("Discord Link Detection");
+                        builder.setDescription("User posted unauthorized discord link:\n" + resolvedInvite.getUrl());
+                        builder.setColor(Color.yellow);
+                        if (event.getMessage().getMember().getAsMention() != null) {
+                            builder.addField("User:", String.format(event.getMessage().getMember().getAsMention() + "\n%s\n%s", event.getAuthor().getAsTag(), event.getAuthor().getId()), true);
+                        } else {
+                            builder.addField("User:", String.format("n%s\n%s", event.getAuthor().getAsTag(), event.getAuthor().getId()), true);
+                        }
+                        builder.addField("Target Guild:", String.format("%s\n%d", resolvedInvite.getGuild().getName(), resolvedInvite.getGuild().getIdLong()), true);
+                        builder.setTimestamp(Instant.now());
+
+                        LogMessage.sendLogMessage(event.getGuild().getIdLong(), builder.build());
+                        builder.clear();
+
+                        //Delete OP
+                        event.getMessage().delete().reason("User posted discord invite link").queue(DeleteSuccess -> {
+
+                            EmbedBuilder embedBuilder = new EmbedBuilder();
+                            embedBuilder.setDescription(event.getMember().getAsMention() + "\n\nSorry, Only authorized Discord servers can have invite links posted here.  Please refrain from posting any other invite links as an automatic punishment will take place.");
+                            embedBuilder.setColor(Color.yellow);
+                            embedBuilder.setFooter("This action has been logged");
+                            event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
+                            embedBuilder.clear();
+                        });
+
+                        SherlockBot.overseer.submitTracker(event.getGuild().getIdLong(),event.getAuthor().getIdLong(),1);
+                    }
+                });
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

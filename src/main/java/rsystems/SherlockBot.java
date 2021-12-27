@@ -6,8 +6,10 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import rsystems.events.*;
 import rsystems.handlers.Dispatcher;
+import rsystems.handlers.Overseer;
 import rsystems.handlers.SQLHandler;
 import rsystems.handlers.SlashCommandDispatcher;
 import rsystems.objects.DBPool;
@@ -35,13 +37,14 @@ public class SherlockBot {
     public static String version = "0.6.2";
     public static JDA jda = null;
     public static Long botOwnerID = Long.valueOf(Config.get("OWNER_ID"));
+    public static Overseer overseer = new Overseer();
 
     public static String defaultPrefix = "!sl";
 
     public static void main(String[] args) throws LoginException {
         JDA api = JDABuilder.createDefault(Config.get("token"))
                 .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
-                //.setMemberCachePolicy(MemberCachePolicy.ALL)
+                .setMemberCachePolicy(MemberCachePolicy.NONE)
                 //.enableCache(CacheFlag.ACTIVITY)
                 .setChunkingFilter(ChunkingFilter.NONE)
                 .build();
