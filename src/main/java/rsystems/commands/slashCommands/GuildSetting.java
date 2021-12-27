@@ -172,12 +172,20 @@ public class GuildSetting extends SlashCommand {
             }
 
             if(event.getSubcommandName().equalsIgnoreCase("add")){
-                if(SherlockBot.database.addFilterWord(event.getGuild().getIdLong(),word) > 0) {
-                    event.getHook().editOriginal(String.format("I have added `%s` to the filter.", word)).queue();
+                try {
+                    if(SherlockBot.database.addFilterWord(event.getGuild().getIdLong(),word) > 0) {
+                        event.getHook().editOriginal(String.format("I have added `%s` to the filter.", word)).queue();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
             } else if(event.getSubcommandName().equalsIgnoreCase("remove")){
-                if(SherlockBot.database.removeFilterWord(event.getGuild().getIdLong(),word) > 0) {
-                    event.getHook().editOriginal(String.format("I have removed `%s` from the filter.", word)).queue();
+                try {
+                    if(SherlockBot.database.removeFilterWord(event.getGuild().getIdLong(),word) > 0) {
+                        event.getHook().editOriginal(String.format("I have removed `%s` from the filter.", word)).queue();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
             } else if(event.getSubcommandName().equalsIgnoreCase("list")){
                 try {

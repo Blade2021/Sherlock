@@ -15,7 +15,12 @@ public class ThreeMinute extends TimerTask {
 
     @Override
     public void run(){
-        ArrayList<TimedEvent> events = new ArrayList<>(database.timedEventList());
+        ArrayList<TimedEvent> events = null;
+        try {
+            events = new ArrayList<>(database.timedEventList());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         for(TimedEvent timedEvent:events){
             if(timedEvent.eventExpiration.isBefore(LocalDateTime.now())){
                 System.out.println(String.format("Expiring timed event: EventID:%d | GuildID:%d | EventType:%d",timedEvent.eventUserID,timedEvent.eventGuildID,timedEvent.eventType));

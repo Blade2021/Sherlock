@@ -37,12 +37,20 @@ public class GuildStateListener extends ListenerAdapter {
 
     @Override
     public void onUnavailableGuildLeave(UnavailableGuildLeaveEvent event) {
-        SherlockBot.database.deleteRow("Guilds","GuildID",event.getGuildIdLong());
+        try {
+            SherlockBot.database.deleteRow("Guilds","GuildID",event.getGuildIdLong());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onGuildLeave(GuildLeaveEvent event) {
-        SherlockBot.database.deleteRow("Guilds","GuildID",event.getGuild().getIdLong());
+        try {
+            SherlockBot.database.deleteRow("Guilds","GuildID",event.getGuild().getIdLong());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -61,7 +69,11 @@ public class GuildStateListener extends ListenerAdapter {
         try {
             if(SherlockBot.database.insertGuild(event.getGuild().getIdLong(),event.getGuild().getOwnerIdLong()) >= 1){
                 event.getGuild().createRole().setColor(Color.decode("#B0A98F")).setName("SL-Muted").queue(role -> {
-                    SherlockBot.database.putValue("Guilds","MuteRoleID","GuildID",event.getGuild().getIdLong(),role.getIdLong());
+                    try {
+                        SherlockBot.database.putValue("Guilds","MuteRoleID","GuildID",event.getGuild().getIdLong(),role.getIdLong());
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
 
                     ArrayList<Permission> mutePerms = new ArrayList<>();
                     mutePerms.add(Permission.MESSAGE_SEND);

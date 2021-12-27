@@ -291,7 +291,7 @@ public class Dispatcher extends ListenerAdapter {
                                         .setDescription(String.format("`Message:`\n%s\n\n" + TimeFormat.RELATIVE.now(), m.getContentRaw()));
                                 builder.addField("User:", event.getAuthor().getAsMention(), false);
                                 builder.setFooter(String.format("Tag: %s | ID: %s", event.getAuthor().getAsTag(), event.getAuthor().getId()));
-                                builder.setColor(Color.decode("#FFCC37"));
+                                builder.setColor(SherlockBot.getColor("warn"));
 
                                 LogMessage.sendLogMessage(event.getGuild().getIdLong(), builder.build());
 
@@ -306,6 +306,8 @@ public class Dispatcher extends ListenerAdapter {
             // Language Filter
             String filterWord = filterWordFound(event.getMessage(), event.getGuild().getIdLong());
             if (filterWord != null) {
+
+                filterWord = filterWord.trim();
 
                 // TRIGGER DELETION AND NOTIFICATION
                 event.getMessage().addReaction("⚠").queue();
@@ -358,7 +360,6 @@ public class Dispatcher extends ListenerAdapter {
             }
         } catch (SQLException exception) {
             exception.printStackTrace();
-            return true;
         }
         return true;
     }
@@ -520,18 +521,17 @@ public class Dispatcher extends ListenerAdapter {
         }
 
         for (String s : filterWordList) {
+
+            s = s.replaceAll("%"," ");
             if (message.getContentRaw().toLowerCase().contains(s.toLowerCase())) {
                 // bad word detected
 
                 String[] args = message.getContentRaw().split("\\s+");
-                for (String arg : args) {
-                    if (arg.toLowerCase().contains(s.toLowerCase())) {
-                        if (arg.startsWith("https://tenor.com")) {
-                            return null;
-                        } else {
-                            return s;
-                        }
-                    }
+
+                if(message.getContentRaw().startsWith("https://tenor.com")){
+                    return null;
+                } else {
+                    return s;
                 }
             }
         }
@@ -611,7 +611,7 @@ public class Dispatcher extends ListenerAdapter {
                         EmbedBuilder builder = new EmbedBuilder();
                         builder.setTitle("Discord Link Detection");
                         builder.setDescription("User posted unauthorized discord link:\n" + resolvedInvite.getUrl());
-                        builder.setColor(Color.yellow);
+                        builder.setColor(SherlockBot.getColor("warn"));
                         if (event.getMessage().getMember().getAsMention() != null) {
                             builder.addField("User:", String.format(event.getMessage().getMember().getAsMention() + "\n%s\n%s", event.getAuthor().getAsTag(), event.getAuthor().getId()), true);
                         } else {
@@ -627,9 +627,10 @@ public class Dispatcher extends ListenerAdapter {
                         event.getMessage().delete().reason("User posted discord invite link").queue(DeleteSuccess -> {
 
                             EmbedBuilder embedBuilder = new EmbedBuilder();
+                            embedBuilder.setTitle("Unauthorized Discord Invite");
+                            embedBuilder.setTimestamp(Instant.now());
                             embedBuilder.setDescription(event.getMember().getAsMention() + "\n\nSorry, Only authorized Discord servers can have invite links posted here.  Please refrain from posting any other invite links as an automatic punishment will take place.");
-                            embedBuilder.setColor(Color.yellow);
-                            embedBuilder.setFooter("This action has been logged");
+                            embedBuilder.setColor(SherlockBot.getColor("warn"));
                             event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
                             embedBuilder.clear();
                         });

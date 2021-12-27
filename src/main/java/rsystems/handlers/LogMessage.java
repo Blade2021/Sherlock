@@ -99,7 +99,11 @@ public class LogMessage {
                 } catch (NullPointerException | PermissionException e) {
                     // REMOVE LOG CHANNEL COMPLETELY FROM PREVIOUS DATA
 
-                    SherlockBot.database.putValueNull("Guilds", "LogChannelID", "GuildID", guildID);
+                    try {
+                        SherlockBot.database.putValueNull("Guilds", "LogChannelID", "GuildID", guildID);
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
                     SherlockBot.guildMap.get(guildID).setLogChannelID(null);
                 }
 
@@ -118,12 +122,20 @@ public class LogMessage {
                 final TextChannel logChannel = SherlockBot.jda.getGuildById(guildID).getTextChannelById(logChannelID);
                 try {
                     logChannel.sendMessageEmbeds(infractionObject.createEmbedMessge()).queue((message -> {
-                        SherlockBot.database.putValue("CaseTable", "LogMessageID", "CaseID", infractionObject.getCaseNumber(), message.getIdLong());
+                        try {
+                            SherlockBot.database.putValue("CaseTable", "LogMessageID", "CaseID", infractionObject.getCaseNumber(), message.getIdLong());
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
                     }));
                 } catch (NullPointerException | PermissionException e) {
                     // REMOVE LOG CHANNEL COMPLETELY FROM PREVIOUS DATA
 
-                    SherlockBot.database.putValueNull("Guilds", "LogChannelID", "GuildID", guildID);
+                    try {
+                        SherlockBot.database.putValueNull("Guilds", "LogChannelID", "GuildID", guildID);
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
                     SherlockBot.guildMap.get(guildID).setLogChannelID(null);
                 }
 
@@ -145,7 +157,11 @@ public class LogMessage {
                 } catch (NullPointerException | PermissionException e) {
                     // REMOVE LOG CHANNEL COMPLETELY FROM PREVIOUS DATA
 
-                    SherlockBot.database.putValueNull("Guilds", "LogChannelID", "GuildID", guildID);
+                    try {
+                        SherlockBot.database.putValueNull("Guilds", "LogChannelID", "GuildID", guildID);
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
                     SherlockBot.guildMap.get(guildID).setLogChannelID(null);
                 }
 

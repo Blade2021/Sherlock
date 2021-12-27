@@ -7,7 +7,10 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
-import rsystems.events.*;
+import rsystems.events.ButtonClickEvents;
+import rsystems.events.GuildMemberEvents;
+import rsystems.events.GuildNicknameListener;
+import rsystems.events.GuildStateListener;
 import rsystems.handlers.Dispatcher;
 import rsystems.handlers.Overseer;
 import rsystems.handlers.SQLHandler;
@@ -16,8 +19,10 @@ import rsystems.objects.DBPool;
 import rsystems.objects.GuildSettings;
 import rsystems.objects.SlashCommand;
 import rsystems.objects.UserRoleReactionObject;
+import rsystems.threads.ExpiredTrackersCheck;
 
 import javax.security.auth.login.LoginException;
+import java.awt.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +44,8 @@ public class SherlockBot {
     public static Long botOwnerID = Long.valueOf(Config.get("OWNER_ID"));
     public static Overseer overseer = new Overseer();
 
+    private static Map<String,String> colorMap = new HashMap<>();
+
     public static String defaultPrefix = "!sl";
 
     public static void main(String[] args) throws LoginException {
@@ -56,6 +63,8 @@ public class SherlockBot {
         api.addEventListener(new GuildMemberEvents());
         //api.addEventListener(new SlashCommandEvents());
         api.addEventListener(new ButtonClickEvents());
+
+        loadColorMap();
 
         try{
             api.awaitReady();
@@ -111,11 +120,25 @@ public class SherlockBot {
 
         Timer timer = new Timer();
         //timer.scheduleAtFixedRate(new ThreeMinute(), 60*1000,60*1000);
+        timer.scheduleAtFixedRate(new ExpiredTrackersCheck(),60*1000, 180*1000);
 
     }
 
     public static GuildSettings getGuildSettings(final Long guildID){
         return guildMap.get(guildID);
+    }
+
+    public static Color getColor(String type){
+        if(colorMap.containsKey(type)){
+            return Color.decode(colorMap.get(type));
+        } else {
+            return null;
+        }
+    }
+
+    private static void loadColorMap(){
+        colorMap.putIfAbsent("warn","#F5741A");
+        colorMap.putIfAbsent("quarantine","#AF1AF5");
     }
 
 }
