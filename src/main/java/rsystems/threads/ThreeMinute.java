@@ -44,11 +44,11 @@ public class ThreeMinute extends TimerTask {
     }
 
     private void unmuteUser(Long guildID, Long userID) throws SQLException {
-        Long muteRoleID = database.getLong("GuildTable","MuteRoleID","GuildID",guildID);
+        Long quarantineRoleID = database.getLong("GuildTable","QuarantineRoleID","GuildID",guildID);
 
         try{
             JDA jda = bot.getJDA();
-            jda.getGuildById(guildID).removeRoleFromMember(userID,jda.getGuildById(guildID).getRoleById(muteRoleID)).queue();
+            jda.getGuildById(guildID).removeRoleFromMember(userID,jda.getGuildById(guildID).getRoleById(quarantineRoleID)).queue();
             database.expireTimedEvent(guildID,userID);
         } catch(NullPointerException e){
             System.out.println("Could not remove mute role from user for Guild:" + guildID);

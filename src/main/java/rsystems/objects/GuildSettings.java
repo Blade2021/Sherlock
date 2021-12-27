@@ -5,7 +5,7 @@ public class GuildSettings {
     private String prefix;
     private Long ownerID;
     private Long logChannelID;
-    private Long muteRoleID;
+    private Long quarantineRoleID;
     private int embedFilterSetting;
     private int grantedSelfRoleCount;
     private int grantedAutoRoleCount;
@@ -43,12 +43,12 @@ public class GuildSettings {
         this.logChannelID = logChannelID;
     }
 
-    public Long getMuteRoleID() {
-        return muteRoleID;
+    public Long getQuarantineRoleID() {
+        return quarantineRoleID;
     }
 
-    public void setMuteRoleID(Long muteRoleID) {
-        this.muteRoleID = muteRoleID;
+    public void setQuarantineRoleID(Long quarantineRoleID) {
+        this.quarantineRoleID = quarantineRoleID;
     }
 
     public int getEmbedFilterSetting() {

@@ -17,7 +17,11 @@ public class Unban extends SlashCommand {
 
     @Override
     public CommandData getCommandData() {
-        return super.getCommandData().addOption(OptionType.NUMBER,"userid","The banned user's ID");
+
+        CommandData commandData = super.getCommandData();
+        commandData.addOption(OptionType.NUMBER,"userid","The banned user's ID");
+
+        return commandData;
     }
 
     @Override

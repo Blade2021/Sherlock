@@ -1,4 +1,7 @@
 package rsystems.handlers;
+/*
+
+ */
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -39,7 +42,7 @@ public class Overseer {
         if (guild != null) {
 
             //Member member = guild.getMember(userID);
-            Role quarantineRole = guild.getRoleById(SherlockBot.guildMap.get(guildID).getMuteRoleID());
+            Role quarantineRole = guild.getRoleById(SherlockBot.guildMap.get(guildID).getQuarantineRoleID());
             if (quarantineRole != null) {
                 guild.retrieveMemberById(userID).queue(foundMember -> {
 
@@ -57,7 +60,7 @@ public class Overseer {
                             roleString.append("`").append(r.getName()).append("`").append("  :  ").append(r.getId()).append("\n");
                         }
 
-                        guild.modifyMemberRoles(foundMember, rolesToAdd, rolesToRemove).queue(success -> {
+                        guild.modifyMemberRoles(foundMember, rolesToAdd, rolesToRemove).reason("Quarantining Member for Investigation").queue(success -> {
                             EmbedBuilder builder = new EmbedBuilder();
                             builder.setTitle("Quarantined User");
                             builder.setDescription("User has been quarantined for exceeding allowed limits");

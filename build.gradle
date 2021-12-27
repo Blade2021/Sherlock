@@ -31,7 +31,7 @@ dependencies {
     //compile 'net.dv8tion:JDA:4.1.1_127' // Discord Lib
     //compile 'net.dv8tion:JDA:4.2.0_222' // Discord Lib
     //implementation("net.dv8tion:JDA:4.3.0_339") // Discord Lib
-    implementation("net.dv8tion:JDA:5.0.0-alpha.2")
+    implementation("net.dv8tion:JDA:5.0.0-alpha.3")
     implementation 'io.github.cdimascio:java-dotenv:5.1.3'  // Config loader
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'

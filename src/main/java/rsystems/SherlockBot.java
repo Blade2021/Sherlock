@@ -17,7 +17,6 @@ import rsystems.handlers.SQLHandler;
 import rsystems.handlers.SlashCommandDispatcher;
 import rsystems.objects.DBPool;
 import rsystems.objects.GuildSettings;
-import rsystems.objects.SlashCommand;
 import rsystems.objects.UserRoleReactionObject;
 import rsystems.threads.ExpiredTrackersCheck;
 
@@ -78,28 +77,13 @@ public class SherlockBot {
 
                 if(guild.getId().equals("386701951662030858") || guild.getId().equals("905507142570741822")){
 
-                    System.out.println("Upserting interactions for Guild: " + guild.getId());
-
-                    guild.retrieveCommands().queue(list -> {
-
-                        for(SlashCommand slashCommand: slashCommandDispatcher.getCommands()){
-                            try {
-                                guild.upsertCommand(slashCommand.getCommandData()).queue(null,failure -> {
-                                    System.out.println("Error loading slash command: " + slashCommand.getName());
-                                    //failure.printStackTrace();
-                                });
-                            } catch(Exception e){
-                                System.out.println("Error loading slash command: " + slashCommand.getName());
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-
                     guild.retrieveCommands().queue(list -> {
                         for(Command command:list){
                             System.out.println(String.format("CMD: %s  | ID: %s",command.getName(),command.getId()));
                         }
                     });
+
+                    SherlockBot.slashCommandDispatcher.submitCommands(guild.getIdLong());
                 }
 
                 try {

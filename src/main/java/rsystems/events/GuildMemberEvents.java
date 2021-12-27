@@ -52,7 +52,7 @@ public class GuildMemberEvents extends ListenerAdapter {
     @Override
     public void onGuildMemberUpdate(GuildMemberUpdateEvent event) {
         event.getGuild().retrieveMemberById(event.getUser().getIdLong()).queue(foundMember -> {
-            Role quarantineRole = event.getGuild().getRoleById(SherlockBot.guildMap.get(event.getGuild().getIdLong()).getMuteRoleID());
+            Role quarantineRole = event.getGuild().getRoleById(SherlockBot.guildMap.get(event.getGuild().getIdLong()).getQuarantineRoleID());
 
             if(foundMember.getRoles().contains(quarantineRole)){
                 event.getGuild().removeRoleFromMember(foundMember,quarantineRole).queueAfter(30, TimeUnit.SECONDS);

@@ -17,13 +17,16 @@ import rsystems.objects.SlashCommand;
 
 import java.awt.*;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AutoRole extends SlashCommand {
-
     @Override
     public CommandData getCommandData() {
+
+        CommandData commandData = new CommandData(this.getName().toLowerCase(),"Auto Roles are roles that are added to any users upon joining");
 
         // Filter Group
         ArrayList<SubcommandData> subCommands = new ArrayList<>();
@@ -31,9 +34,9 @@ public class AutoRole extends SlashCommand {
         subCommands.add(new SubcommandData("remove", "Remove an AutoRole").addOption(OptionType.ROLE, "role", "The role to be removed", true));
         subCommands.add(new SubcommandData("list", "List all AutoRoles"));
 
-        super.getCommandData().addSubcommands(subCommands);
+        commandData.addSubcommands(subCommands);
 
-        return super.getCommandData();
+        return commandData;
     }
 
     @Override

@@ -83,7 +83,7 @@ public class InfractionObject {
 
         switch(this.eventType){
             case WARNING:
-                builder.setColor(Color.yellow);
+                builder.setColor(SherlockBot.getColor("warn"));
                 break;
             case RESERVED:
             case MUTE:

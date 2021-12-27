@@ -2,6 +2,7 @@ package rsystems.handlers;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -30,12 +31,12 @@ public class SlashCommandDispatcher extends ListenerAdapter {
 
         registerCommand(new Apple());
         registerCommand(new Commands());
-        registerCommand(new Ban());
+        //registerCommand(new Ban());
         registerCommand(new GuildSetting());
         registerCommand(new SelfRole());
         registerCommand(new AutoRole());
         registerCommand(new Verify());
-        registerCommand(new Unban());
+        //registerCommand(new Unban());
     }
 
     public Set<SlashCommand> getCommands() {
@@ -208,6 +209,46 @@ public class SlashCommandDispatcher extends ListenerAdapter {
 
             embedBuilder.clear();
         });
+    }
+
+    public void submitCommands(final Long guildID){
+
+        final Guild guild = SherlockBot.jda.getGuildById(guildID);
+        if(guild != null){
+
+            guild.updateCommands().queue();
+
+            guild.retrieveCommands().queue(commands -> {
+
+                for(SlashCommand slashCommand: this.slashCommands){
+
+                    Boolean commandFound = false;
+                    for(net.dv8tion.jda.api.interactions.commands.Command cmd:commands){
+                        if(slashCommand.getName().equalsIgnoreCase(cmd.getName())){
+                            commandFound = true;
+                        }
+                    }
+
+                    if(!commandFound){
+                        System.out.println(String.format("DIDN'T FIND COMMAND: %s FOR GUILD: %d",slashCommand.getName(),guildID));
+                    }
+
+                    guild.upsertCommand(slashCommand.getCommandData()).queueAfter(5,TimeUnit.SECONDS,success -> {
+                        System.out.println(String.format("UPSERTED COMMAND: %s FOR GUILD: %d",success.getName(),guild.getIdLong()));
+                    });
+                }
+
+            });
+        }
+
+        /*for(SlashCommand slashCommand: this.getCommands()){
+            SherlockBot.jda.getGuildById(guildID).upsertCommand(slashCommand.getCommandData()).queueAfter(10,TimeUnit.SECONDS,null,failure -> {
+                System.out.println("Error loading slash command: " + slashCommand.getName());
+                failure.printStackTrace();
+            });
+        }
+
+         */
     }
 
 }

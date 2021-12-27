@@ -23,14 +23,16 @@ public class SelfRole extends SlashCommand {
     @Override
     public CommandData getCommandData() {
 
+        CommandData commandData = new CommandData(this.getName().toLowerCase(),"Self roles are roles that any user can add/remove from themselves");
+
         ArrayList<SubcommandData> selfRoleCommands = new ArrayList<>();
         selfRoleCommands.add(new SubcommandData("add", "Enable a role to self added/removed").addOption(OptionType.STRING, "trigger", "The trigger to be used to add/remove the role", true).addOption(OptionType.ROLE, "role", "The role to be added/removed", true));
         selfRoleCommands.add(new SubcommandData("remove", "Remove a self-role").addOption(OptionType.STRING, "trigger", "The trigger of the self role to be removed", true));
         selfRoleCommands.add(new SubcommandData("list", "List all Self-Roles"));
 
-        super.getCommandData().addSubcommands(selfRoleCommands);
+        commandData.addSubcommands(selfRoleCommands);
 
-        return super.getCommandData();
+        return commandData;
     }
 
     @Override

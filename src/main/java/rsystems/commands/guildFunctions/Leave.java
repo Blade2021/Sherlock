@@ -20,11 +20,11 @@ public class Leave extends Command {
     @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, MessageReceivedEvent event) throws SQLException {
 
-        Long muteRoleID = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getMuteRoleID();
+        Long quarantineRoleID = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getQuarantineRoleID();
 
-        if ((muteRoleID != null) && (event.getGuild().getRoleById(muteRoleID) != null)){
+        if ((quarantineRoleID != null) && (event.getGuild().getRoleById(quarantineRoleID) != null)){
 
-            event.getGuild().getRoleById(muteRoleID).delete().reason("Leaving guild.  Removing auto-created mute role").queue(Success -> {
+            event.getGuild().getRoleById(quarantineRoleID).delete().reason("Leaving guild.  Removing auto-created mute role").queue(Success -> {
                 event.getGuild().leave().queue();
             });
 

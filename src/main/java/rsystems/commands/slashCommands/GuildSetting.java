@@ -22,13 +22,14 @@ public class GuildSetting extends SlashCommand {
     public CommandData getCommandData() {
 
         ArrayList<SubcommandGroupData> subCmdGroupData = new ArrayList<>();
+        CommandData commandData = new CommandData(this.getName().toLowerCase(),"Guild Setting");
 
         // Prefix Group
         ArrayList<SubcommandData> prefixCommands = new ArrayList<>();
         prefixCommands.add(new SubcommandData("set","Set a custom prefix for the bot on this server").addOption(OptionType.STRING,"prefix","The prefix to be set",true));
         prefixCommands.add(new SubcommandData("clear","Return to the default prefix only"));
 
-        subCmdGroupData.add(new SubcommandGroupData("prefix","Prefix Set/Clear commands").addSubcommands(prefixCommands));
+        subCmdGroupData.add(new SubcommandGroupData("bot-prefix","Prefix Set/Clear commands").addSubcommands(prefixCommands));
 
         // Filter Group
         ArrayList<SubcommandData> filteringCommands = new ArrayList<>();
@@ -53,9 +54,9 @@ public class GuildSetting extends SlashCommand {
         subCmdGroupData.add(new SubcommandGroupData("welcome","Welcome Message Commands").addSubcommands(welcomeCommands));
 
 
-        super.getCommandData().addSubcommandGroups(subCmdGroupData);
+        commandData.addSubcommandGroups(subCmdGroupData);
 
-        return super.getCommandData();
+        return commandData;
     }
 
     @Override
@@ -71,7 +72,7 @@ public class GuildSetting extends SlashCommand {
     @Override
     public void dispatch(User sender, MessageChannel channel, String content, SlashCommandEvent event) {
 
-        if(event.getSubcommandGroup().equalsIgnoreCase("prefix")){
+        if(event.getSubcommandGroup().equalsIgnoreCase("bot-prefix")){
 
             event.deferReply().setEphemeral(false).queue();
 

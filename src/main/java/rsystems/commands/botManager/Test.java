@@ -1,12 +1,10 @@
 package rsystems.commands.botManager;
 
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
+import rsystems.SherlockBot;
 import rsystems.objects.Command;
 
 import java.sql.SQLException;
@@ -20,6 +18,7 @@ public class Test extends Command {
     @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, MessageReceivedEvent event) throws SQLException {
 
+        /*
         MessageBuilder messageBuilder = new MessageBuilder();
         messageBuilder.setContent("This is just some content");
         messageBuilder.setActionRows(ActionRow.of(Button.primary("next","Click here!"),Button.danger("previous","Don't click this")));
@@ -27,6 +26,9 @@ public class Test extends Command {
             event.getMessage().delete().queue();
         });
 
+         */
+
+        SherlockBot.slashCommandDispatcher.submitCommands(event.getGuild().getIdLong());
     }
 
     @Override

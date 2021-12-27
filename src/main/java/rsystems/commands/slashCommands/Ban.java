@@ -29,10 +29,12 @@ public class Ban extends SlashCommand {
 
     @Override
     public CommandData getCommandData() {
-        return super.getCommandData()
-                //.addOption(OptionType.STRING,"reason","The reason the user is getting banned", false)
-                .addOption(OptionType.USER, "user", "User to be banned", true)
-                .addOption(OptionType.STRING,"reason","The reason the user is getting banned", false);
+
+        CommandData commandData = super.getCommandData();
+        commandData.addOption(OptionType.USER, "user", "User to be banned", true)
+                .addOption(OptionType.STRING,"reason","The reason the user is getting banned", true);
+
+        return commandData;
     }
 
     @Override

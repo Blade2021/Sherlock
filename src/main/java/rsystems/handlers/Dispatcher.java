@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.TimeFormat;
@@ -292,6 +293,7 @@ public class Dispatcher extends ListenerAdapter {
                                 builder.addField("User:", event.getAuthor().getAsMention(), false);
                                 builder.setFooter(String.format("Tag: %s | ID: %s", event.getAuthor().getAsTag(), event.getAuthor().getId()));
                                 builder.setColor(SherlockBot.getColor("warn"));
+                                builder.setThumbnail(event.getMember().getEffectiveAvatarUrl());
 
                                 LogMessage.sendLogMessage(event.getGuild().getIdLong(), builder.build());
 
@@ -478,6 +480,9 @@ public class Dispatcher extends ListenerAdapter {
                     });
                 }
 
+            } catch (HierarchyException e){
+                event.getMessage().reply("Sorry that role is above me in the permission hierarchy.").queue();
+                event.getMessage().addReaction("⚠").queue();
             } catch (PermissionException permissionException) {
                 event.getMessage().reply("Missing Permissions: " + permissionException.getPermission().toString()).queue();
                 event.getMessage().addReaction("⚠").queue();
@@ -486,7 +491,7 @@ public class Dispatcher extends ListenerAdapter {
     }
 
     private void muteUser(final MessageReceivedEvent event, final String reason, final int minutes) {
-        Role muteRole = event.getGuild().getRoleById(SherlockBot.guildMap.get(event.getGuild().getIdLong()).getMuteRoleID());
+        Role muteRole = event.getGuild().getRoleById(SherlockBot.guildMap.get(event.getGuild().getIdLong()).getQuarantineRoleID());
         if (muteRole != null) {
             event.getGuild().addRoleToMember(event.getMember(), muteRole).reason("Spam Detected").queue(Success -> {
                 try {
