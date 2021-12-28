@@ -3,6 +3,7 @@ package rsystems.commands.slashCommands;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import rsystems.SherlockBot;
 import rsystems.objects.SlashCommand;
 
 public class Apple extends SlashCommand {
@@ -12,10 +13,13 @@ public class Apple extends SlashCommand {
 
         event.deferReply(true).queue();
 
-        event.getGuild().retrieveCommands().queue(success -> {
-            success.forEach(cmd -> {
-                cmd.delete().queue();
-            });
+        event.getGuild().retrieveCommands().queue(commandList -> {
+            System.out.println("debug");
+            System.out.println(commandList);
+            System.out.println(SherlockBot.slashCommandDispatcher.getCommands());
+            System.out.println("debug");
+
+            event.getHook().editOriginal(commandList.toString()).queue();
         });
 
     }

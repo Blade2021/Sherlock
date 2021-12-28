@@ -1,5 +1,6 @@
 package rsystems.commands.botManager;
 
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -28,7 +29,17 @@ public class Test extends Command {
 
          */
 
-        SherlockBot.slashCommandDispatcher.submitCommands(event.getGuild().getIdLong());
+        //SherlockBot.slashCommandDispatcher.submitCommands(event.getGuild().getIdLong());
+
+        for(Guild guild: SherlockBot.jda.getGuilds()){
+            guild.retrieveCommands().queue(success -> {
+                success.forEach(command -> {
+                    if(command.getName().equalsIgnoreCase(content)){
+                        command.delete().queue();
+                    }
+                });
+            });
+        }
     }
 
     @Override

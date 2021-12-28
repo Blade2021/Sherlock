@@ -15,10 +15,7 @@ import rsystems.objects.SlashCommand;
 
 import java.awt.*;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 
 public class SlashCommandDispatcher extends ListenerAdapter {
@@ -29,7 +26,7 @@ public class SlashCommandDispatcher extends ListenerAdapter {
 
     public SlashCommandDispatcher() {
 
-        registerCommand(new Apple());
+        //registerCommand(new Apple());
         registerCommand(new Commands());
         registerCommand(new Ban());
         registerCommand(new GuildSetting());
@@ -217,22 +214,42 @@ public class SlashCommandDispatcher extends ListenerAdapter {
         final Guild guild = SherlockBot.jda.getGuildById(guildID);
         if(guild != null){
 
-            guild.retrieveCommands().queue(commands -> {
+            guild.retrieveCommands().queue(commandsList -> {
 
-                for(SlashCommand slashCommand: this.slashCommands){
 
-                    Boolean commandFound = false;
-                    for(net.dv8tion.jda.api.interactions.commands.Command cmd:commands){
-                        if(slashCommand.getName().equalsIgnoreCase(cmd.getName())){
-                            commandFound = true;
+                // DELETE ANY LINGERING COMMANDS THAT ARE NOT PART OF THE APPLICATION ANYMORE FROM THE GUILD COMMAND CACHE
+                for(net.dv8tion.jda.api.interactions.commands.Command command:commandsList){
+                    Boolean cmdFound = false;
+
+                    for(SlashCommand slashCommand: this.slashCommands){
+                        if(slashCommand.getName().equalsIgnoreCase(command.getName())){
+                            cmdFound = true;
+                            break;
                         }
                     }
 
-                    if(!commandFound) {
+                    if(!cmdFound){
+                        System.out.println(String.format("REMOVING %s FROM GUILD: %d (Command not found in SET)",command.getName(),guildID));
+                        command.delete().queue();
+                    }
+                }
+
+                // ADD ANY MISSING COMMANDS TO THE GUILD
+                for(SlashCommand slashCommand: this.slashCommands){
+
+                    Boolean cmdFound = false;
+                    for(net.dv8tion.jda.api.interactions.commands.Command command:commandsList){
+                        if(slashCommand.getName().equalsIgnoreCase(command.getName())){
+                            cmdFound = true;
+                            break;
+                        }
+                    }
+
+                    if(!cmdFound) {
                         System.out.println(String.format("DIDN'T FIND COMMAND: %s FOR GUILD: %d", slashCommand.getName(), guildID));
 
                         guild.upsertCommand(slashCommand.getCommandData()).queueAfter(5, TimeUnit.SECONDS, success -> {
-                            System.out.println(String.format("UPSERTED COMMAND: %s FOR GUILD: %d", success.getName(), guild.getIdLong()));
+                            System.out.println(String.format("UPSERT COMMAND: %s FOR GUILD: %d", success.getName(), guild.getIdLong()));
                         });
                     }
                 }

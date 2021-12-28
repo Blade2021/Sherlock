@@ -35,7 +35,7 @@ public class Leave extends Command {
 
     @Override
     public String getHelp() {
-        //todo help docs
-        return null;
+        return "This command will have the bot remove the quarantine role that was created when it joined AND leave the server.  All data once a server has been left is erased.\n" +
+                "Do not ask us to recover it, once its gone, its gone.";
     }
 }
