@@ -121,7 +121,7 @@ public class Dispatcher extends ListenerAdapter {
                             EmbedBuilder builder = new EmbedBuilder();
                             builder.setTitle("Mass Mention Detected");
                             builder.setDescription(String.format("%s\nMentioning `@here` or `@everyone` is not allowed here.  Please refrain doing this as it will lead to repercussions.",event.getMember().getAsMention()));
-                            builder.setColor(SherlockBot.getColor("warn"));
+                            builder.setColor(SherlockBot.getColor(SherlockBot.colorType.WARNING));
                             builder.setThumbnail(SherlockBot.bot.getEffectiveAvatarUrl());
                             builder.setTimestamp(Instant.now());
                             event.getMessage().replyEmbeds(builder.build()).queue();
@@ -305,7 +305,7 @@ public class Dispatcher extends ListenerAdapter {
                                         .setDescription(String.format("`Message:`\n%s\n\n" + TimeFormat.RELATIVE.now(), m.getContentRaw()));
                                 builder.addField("User:", event.getAuthor().getAsMention(), false);
                                 builder.setFooter(String.format("Tag: %s | ID: %s", event.getAuthor().getAsTag(), event.getAuthor().getId()));
-                                builder.setColor(SherlockBot.getColor("warn"));
+                                builder.setColor(SherlockBot.getColor(SherlockBot.colorType.WARNING));
                                 builder.setThumbnail(event.getMember().getEffectiveAvatarUrl());
 
                                 LogMessage.sendLogMessage(event.getGuild().getIdLong(), builder.build());
@@ -632,7 +632,7 @@ public class Dispatcher extends ListenerAdapter {
                         EmbedBuilder builder = new EmbedBuilder();
                         builder.setTitle("Discord Link Detection");
                         builder.setDescription("User posted unauthorized discord link:\n" + resolvedInvite.getUrl());
-                        builder.setColor(SherlockBot.getColor("warn"));
+                        builder.setColor(SherlockBot.getColor(SherlockBot.colorType.WARNING));
                         if (event.getMessage().getMember().getAsMention() != null) {
                             builder.addField("User:", String.format(event.getMessage().getMember().getAsMention() + "\n%s\n%s", event.getAuthor().getAsTag(), event.getAuthor().getId()), true);
                         } else {
@@ -651,7 +651,7 @@ public class Dispatcher extends ListenerAdapter {
                             embedBuilder.setTitle("Unauthorized Discord Invite");
                             embedBuilder.setTimestamp(Instant.now());
                             embedBuilder.setDescription(event.getMember().getAsMention() + "\n\nSorry, Only authorized Discord servers can have invite links posted here.  Please refrain from posting any other invite links as an automatic punishment will take place.");
-                            embedBuilder.setColor(SherlockBot.getColor("warn"));
+                            embedBuilder.setColor(SherlockBot.getColor(SherlockBot.colorType.WARNING));
                             event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
                             embedBuilder.clear();
                         });

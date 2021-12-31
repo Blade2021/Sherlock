@@ -42,9 +42,9 @@ public class SherlockBot {
     public static Long botOwnerID = Long.valueOf(Config.get("OWNER_ID"));
     public static Overseer overseer = new Overseer();
 
-    private static Map<String,String> colorMap = new HashMap<>();
+    private static Map<colorType,String> colorMap = new HashMap<>();
 
-    public static String defaultPrefix = "!sl";
+    public static String defaultPrefix = Config.get("defaultPrefix");
 
     public static void main(String[] args) throws LoginException {
         JDA api = JDABuilder.createDefault(Config.get("token"))
@@ -74,7 +74,7 @@ public class SherlockBot {
             //Get the data for each guild from the database
             api.getGuilds().forEach(guild -> {
 
-                if(guild.getId().equals("386701951662030858") || guild.getId().equals("905507142570741822")){
+
 
                     guild.retrieveCommands().queue(list -> {
                         for(Command command:list){
@@ -83,7 +83,7 @@ public class SherlockBot {
                     });
 
                     SherlockBot.slashCommandDispatcher.submitCommands(guild.getIdLong());
-                }
+
 
                 try {
                     guildMap.put(guild.getIdLong(),SherlockBot.database.getGuildData(guild.getIdLong()));
@@ -111,18 +111,22 @@ public class SherlockBot {
         return guildMap.get(guildID);
     }
 
-    public static Color getColor(String type){
-        if(colorMap.containsKey(type)){
-            return Color.decode(colorMap.get(type));
+    public static Color getColor(colorType colorType){
+        if(colorMap.containsKey(colorType)){
+            return Color.decode(colorMap.get(colorType));
         } else {
-            return null;
+            return Color.decode(colorMap.get(SherlockBot.colorType.GENERIC));
         }
     }
 
     private static void loadColorMap(){
-        colorMap.putIfAbsent("warn","#F5741A");
-        colorMap.putIfAbsent("quarantine","#AF1AF5");
-        colorMap.putIfAbsent("generic","#1ABDF5");
+        colorMap.putIfAbsent(colorType.WARNING,"#F5741A");
+        colorMap.putIfAbsent(colorType.QUARANTINE,"#AF1AF5");
+        colorMap.putIfAbsent(colorType.GENERIC,"#1ABDF5");
+    }
+
+    public enum colorType{
+        WARNING, QUARANTINE, GENERIC
     }
 
 }

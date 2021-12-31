@@ -166,7 +166,7 @@ public class GuildStateListener extends ListenerAdapter {
         builder.setTitle("Sherlock Setup");
         builder.setDescription(String.format("Hello there!\n\n" +
                 "I am Sherlock!  It is great to meet you.  I have a few tasks that must be completed for me to work efficiently for your server.\n\nIf you are a server administrator, please do %ssetup to finish the setup steps.", Config.get("DEFAULTPREFIX")));
-        builder.setColor(SherlockBot.getColor("generic"));
+        builder.setColor(SherlockBot.getColor(SherlockBot.colorType.GENERIC));
 
         event.getGuild().getDefaultChannel().sendMessageEmbeds(builder.build()).queue();
 

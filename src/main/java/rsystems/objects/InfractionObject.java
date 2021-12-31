@@ -83,11 +83,11 @@ public class InfractionObject {
 
         switch(this.eventType){
             case WARNING:
-                builder.setColor(SherlockBot.getColor("warn"));
+                builder.setColor(SherlockBot.getColor(SherlockBot.colorType.WARNING));
                 break;
             case RESERVED:
             case MUTE:
-                builder.setColor(Color.decode("#C133FF"));
+                builder.setColor(SherlockBot.getColor(SherlockBot.colorType.QUARANTINE));
                 break;
             case KICK:
                 builder.setColor(Color.decode("#FF9C33"));

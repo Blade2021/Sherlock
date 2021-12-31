@@ -90,7 +90,7 @@ public class Overseer {
                             builder.addField("Removed Roles:", roleString.toString(), false);
                             builder.setThumbnail(foundMember.getEffectiveAvatarUrl());
                             builder.setTimestamp(Instant.now());
-                            builder.setColor(SherlockBot.getColor("quarantine"));
+                            builder.setColor(SherlockBot.getColor(SherlockBot.colorType.QUARANTINE));
 
                             LogMessage.sendLogMessage(guildID, builder.build());
                             builder.clear();

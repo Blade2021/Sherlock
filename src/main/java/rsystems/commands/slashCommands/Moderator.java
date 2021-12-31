@@ -92,7 +92,7 @@ public class Moderator extends SlashCommand {
                     }
 
                     builder.setTitle("Moderator Roles");
-                    builder.setColor(SherlockBot.getColor("generic"));
+                    builder.setColor(SherlockBot.getColor(SherlockBot.colorType.GENERIC));
                     builder.addField("Role Name",roleNameString.toString(),true);
                     builder.addField("Role ID",roleIDSting.toString(),true);
                     builder.addField("Role Permissions",rolePermString.toString(),true);

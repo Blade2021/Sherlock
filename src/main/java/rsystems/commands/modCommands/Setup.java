@@ -14,7 +14,7 @@ public class Setup extends Command {
     @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, MessageReceivedEvent event) throws SQLException {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(SherlockBot.getColor("generic"));
+        builder.setColor(SherlockBot.getColor(SherlockBot.colorType.GENERIC));
         builder.setTitle("Sherlock Setup");
         builder.setDescription("Here are the standard settings/setup steps:");
         builder.addField("Step 1","Move the `Sherlock Role` to the **highest role allowed**, any roles above this will **NOT** be able to be moderated by Sherlock\n\nNext move `SL-Quarantine` right below the Sherlock Role in the list",false);
