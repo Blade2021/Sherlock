@@ -1,5 +1,6 @@
 package rsystems.events;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;
@@ -13,6 +14,7 @@ import net.dv8tion.jda.api.events.thread.ThreadRevealedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import rsystems.Config;
 import rsystems.SherlockBot;
 import rsystems.handlers.ErrorReportHandler;
 import rsystems.handlers.LogMessage;
@@ -40,7 +42,7 @@ public class GuildStateListener extends ListenerAdapter {
     @Override
     public void onUnavailableGuildLeave(UnavailableGuildLeaveEvent event) {
         try {
-            SherlockBot.database.deleteRow("Guilds", "GuildID", event.getGuildIdLong());
+            SherlockBot.database.deleteRow("GuildTable", "GuildID", event.getGuildIdLong());
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -49,7 +51,7 @@ public class GuildStateListener extends ListenerAdapter {
     @Override
     public void onGuildLeave(GuildLeaveEvent event) {
         try {
-            SherlockBot.database.deleteRow("Guilds", "GuildID", event.getGuild().getIdLong());
+            SherlockBot.database.deleteRow("GuildTable", "GuildID", event.getGuild().getIdLong());
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -66,21 +68,31 @@ public class GuildStateListener extends ListenerAdapter {
             e.printStackTrace();
         }
 
+
         SherlockBot.guildMap.putIfAbsent(event.getGuild().getIdLong(), new GuildSettings(event.getGuild().getIdLong()));
 
+
         try {
+
+            //INSERT THE NEW GUILD INTO THE DATABASE
             if (SherlockBot.database.insertGuild(event.getGuild().getIdLong(), event.getGuild().getOwnerIdLong()) >= 1) {
+
+                if(event.getGuild().getCommunityUpdatesChannel() != null){
+                    if(event.getGuild().getCommunityUpdatesChannel().canTalk()) {
+                        SherlockBot.guildMap.get(event.getGuild().getIdLong()).setLogChannelID(event.getGuild().getCommunityUpdatesChannel().getIdLong());
+
+                        sendSetupMessage(event);
+                    }
+                } else {
+                    if(event.getGuild().getDefaultChannel().canTalk()){
+                        sendSetupMessage(event);
+                    }
+                }
 
                 /*
                 Create quarantine Role
                  */
                 event.getGuild().createRole().setColor(Color.decode("#9B1AF5")).setName("SL-Quarantine").queue(role -> {
-                    try {
-                        SherlockBot.database.putValue("Guilds", "QuarantineRoleID", "GuildID", event.getGuild().getIdLong(), role.getIdLong());
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-
                     role.getManager().revokePermissions(role.getPermissions()).queue();
 
                     ArrayList<Permission> mutePerms = new ArrayList<>();
@@ -133,6 +145,8 @@ public class GuildStateListener extends ListenerAdapter {
                     threadChannel.join().queue();
                 });
 
+                SherlockBot.guildMap.get(event.getGuild().getIdLong()).save();
+
             } else {
                 ErrorReportHandler.sendErrorReport("Failed to add guild to database", event.getGuild().getIdLong());
             }
@@ -145,6 +159,18 @@ public class GuildStateListener extends ListenerAdapter {
         for (ThreadChannel thread : event.getGuild().getThreadChannels()) {
             thread.join().queue();
         }
+    }
+
+    private void sendSetupMessage(GuildJoinEvent event) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle("Sherlock Setup");
+        builder.setDescription(String.format("Hello there!\n\n" +
+                "I am Sherlock!  It is great to meet you.  I have a few tasks that must be completed for me to work efficiently for your server.\n\nIf you are a server administrator, please do %ssetup to finish the setup steps.", Config.get("DEFAULTPREFIX")));
+        builder.setColor(SherlockBot.getColor("generic"));
+
+        event.getGuild().getDefaultChannel().sendMessageEmbeds(builder.build()).queue();
+
+        builder.clear();
     }
 
     @Override

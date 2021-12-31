@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import rsystems.Config;
 import rsystems.SherlockBot;
 import rsystems.objects.Command;
 
@@ -37,7 +38,7 @@ public class Help extends Command {
                         builder.setTitle("Help | " + c.getName());
 
                         String helpString = c.getHelp();
-                        String prefix = "!sL";
+                        String prefix = Config.get("defaultPrefix");
                         if(SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix() != null){
                             prefix = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix();
                         }

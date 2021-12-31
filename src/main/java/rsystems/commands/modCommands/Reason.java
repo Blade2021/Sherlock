@@ -33,7 +33,7 @@ public class Reason extends Command {
                 message.addReaction("✅").queue();
 
                 Long previousMessageID = SherlockBot.database.getLong("CaseTable","LogMessageID","ChildGuildID",event.getGuild().getIdLong(),"CaseID",caseID);
-                Long logChannelID = SherlockBot.database.getLong("Guilds","LogChannelID","GuildID",event.getGuild().getIdLong());
+                Long logChannelID = SherlockBot.database.getLong("GuildTable","LogChannelID","GuildID",event.getGuild().getIdLong());
 
                 if((previousMessageID != null) && (logChannelID != null)){
                     // gold star...
@@ -70,7 +70,6 @@ public class Reason extends Command {
 
     @Override
     public String getHelp() {
-        //todo help docs
-        return null;
+        return "`{prefix}{command} (caseID) (Reason)\n\nAdd a note to a case event";
     }
 }

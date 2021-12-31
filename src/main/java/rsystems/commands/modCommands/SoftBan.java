@@ -50,8 +50,7 @@ public class SoftBan extends Command {
 
     @Override
     public String getHelp() {
-        //todo help docs
-        return null;
+        return "Kick a user from discord.  This will also remove the messages sent by said user within the last 7 days.";
     }
 
     @Override

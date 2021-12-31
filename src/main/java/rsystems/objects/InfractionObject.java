@@ -45,8 +45,8 @@ public class InfractionObject {
     public InfractionObject(Long guildID){
         // Trigger get case number from database
         try {
-            this.caseNumber = SherlockBot.database.getInt("Guilds","CaseIndex","GuildID",guildID);
-            SherlockBot.database.putValue("Guilds","CaseIndex","GuildID",guildID,this.caseNumber+1);
+            this.caseNumber = SherlockBot.database.getInt("GuildTable","CaseIndex","GuildID",guildID);
+            SherlockBot.database.putValue("GuildTable","CaseIndex","GuildID",guildID,this.caseNumber+1);
 
             this.submissionDate = LocalDateTime.now().atZone(ZoneId.of("UTC"));
             this.note = String.format("Moderator: please do `%sreason %05d [reason]`",SherlockBot.guildMap.get(guildID).getPrefix(),this.caseNumber);

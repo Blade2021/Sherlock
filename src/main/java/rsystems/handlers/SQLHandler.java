@@ -291,7 +291,7 @@ public class SQLHandler {
         try{
             Statement st = connection.createStatement();
 
-            ResultSet rs = st.executeQuery("SELECT Prefix, OwnerID, LogChannelID, QuarantineRoleID, EmbedFilter, OwnerID, GrantedSelfRoleCount, GrantedAutoRoleCount, WelcomeMessageSetting FROM Guilds WHERE GuildID = " + guildID);
+            ResultSet rs = st.executeQuery("SELECT Prefix, OwnerID, LogChannelID, QuarantineRoleID, EmbedFilter, OwnerID, GrantedSelfRoleCount, GrantedAutoRoleCount, WelcomeMessageSetting FROM GuildTable WHERE GuildID = " + guildID);
             while (rs.next()) {
                 guildSettings.setPrefix(rs.getString("Prefix"));
                 guildSettings.setOwnerID(rs.getLong("OwnerID"));
@@ -319,7 +319,7 @@ public class SQLHandler {
         try {
             Statement st = connection.createStatement();
 
-            st.execute(String.format("UPDATE Guilds SET OwnerID=%d, Prefix=\"%s\", LogChannelID=%d, QuarantineRoleID=%d, EmbedFilter=%d, WelcomeMessageSetting=%d " +
+            st.execute(String.format("UPDATE GuildTable SET OwnerID=%d, Prefix=\"%s\", LogChannelID=%d, QuarantineRoleID=%d, EmbedFilter=%d, WelcomeMessageSetting=%d " +
                     "where GuildID=%d", guildSettings.getOwnerID(),guildSettings.getPrefix(),guildSettings.getLogChannelID(),guildSettings.getQuarantineRoleID(),
                     guildSettings.getEmbedFilterSetting(),guildSettings.getWelcomeMessageSetting(),guildSettings.getGuildID()));
             return st.getUpdateCount();
@@ -338,7 +338,7 @@ public class SQLHandler {
         try {
             Statement st = connection.createStatement();
 
-            st.execute(String.format("INSERT INTO Guilds SET GuildID=%d, OwnerID=%d", guildID,guildOwnerID));
+            st.execute(String.format("INSERT INTO GuildTable SET GuildID=%d, OwnerID=%d", guildID,guildOwnerID));
             return st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();

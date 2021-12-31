@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import rsystems.events.ButtonClickEvents;
 import rsystems.events.GuildMemberEvents;
-import rsystems.events.GuildNicknameListener;
 import rsystems.events.GuildStateListener;
 import rsystems.handlers.Dispatcher;
 import rsystems.handlers.Overseer;
@@ -58,7 +57,7 @@ public class SherlockBot {
         api.addEventListener(dispatcher = new Dispatcher());
         api.addEventListener(slashCommandDispatcher = new SlashCommandDispatcher());
         api.addEventListener(new GuildStateListener());
-        api.addEventListener(new GuildNicknameListener());
+        //api.addEventListener(new GuildNicknameListener());
         api.addEventListener(new GuildMemberEvents());
         //api.addEventListener(new SlashCommandEvents());
         api.addEventListener(new ButtonClickEvents());

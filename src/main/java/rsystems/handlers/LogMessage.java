@@ -100,7 +100,7 @@ public class LogMessage {
                     // REMOVE LOG CHANNEL COMPLETELY FROM PREVIOUS DATA
 
                     try {
-                        SherlockBot.database.putValueNull("Guilds", "LogChannelID", "GuildID", guildID);
+                        SherlockBot.database.putValueNull("GuildTable", "LogChannelID", "GuildID", guildID);
                     } catch (SQLException ex) {
                         ex.printStackTrace();
                     }
@@ -132,7 +132,7 @@ public class LogMessage {
                     // REMOVE LOG CHANNEL COMPLETELY FROM PREVIOUS DATA
 
                     try {
-                        SherlockBot.database.putValueNull("Guilds", "LogChannelID", "GuildID", guildID);
+                        SherlockBot.database.putValueNull("GuildTable", "LogChannelID", "GuildID", guildID);
                     } catch (SQLException ex) {
                         ex.printStackTrace();
                     }
@@ -158,7 +158,7 @@ public class LogMessage {
                     // REMOVE LOG CHANNEL COMPLETELY FROM PREVIOUS DATA
 
                     try {
-                        SherlockBot.database.putValueNull("Guilds", "LogChannelID", "GuildID", guildID);
+                        SherlockBot.database.putValueNull("GuildTable", "LogChannelID", "GuildID", guildID);
                     } catch (SQLException ex) {
                         ex.printStackTrace();
                     }

@@ -1,5 +1,9 @@
 package rsystems.objects;
 
+import rsystems.SherlockBot;
+
+import java.sql.SQLException;
+
 public class GuildSettings {
     private Long guildID;
     private String prefix;
@@ -81,5 +85,13 @@ public class GuildSettings {
 
     public void setWelcomeMessageSetting(int welcomeMessageSetting) {
         this.welcomeMessageSetting = welcomeMessageSetting;
+    }
+
+    public void save(){
+        try {
+            SherlockBot.database.updateGuild(this);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

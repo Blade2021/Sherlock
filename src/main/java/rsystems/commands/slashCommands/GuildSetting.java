@@ -144,7 +144,7 @@ public class GuildSetting extends SlashCommand {
                 if (!event.getOption("message").getAsString().isEmpty()) {
                     try {
                         SherlockBot.database.addWelcomeRow(event.getGuild().getIdLong(), event.getOption("message").getAsString());
-                        SherlockBot.database.putValue("Guilds", "WelcomeMessageSetting", "GuildID", event.getGuild().getIdLong(), 1);
+                        SherlockBot.database.putValue("GuildTable", "WelcomeMessageSetting", "GuildID", event.getGuild().getIdLong(), 1);
                         event.getHook().editOriginal("Welcome message was set").queue();
                     } catch(SQLException e){
                         event.getHook().editOriginal("An error occured").queue();
@@ -154,7 +154,7 @@ public class GuildSetting extends SlashCommand {
 
                 try {
                     SherlockBot.database.putValueNull("WelcomeTable", "WelcomeMessage", "ChildGuildID", event.getGuild().getIdLong());
-                    SherlockBot.database.putValue("Guilds", "WelcomeMessageSetting", "GuildID", event.getGuild().getIdLong(), 0);
+                    SherlockBot.database.putValue("GuildTable", "WelcomeMessageSetting", "GuildID", event.getGuild().getIdLong(), 0);
 
                     event.getHook().editOriginal("Welcome message cleared.").queue();
                 } catch(SQLException e){

@@ -22,7 +22,6 @@ import rsystems.commands.modCommands.*;
 import rsystems.commands.publicCommands.Commands;
 import rsystems.commands.publicCommands.Help;
 import rsystems.commands.publicCommands.Info;
-import rsystems.commands.subscriberOnly.ColorRole;
 import rsystems.objects.Command;
 import rsystems.objects.InfractionObject;
 
@@ -56,7 +55,7 @@ public class Dispatcher extends ListenerAdapter {
         //registerCommand(new CopyChannel());
         registerCommand(new IgnoreChannel());
         registerCommand(new WatchChannel());
-        registerCommand(new ColorRole());
+        //registerCommand(new ColorRole());
         registerCommand(new Help());
         registerCommand(new ForceDisconnect());
         registerCommand(new Leave());
@@ -64,6 +63,7 @@ public class Dispatcher extends ListenerAdapter {
         registerCommand(new Info());
         registerCommand(new Commands());
         registerCommand(new Topic());
+        registerCommand(new Setup());
 
     }
 
@@ -185,14 +185,14 @@ public class Dispatcher extends ListenerAdapter {
                         throwables.printStackTrace();
                     }
 
-                } else {
+                }
                     /*
                     No command was found.
                     No Self role triggers were found.
                     Pass the event to the next series.
                      */
                     handleEvent(message, event);
-                }
+
             }
         } else {
             // Private Message

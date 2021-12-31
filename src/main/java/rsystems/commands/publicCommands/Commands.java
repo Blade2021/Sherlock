@@ -63,7 +63,6 @@ public class Commands extends Command {
 
     @Override
     public String getHelp() {
-        //todo help docs
-        return null;
+        return "Get a list of commands that you have access too.";
     }
 }

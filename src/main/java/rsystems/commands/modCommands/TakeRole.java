@@ -110,6 +110,6 @@ public class TakeRole extends Command {
 
     @Override
     public String getHelp() {
-        return "{prefix}{command} `(Mention Members)` `(RoleID)`\n{prefix}{command} `(MemberID)` `(RoleID)`\n\nGive a role to a member or members of the server.";
+        return "{prefix}{command} `(Mention Members)` `(RoleID)`\n{prefix}{command} `(MemberID)` `(RoleID)`\n\nTake a role from a member or members of the server.";
     }
 }
