@@ -19,6 +19,7 @@ import rsystems.commands.botManager.Test;
 import rsystems.commands.channelCommands.Topic;
 import rsystems.commands.guildFunctions.*;
 import rsystems.commands.modCommands.*;
+import rsystems.commands.publicCommands.BotSupport;
 import rsystems.commands.publicCommands.Commands;
 import rsystems.commands.publicCommands.Help;
 import rsystems.commands.publicCommands.Info;
@@ -64,6 +65,7 @@ public class Dispatcher extends ListenerAdapter {
         registerCommand(new Commands());
         registerCommand(new Topic());
         registerCommand(new Setup());
+        registerCommand(new BotSupport());
 
     }
 

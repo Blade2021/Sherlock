@@ -35,6 +35,7 @@ public class SlashCommandDispatcher extends ListenerAdapter {
         registerCommand(new Verify());
         registerCommand(new Unban());
         registerCommand(new Moderator());
+        registerCommand(new BotSupport());
     }
 
     public Set<SlashCommand> getCommands() {
