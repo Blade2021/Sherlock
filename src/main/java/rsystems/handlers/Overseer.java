@@ -6,6 +6,7 @@ package rsystems.handlers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
+import rsystems.Config;
 import rsystems.SherlockBot;
 import rsystems.objects.TrackerObject;
 
@@ -41,15 +42,15 @@ public class Overseer {
 
                 Integer type = trackerObject.getType();
                 if(type == 2){
-                    heatLevel = heatLevel + 9;
+                    heatLevel = heatLevel + Integer.parseInt(Config.get("HighTrigger"));
                 } else if(type == 1){
-                    heatLevel = heatLevel + 7;
+                    heatLevel = heatLevel + Integer.parseInt(Config.get("MidTrigger"));
                 } else {
-                    heatLevel = heatLevel + 5;
+                    heatLevel = heatLevel + Integer.parseInt(Config.get("LowTrigger"));
                 }
             }
 
-            if(heatLevel >= 18){
+            if(heatLevel >= Integer.parseInt(Config.get("QuarantineLimit"))){
                 quarantineUser(guildID,userID);
             }
 

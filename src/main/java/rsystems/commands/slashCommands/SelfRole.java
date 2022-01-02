@@ -60,8 +60,12 @@ public class SelfRole extends SlashCommand {
                 //Query Database for current self role count
                 try {
                     if(SherlockBot.database.getTableCount(event.getGuild().getIdLong(),"SelfRoles") < SherlockBot.database.getGuildData(event.getGuild().getIdLong()).getGrantedSelfRoleCount()){
-                        if(SherlockBot.database.insertSelfRole(event.getGuild().getIdLong(),roleTrigger,role.getIdLong()) == 200){
-                            reply(event,"I have added the role as a self-role.",false);
+                        Integer responseCode = SherlockBot.database.insertSelfRole(event.getGuild().getIdLong(),roleTrigger,role.getIdLong());
+
+                        if(responseCode == 200){
+                            reply(event,String.format("I have added `%s` as a self-role with the trigger `%s`",role.getName(),roleTrigger),false);
+                        } else if(responseCode == 201) {
+                            reply(event,String.format("`%s` is already a trigger.  Please try with a different role trigger",roleTrigger),false);
                         } else {
                             // DATABASE ERROR
                             reply(event,"A system error occurred.  Please try again later or contact us for support.  ERROR_ID:2301",false);

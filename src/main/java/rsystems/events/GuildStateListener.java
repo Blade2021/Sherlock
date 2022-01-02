@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.events.channel.update.GenericChannelUpdateEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.UnavailableGuildLeaveEvent;
+import net.dv8tion.jda.api.events.role.RoleDeleteEvent;
 import net.dv8tion.jda.api.events.thread.GenericThreadEvent;
 import net.dv8tion.jda.api.events.thread.ThreadRevealedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
@@ -23,6 +24,7 @@ import rsystems.objects.GuildSettings;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class GuildStateListener extends ListenerAdapter {
 
@@ -197,6 +199,80 @@ public class GuildStateListener extends ListenerAdapter {
             if (!threadChannel.isArchived()) {
                 threadChannel.join().queue();
             }
+        }
+    }
+
+    @Override
+    public void onRoleDelete(RoleDeleteEvent event) {
+        try {
+            int selfRoleCount = SherlockBot.database.getTableCount(event.getGuild().getIdLong(), "SelfRoles");
+            int autoRoleCount = SherlockBot.database.getTableCount(event.getGuild().getIdLong(), "AutoRoles");
+
+            ArrayList<String> triggers = new ArrayList<>();
+            boolean autoRoleFound = false;
+
+            if ((selfRoleCount > 0) || (autoRoleCount > 0)){
+
+                if(selfRoleCount > 0) {
+                    Map<String, Long> guildSelfRoleMap = SherlockBot.database.getGuildSelfRoles(event.getGuild().getIdLong());
+
+                    //ITERATE THROUGH GUILD SELF ROLE MAP
+                    for (Map.Entry<String, Long> entry : guildSelfRoleMap.entrySet()) {
+
+                        if (entry.getValue().equals(event.getRole().getIdLong())) {
+                            //ENTRY FOUND
+                            triggers.add(entry.getKey());
+
+                            SherlockBot.database.deleteRow("SelfRoles","RoleID",event.getRole().getIdLong());
+                        }
+                    }
+                }
+
+                if(autoRoleCount > 0){
+
+                    if(SherlockBot.database.getLong("AutoRoles","RoleID","RoleID",event.getRole().getIdLong()) != null){
+                        autoRoleFound = true;
+
+                        SherlockBot.database.deleteRow("AutoRoles","RoleID",event.getRole().getIdLong());
+                    }
+
+                }
+
+                if((autoRoleFound || triggers.size() > 0)){
+
+                    EmbedBuilder builder = new EmbedBuilder();
+                    builder.setTitle("Role Assignments Removed");
+                    builder.setDescription("A role containing assignments in this bot was deleted. The following commands were deleted automatically.");
+                    builder.setColor(SherlockBot.getColor(SherlockBot.colorType.GENERIC));
+
+                    builder.addField("Role Name:",event.getRole().getName(),true);
+                    builder.addField("Role ID",event.getRole().getId(),true);
+                    builder.addBlankField(true);
+
+                    if(autoRoleFound){
+                        builder.addField("Auto Role:","TRUE",false);
+                    }
+
+                    if(triggers.size() > 0){
+                        StringBuilder triggersString = new StringBuilder();
+
+                        for(String trigger:triggers){
+                            triggersString.append(trigger).append("\n");
+                        }
+
+                        builder.addField("SelfRole Triggers:",triggersString.toString(),false);
+                    }
+
+                    LogMessage.sendLogMessage(event.getGuild().getIdLong(),builder.build());
+
+                    builder.clear();
+
+                }
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

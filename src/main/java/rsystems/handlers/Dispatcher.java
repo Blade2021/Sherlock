@@ -489,11 +489,11 @@ public class Dispatcher extends ListenerAdapter {
 
                 if (event.getMember().getRoles().contains(role)) {
                     event.getGuild().removeRoleFromMember(event.getMember().getIdLong(), role).reason("Requested via SelfRole").queue(success -> {
-                        event.getMessage().addReaction("\uD83D\uDC4D ").queue();
+                        event.getMessage().addReaction("\uD83D\uDD3D").queue();
                     });
                 } else {
                     event.getGuild().addRoleToMember(event.getMember().getIdLong(), role).reason("Requested via SelfRole").queue(success -> {
-                        event.getMessage().addReaction("\uD83D\uDC4D ").queue();
+                        event.getMessage().addReaction("\uD83D\uDD3C").queue();
                     });
                 }
 
