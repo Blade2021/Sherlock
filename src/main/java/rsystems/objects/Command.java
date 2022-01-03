@@ -1,230 +1,148 @@
 package rsystems.objects;
 
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
+import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.exceptions.PermissionException;
-import rsystems.SherlockBot;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-import java.util.ArrayList;
+import java.sql.SQLException;
+import java.util.function.Consumer;
 
-public class Command {
-    protected int id;
-    protected String command;
-    protected ArrayList<String> alias = new ArrayList<>();
-    protected int minArgCount;
-    protected String description;
-    protected String syntax;
-    protected int rank;
-    protected boolean deleteTrigger;
-    protected String wikiLink;
+public abstract class Command {
 
-    public Command(String command) {
-        this.command = command;
+    private Integer permissionIndex = null;
+    public Integer getPermissionIndex() {
+        return permissionIndex;
+    }
+    public void setPermissionIndex(int permissionIndex) {
+        this.permissionIndex = permissionIndex;
+    }
+    public Permission getDiscordPermission(){
+        return null;
+    }
+    public boolean isOwnerOnly(){
+        return false;
     }
 
-    public Command(String command, int id) {
-        this.id = id;
-        this.command = command;
+    private static final FixedSizeCache<Long, TLongSet> MESSAGE_LINK_MAP = new FixedSizeCache<>(20);
+
+    public abstract void dispatch(User sender, MessageChannel channel, Message message, String content, MessageReceivedEvent event) throws SQLException;
+
+    public abstract String getHelp();
+
+    public String getName(){
+        return this.getClass().getSimpleName();
+    };
+
+    /**
+     * Reply to the message.
+     * @param event
+     * @param message
+     */
+    protected void reply(MessageReceivedEvent event, String message){
+        reply(event,message,null);
     }
 
-    public Command(String command, String description, String syntax, int minimumArgCount, int rank) {
-        this.command = command;
-        this.description = description;
-        this.syntax = syntax;
-        this.minArgCount = minimumArgCount;
-        this.rank = rank;
+    protected void reply(MessageReceivedEvent event, Message message){
+        reply(event,message,null);
     }
 
-    public String getCommand() {
-        return command;
+    protected void reply(MessageReceivedEvent event, String message, Consumer<Message> successConsumer)
+    {
+        reply(event, new MessageBuilder(message).build(), successConsumer);
     }
 
-    public void setCommand(String command) {
-        this.command = command;
+    protected void reply(MessageReceivedEvent event, MessageEmbed embed)
+    {
+        reply(event, embed, null);
     }
 
-    public String getDescription() {
-        return description;
+    protected void reply(MessageReceivedEvent event, MessageEmbed embed, Consumer<Message> successConsumer)
+    {
+        reply(event, new MessageBuilder(embed).build(), successConsumer);
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    protected void reply(MessageReceivedEvent event, Message message, Consumer<Message> successConsumer)
+    {
+        event.getMessage().reply(message).queue(msg ->
+        {
+            linkMessage(event.getMessageIdLong(), msg.getIdLong());
+            if(successConsumer != null)
+                successConsumer.accept(msg);
+        });
     }
 
-    public String getSyntax() {
-        return syntax;
+    protected void channelReply(MessageReceivedEvent event, Message message){
+        channelReply(event,message,null);
     }
 
-    public void setSyntax(String syntax) {
-        this.syntax = syntax;
+    protected void channelReply(MessageReceivedEvent event, String message){
+        channelReply(event,message,null);
     }
 
-    public int getMinimumArgCount() {
-        return minArgCount;
+    protected void channelReply(MessageReceivedEvent event, MessageEmbed embed)
+    {
+        channelReply(event, embed, null);
     }
 
-    public void setMinimumArgCount(int minimumArgCount) {
-        this.minArgCount = minimumArgCount;
+    protected void channelReply(MessageReceivedEvent event, MessageEmbed embed, Consumer<Message> successConsumer)
+    {
+        channelReply(event, new MessageBuilder(embed).build(), successConsumer);
     }
 
-    public int getRank() {
-        return rank;
+    protected void channelReply(MessageReceivedEvent event, String message, Consumer<Message> successConsumer)
+    {
+        channelReply(event, new MessageBuilder(message).build(), successConsumer);
     }
 
-    public void setRank(int rank) {
-        this.rank = rank;
+    protected void channelReply(MessageReceivedEvent event, Message message, Consumer<Message> successConsumer){
+        event.getChannel().sendMessage(message).queue(msg -> {
+
+            linkMessage(event.getMessageIdLong(),msg.getIdLong());
+            if(successConsumer != null)
+                successConsumer.accept(msg);
+        });
     }
 
-    public ArrayList<String> getAlias() {
-        return alias;
-    }
-
-    public void setAlias(ArrayList<String> alias) {
-        this.alias.addAll(alias);
-    }
-
-    public void clearAlias() {
-        this.alias.clear();
-    }
-
-    public boolean isDeleteTrigger() {
-        return deleteTrigger;
-    }
-
-    public void setDeleteTrigger(boolean deleteTrigger) {
-        this.deleteTrigger = deleteTrigger;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getWikiLink() {
-        return wikiLink;
-    }
-
-    public void setWikiLink(String wikiLink) {
-        this.wikiLink = wikiLink;
-    }
-
-    public boolean checkCommand(Message message) {
-        String guildID = message.getGuild().getId();
-        String prefix = SherlockBot.guildMap.get(guildID).getPrefix();
-        String formattedMessage = message.getContentRaw().toLowerCase();
-
-        Boolean commandMatch = false;
-        Boolean authorized = false;
-
-        String[] args = formattedMessage.split("\\s+");
-
-        if (args[0].equalsIgnoreCase(prefix + this.command)) {
-            commandMatch = true;
-        } else {
-            for (String alias : this.getAlias()) {
-                if (args[0].equalsIgnoreCase(prefix + alias)) {
-                    commandMatch = true;
-                }
-            }
+    public static void linkMessage(long commandId, long responseId)
+    {
+        TLongSet set;
+        if(!MESSAGE_LINK_MAP.contains(commandId))
+        {
+            set = new TLongHashSet(2);
+            MESSAGE_LINK_MAP.add(commandId, set);
         }
-
-        if (commandMatch) {
-            if (this.rank > 0) {
-                if (!checkPermissionLevel(this.rank, guildID, message.getMember())) {
-                    try {
-                        message.getChannel().sendMessage(message.getAuthor().getAsMention() + " You are not authorized for that command").queue();
-                    } catch (NullPointerException | PermissionException e) {
-                        System.out.println(String.format("An error occurred when trying to send a message. GUILD:%s CHANNEL:%s", message.getGuild().getId(), message.getChannel().getId()));
-                    }
-                } else {
-                    //USER IS AUTHORIZED
-                    authorized = true;
-                }
-            } else {
-                // PERMISSION FOR COMMAND IS ZERO
-                authorized = true;
-            }
+        else
+        {
+            set = MESSAGE_LINK_MAP.get(commandId);
         }
-
-        return (commandMatch) && (authorized);
+        set.add(responseId);
     }
 
-
-    //Check if requester is authorized for command
-    public boolean checkPermissionLevel(int binaryIndex, String guildID, Member requester) {
-        boolean authorized = false;
-
-        //MEMBER HAS ADMIN PERMISSIONS SO ALLOW ALL
-        if (requester.hasPermission(Permission.ADMINISTRATOR)) {
-            authorized = true;
-        } else if((binaryIndex >= 32768) && (requester.hasPermission(Permission.ADMINISTRATOR))){
-                authorized = true;
-        } else {
-            int modRoleValue = 0;
-            String binaryString = null;
-            char indexChar = '0';
-
-            //Parse through each role that the member has
-            for (Role r : requester.getRoles()) {
-
-                //Does role fall into defined moderation roles
-                if (SherlockBot.guildMap.get(guildID).modRoleMap.containsKey(r.getId())) {
-
-                    //Get the role's Permission level
-                    modRoleValue = SherlockBot.guildMap.get(guildID).modRoleMap.get(r.getId());
-
-                    /*
-                    Form a binary string based on the permission level integer found.
-                    Example: 24 = 11000
-                     */
-                    binaryString = Integer.toBinaryString(modRoleValue);
-
-                    //Reverse the string for processing
-                    String reverseString = new StringBuilder(binaryString).reverse().toString();
-
-                    //Turn the command rank into a binary string
-                    String binaryIndexString = Integer.toBinaryString(binaryIndex);
-
-                    //Reverse the string for lookup
-                    String reverseLookupString = new StringBuilder(binaryIndexString).reverse().toString();
-
-                    //Grab the index of the on bit
-                    int realIndex = reverseLookupString.indexOf('1');
-                    try {
-
-                        indexChar = reverseString.charAt(realIndex);
-
-                    } catch (IndexOutOfBoundsException e) {
-
-                    } finally {
-                        if (indexChar == '1') {
-                            authorized = true;
-                        } else {
-                            authorized = false;
-                        }
-                    }
-                }
-            }
-        }
-
-        return authorized;
-    }
-
-
-    public boolean helpCheck(String command) {
-        String[] args = command.split("\\s+");
-        if (args[0].equalsIgnoreCase(this.command)) {
-            return true;
-        } else {
-            final Boolean[] returnValue = {false};
-            this.alias.forEach(alias -> {
-                if (args[0].equalsIgnoreCase(alias)) {
-                    returnValue[0] = true;
-                }
-            });
-            return returnValue[0];
+    public static void removeResponses(MessageChannel channel, long messageId)
+    {
+        TLongSet responses = MESSAGE_LINK_MAP.get(messageId);
+        if(responses != null)
+        {
+            channel.purgeMessagesById(responses.toArray());
         }
     }
 
+    public String[] getAliases(){
+        return new String[0];
+    }
+
+    protected Long getLongFromArgument(String arg){
+        Long output = null;
+
+        try{
+            output = Long.parseLong(arg);
+        }catch(NumberFormatException e){
+            // do nothing
+        }
+
+        return output;
+    }
 }

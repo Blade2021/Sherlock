@@ -2,92 +2,133 @@ package rsystems;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
-import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import rsystems.commands.*;
-import rsystems.events.*;
-import rsystems.handlers.CommandLoader;
-import rsystems.handlers.LanguageFilter;
+import rsystems.events.ButtonClickEvents;
+import rsystems.events.GuildMemberEvents;
+import rsystems.events.GuildNicknameListener;
+import rsystems.events.GuildStateListener;
+import rsystems.handlers.Dispatcher;
+import rsystems.handlers.Overseer;
 import rsystems.handlers.SQLHandler;
-import rsystems.objects.Command;
+import rsystems.handlers.SlashCommandDispatcher;
+import rsystems.objects.DBPool;
 import rsystems.objects.GuildSettings;
 import rsystems.objects.UserRoleReactionObject;
-import rsystems.threads.ThreeMinute;
+import rsystems.threads.ExpiredTrackersCheck;
+import rsystems.threads.OneMinute;
 
 import javax.security.auth.login.LoginException;
+import java.awt.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 
 public class SherlockBot {
-    public static Map<Integer, Command> commandMap = new HashMap<>();
-    public static Map<String,GuildSettings> guildMap = new HashMap<>();
-    public static Map<Long, Map<Long, ArrayList<UserRoleReactionObject>>> reactionHandleMap = new HashMap<>();
-    public static SQLHandler database = new SQLHandler(Config.get("Database_Host"),Config.get("Database_User"),Config.get("Database_Pass"));
-    public static User bot = null;
-    public static String version = "0.6.2";
 
+    public static DBPool dbPool = new DBPool(Config.get("DATABASE_HOST"), Config.get("DATABASE_USER"), Config.get("DATABASE_PASS"));
+    public static SQLHandler database = new SQLHandler(dbPool.getPool());
+    public static Dispatcher dispatcher;
+    public static SlashCommandDispatcher slashCommandDispatcher;
+
+    public static Map<Long, GuildSettings> guildMap = new HashMap<>();
+    public static Map<Long, Map<Long, ArrayList<UserRoleReactionObject>>> reactionHandleMap = new HashMap<>();
+    public static User bot = null;
+    public static String version = "2.6.7";
     public static JDA jda = null;
+    public static Long botOwnerID = Long.valueOf(Config.get("OWNER_ID"));
+    public static Overseer overseer = new Overseer();
+    public static int activityIndex = 0;
+
+    private static Map<colorType, String> colorMap = new HashMap<>();
+
+    public static String defaultPrefix = Config.get("defaultPrefix");
 
     public static void main(String[] args) throws LoginException {
         JDA api = JDABuilder.createDefault(Config.get("token"))
                 .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
-                .setMemberCachePolicy(MemberCachePolicy.ALL)
-                .enableCache(CacheFlag.ACTIVITY)
-                .setChunkingFilter(ChunkingFilter.ALL)
+                .setMemberCachePolicy(MemberCachePolicy.NONE)
+                //.enableCache(CacheFlag.ACTIVITY)
+                .setChunkingFilter(ChunkingFilter.NONE)
                 .build();
 
-        api.addEventListener(new LocalChannelManager());
-        api.addEventListener(new JoinGuild());
-        api.addEventListener(new Leave());
-        api.addEventListener(new LeaveGuild());
-        api.addEventListener(new Infraction());
-        api.addEventListener(new Mute());
-        api.addEventListener(new SelfRoles());
-        api.addEventListener(new ModifyGuildSettings());
-        api.addEventListener(new PrivateMessageReceived());
-        api.addEventListener(new GuildRoleDeleted());
-        api.addEventListener(new LanguageFilter());
-        api.addEventListener(new EmbedMessageListener());
-        api.addEventListener(new ChannelCooldown());
-        api.addEventListener(new Generics());
-        api.addEventListener(new WelcomeSettings());
-        api.addEventListener(new GuildMemberJoin());
-        api.addEventListener(new ModCommands());
-        api.addEventListener(new GuildMessageDeleted());
-        api.addEventListener(new ArchiveChannel());
-        api.addEventListener(new GuildChannelMoveEvent());
-        api.addEventListener(new GuildCategoryDeleted());
-        api.addEventListener(new GuildTextChannelDeleted());
-        api.addEventListener(new ChannelTopic());
-        api.addEventListener(new GuildReactionListener());
-        api.addEventListener(new GuildEmoteRemoved());
+        api.addEventListener(dispatcher = new Dispatcher());
+        api.addEventListener(slashCommandDispatcher = new SlashCommandDispatcher());
+        api.addEventListener(new GuildStateListener());
+        api.addEventListener(new GuildMemberEvents());
+        api.addEventListener(new ButtonClickEvents());
+        api.addEventListener(new GuildNicknameListener());
 
-        try{
+        loadColorMap();
+
+        try {
             api.awaitReady();
+            api.getPresence().setActivity(Activity.playing("Starting up..."));
+            api.awaitStatus(JDA.Status.CONNECTED);
 
             jda = api;
             bot = api.getSelfUser();
 
+            slashCommandDispatcher.submitCommands(api);
+
+
             //Get the data for each guild from the database
             api.getGuilds().forEach(guild -> {
-                guildMap.put(guild.getId(),new GuildSettings("!"));
-                database.loadGuildData(guild.getId());
+
+                //SherlockBot.slashCommandDispatcher.submitCommands(guild.getIdLong());
+
+                try {
+                    guildMap.put(guild.getIdLong(), SherlockBot.database.getGuildData(guild.getIdLong()));
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
             });
 
-        } catch(InterruptedException e){
-            //do nothing
+            System.out.println("Commands Loaded: " + SherlockBot.dispatcher.getCommands().size());
+            System.out.println("Commands Loaded: " + SherlockBot.slashCommandDispatcher.getCommands().size());
+
+
+        } catch (InterruptedException e) {
+
         }
 
         Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new ThreeMinute(), 60*1000,60*1000);
+        //timer.scheduleAtFixedRate(new ThreeMinute(), 60*1000,60*1000);
 
-        CommandLoader commandLoader = new CommandLoader();
+        //One-Minute Timer
+        timer.scheduleAtFixedRate(new OneMinute(), 30 * 1000, 60 * 1000);
+
+        //Three-Minute Timer
+        timer.scheduleAtFixedRate(new ExpiredTrackersCheck(), 60 * 1000, 180 * 1000);
 
     }
 
+    public static GuildSettings getGuildSettings(final Long guildID) {
+        return guildMap.get(guildID);
+    }
+
+    public static Color getColor(colorType colorType) {
+        if (colorMap.containsKey(colorType)) {
+            return Color.decode(colorMap.get(colorType));
+        } else {
+            return Color.decode(colorMap.get(SherlockBot.colorType.GENERIC));
+        }
+    }
+
+    private static void loadColorMap() {
+        colorMap.putIfAbsent(colorType.WARNING, "#F5741A");
+        colorMap.putIfAbsent(colorType.QUARANTINE, "#AF1AF5");
+        colorMap.putIfAbsent(colorType.GENERIC, "#1ABDF5");
+        colorMap.putIfAbsent(colorType.ERROR, "#EC0000");
+    }
+
+    public enum colorType {
+        WARNING, QUARANTINE, GENERIC, ERROR
+    }
 }

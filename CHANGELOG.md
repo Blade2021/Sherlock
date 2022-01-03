@@ -1,11 +1,11 @@
-##0.4.0
+## 0.4.0
 Added Auto roles!  
 
 	!addAutoRole RoleID  
 	!removeAutoRole RoleID  
 	!getAutoRoles 
 
-##0.3.7
+## 0.3.7
 !topic is now an available command to pull the triggering channels topic.
 
 ## 0.3.2

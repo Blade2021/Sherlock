@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'rsystems'
-version '0.6.2'
+version '2.6.7'
 
 mainClassName = 'rsystems.SherlockBot'
 
@@ -17,6 +17,11 @@ repositories {
     mavenCentral()
     jcenter()
 
+    maven {
+        name 'm2-dv8tion'
+        url 'https://m2.dv8tion.net/releases'
+    }
+
     maven { url 'https://jitpack.io' }
     maven { url "https://oss.jfrog.org/artifactory/libs-release"}
 }
@@ -24,15 +29,19 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     //compile 'net.dv8tion:JDA:4.1.1_127' // Discord Lib
-    compile 'net.dv8tion:JDA:4.2.0_222' // Discord Lib
-    compile 'io.github.cdimascio:java-dotenv:5.1.3'  // Config loader
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
-    compile("ch.qos.logback:logback-classic:1.2.3")
-    compile 'com.vdurmont:emoji-java:5.1.1'
+    //compile 'net.dv8tion:JDA:4.2.0_222' // Discord Lib
+    //implementation("net.dv8tion:JDA:4.3.0_339") // Discord Lib
+    implementation("net.dv8tion:JDA:5.0.0-alpha.3")
+    implementation 'io.github.cdimascio:java-dotenv:5.1.3'  // Config loader
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
+    implementation("ch.qos.logback:logback-classic:1.2.3")
+    implementation 'com.vdurmont:emoji-java:5.1.1'
 
     implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.0'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+
+    implementation group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
 }
 
 compileJava.options.encoding = 'UTF-8'
