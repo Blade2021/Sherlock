@@ -137,6 +137,10 @@ public class SlashCommandDispatcher extends ListenerAdapter {
         if(c.getDiscordPermission() != null){
             if(member.getPermissions().contains(c.getDiscordPermission())){
                 return true;
+            } else {
+                if(c.getPermissionIndex() == null){
+                    return false;
+                }
             }
         }
 

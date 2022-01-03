@@ -204,6 +204,24 @@ public class SQLHandler {
         return output;
     }
 
+    public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, String value) throws SQLException {
+        int output = 0;
+
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement st = connection.createStatement();
+            st.execute(String.format("UPDATE %s SET %s = '%s' WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
+            output = st.getUpdateCount();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return output;
+    }
+
     /**
      * @param tableName
      * @param columnName
@@ -777,6 +795,28 @@ public class SQLHandler {
         return list;
     }
 
+    public Map<Long, String> getMap(Long guildID,String tableName,String firstColumn,String secondColumn) throws SQLException {
+        Map<Long, String> map = new HashMap<>();
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("SELECT %s, %s FROM %s WHERE ChildGuildID = %d",firstColumn,secondColumn,tableName,guildID));
+            while (rs.next()) {
+
+                map.putIfAbsent(rs.getLong(firstColumn),rs.getString(secondColumn));
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+
+        return map;
+    }
+
     // INSERT A BADWORD INTO THE DATABASE
     public Integer addFilterWord(Long guildID, String filterWord) throws SQLException {
 
@@ -814,7 +854,7 @@ public class SQLHandler {
     }
 
     // INSERT A BADWORD INTO THE DATABASE
-    public Integer whiteListServer(Long guildID, Long serverID) throws SQLException {
+    public Integer whiteListServer(Long guildID, Long serverID, String note) throws SQLException {
 
         Connection connection = pool.getConnection();
         Integer output = null;
@@ -823,7 +863,7 @@ public class SQLHandler {
 
             Statement st = connection.createStatement();
 
-            st.execute(String.format("INSERT INTO InviteWhitelist (ChildGuildID, TargetGuildID) VALUES (%d, %d)", guildID, serverID));
+            st.execute(String.format("INSERT INTO InviteWhitelist (ChildGuildID, TargetGuildID, Note) VALUES (%d, %d, '%s')", guildID, serverID, note));
             output = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -1060,10 +1100,11 @@ public class SQLHandler {
             }
 
             if(result == null){
-                rs = st.executeQuery(String.format("SELECT ID, Activity FROM ActivityList ORDER BY ID"));
+                rs = st.executeQuery("SELECT ID, Activity FROM ActivityList ORDER BY ID");
                 while(rs.next()){
                     result = rs.getString("Activity");
                     SherlockBot.activityIndex = rs.getInt("ID");
+                    break;
                 }
             }
         } catch (SQLException throwables) {
