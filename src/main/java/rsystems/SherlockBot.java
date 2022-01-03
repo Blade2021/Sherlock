@@ -2,6 +2,7 @@ package rsystems;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -18,6 +19,7 @@ import rsystems.objects.DBPool;
 import rsystems.objects.GuildSettings;
 import rsystems.objects.UserRoleReactionObject;
 import rsystems.threads.ExpiredTrackersCheck;
+import rsystems.threads.OneMinute;
 
 import javax.security.auth.login.LoginException;
 import java.awt.*;
@@ -37,10 +39,11 @@ public class SherlockBot {
     public static Map<Long,GuildSettings> guildMap = new HashMap<>();
     public static Map<Long, Map<Long, ArrayList<UserRoleReactionObject>>> reactionHandleMap = new HashMap<>();
     public static User bot = null;
-    public static String version = "0.6.2";
+    public static String version = "2.6.2";
     public static JDA jda = null;
     public static Long botOwnerID = Long.valueOf(Config.get("OWNER_ID"));
     public static Overseer overseer = new Overseer();
+    public static int activityIndex = 0;
 
     private static Map<colorType,String> colorMap = new HashMap<>();
 
@@ -57,15 +60,16 @@ public class SherlockBot {
         api.addEventListener(dispatcher = new Dispatcher());
         api.addEventListener(slashCommandDispatcher = new SlashCommandDispatcher());
         api.addEventListener(new GuildStateListener());
-        //api.addEventListener(new GuildNicknameListener());
         api.addEventListener(new GuildMemberEvents());
-        //api.addEventListener(new SlashCommandEvents());
         api.addEventListener(new ButtonClickEvents());
 
         loadColorMap();
 
         try{
             api.awaitReady();
+
+            api.getPresence().setActivity(Activity.playing("Starting up..."));
+
             api.awaitStatus(JDA.Status.CONNECTED);
 
             jda = api;
@@ -74,8 +78,6 @@ public class SherlockBot {
             //Get the data for each guild from the database
             api.getGuilds().forEach(guild -> {
 
-
-
                     guild.retrieveCommands().queue(list -> {
                         for(Command command:list){
                             System.out.println(String.format("CMD: %s  | ID: %s",command.getName(),command.getId()));
@@ -83,7 +85,6 @@ public class SherlockBot {
                     });
 
                     SherlockBot.slashCommandDispatcher.submitCommands(guild.getIdLong());
-
 
                 try {
                     guildMap.put(guild.getIdLong(),SherlockBot.database.getGuildData(guild.getIdLong()));
@@ -103,6 +104,11 @@ public class SherlockBot {
 
         Timer timer = new Timer();
         //timer.scheduleAtFixedRate(new ThreeMinute(), 60*1000,60*1000);
+
+        //One-Minute Timer
+        timer.scheduleAtFixedRate(new OneMinute(),30*1000, 60*1000);
+
+        //Three-Minute Timer
         timer.scheduleAtFixedRate(new ExpiredTrackersCheck(),60*1000, 180*1000);
 
     }
@@ -128,5 +134,4 @@ public class SherlockBot {
     public enum colorType{
         WARNING, QUARANTINE, GENERIC
     }
-
 }

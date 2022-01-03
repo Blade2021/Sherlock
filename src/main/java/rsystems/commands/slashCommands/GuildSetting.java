@@ -53,6 +53,14 @@ public class GuildSetting extends SlashCommand {
 
         subCmdGroupData.add(new SubcommandGroupData("welcome","Welcome Message Commands").addSubcommands(welcomeCommands));
 
+        // Whitelist Guild Group
+        ArrayList<SubcommandData> whitelistCommands = new ArrayList<>();
+        whitelistCommands.add(new SubcommandData("add","Enable a sever's invites to be posted here").addOption(OptionType.STRING,"serverid","ID of the server to be whitelisted",true));
+        whitelistCommands.add(new SubcommandData("remove","Disable a server's invites from being posted here").addOption(OptionType.STRING,"serverid","ID of the server to be removed from the whitelist",true));
+        whitelistCommands.add(new SubcommandData("list","List all whitelisted servers"));
+
+        subCmdGroupData.add(new SubcommandGroupData("invites","Server Invite Whitelist Commands").addSubcommands(whitelistCommands));
+
 
         commandData.addSubcommandGroups(subCmdGroupData);
 
@@ -191,7 +199,56 @@ public class GuildSetting extends SlashCommand {
             } else if(event.getSubcommandName().equalsIgnoreCase("list")){
                 try {
                     ArrayList<String> filterWordList = SherlockBot.database.getFilterWords(event.getGuild().getIdLong());
-                    event.getHook().editOriginal(filterWordList.toString()).queue();
+
+                    if(filterWordList.size() > 0) {
+                        event.getHook().editOriginal(filterWordList.toString()).queue();
+                    } else {
+                        event.getHook().editOriginal("There are no words that are currently being filtered.").queue();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        if(event.getSubcommandGroup().equalsIgnoreCase("invites")){
+
+            event.deferReply().setEphemeral(true).queue();
+
+            Long serverIDLong = null;
+            if(event.getOption("serverid") != null){
+                serverIDLong = event.getOption("serverid").getAsLong();
+            }
+
+            if(event.getSubcommandName().equalsIgnoreCase("add")){
+                try {
+                    if(SherlockBot.database.whiteListServer(event.getGuild().getIdLong(),serverIDLong) > 0) {
+                        event.getHook().editOriginal(String.format("I have added `%d` to the whitelist.", serverIDLong)).queue();
+                    } else {
+                        event.getHook().editOriginal("Nothing happened...").queue();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            } else if(event.getSubcommandName().equalsIgnoreCase("remove")){
+                try {
+                    if(SherlockBot.database.deWhiteListServer(event.getGuild().getIdLong(),serverIDLong) > 0) {
+                        event.getHook().editOriginal(String.format("I have removed `%d` from the whitelist.", serverIDLong)).queue();
+                    } else {
+                        event.getHook().editOriginal("Nothing happened...").queue();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            } else if(event.getSubcommandName().equalsIgnoreCase("list")){
+                try {
+                    ArrayList<String> whiteList = SherlockBot.database.getList(event.getGuild().getIdLong(),"InviteWhitelist","TargetGuildID");
+
+                    if(whiteList.size() > 0) {
+                        event.getHook().editOriginal(whiteList.toString()).queue();
+                    } else {
+                        event.getHook().editOriginal("There are no servers that are currently whitelisted.").queue();
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

@@ -2,6 +2,7 @@ package rsystems.handlers;
 
 import org.mariadb.jdbc.MariaDbPoolDataSource;
 import rsystems.Config;
+import rsystems.SherlockBot;
 import rsystems.objects.GuildSettings;
 import rsystems.objects.InfractionObject;
 import rsystems.objects.TimedEvent;
@@ -21,6 +22,10 @@ public class SQLHandler {
     public SQLHandler(MariaDbPoolDataSource pool) {
         SQLHandler.pool = pool;
     }
+
+    /*
+    GETTERS
+     */
 
     public String getString(String table, String columnName, String identifierColumn, Long identifier) throws SQLException {
         String output = null;
@@ -716,6 +721,48 @@ public class SQLHandler {
         return badWordsList;
     }
 
+    public ArrayList<String> getList(String tableName,String columnName) throws SQLException {
+        ArrayList<String> list = new ArrayList<>();
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("SELECT %s FROM %s",columnName,tableName));
+            while (rs.next()) {
+                list.add(rs.getString(columnName));
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+
+        return list;
+    }
+
+    public ArrayList<String> getList(Long guildID,String tableName,String columnName) throws SQLException {
+        ArrayList<String> list = new ArrayList<>();
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("SELECT %s FROM %s WHERE ChildGuildID = %d",columnName,tableName,guildID));
+            while (rs.next()) {
+                list.add(rs.getString(columnName));
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+
+        return list;
+    }
+
     // INSERT A BADWORD INTO THE DATABASE
     public Integer addFilterWord(Long guildID, String filterWord) throws SQLException {
 
@@ -750,6 +797,45 @@ public class SQLHandler {
             connection.close();
         }
         return 0;
+    }
+
+    // INSERT A BADWORD INTO THE DATABASE
+    public Integer whiteListServer(Long guildID, Long serverID) throws SQLException {
+
+        Connection connection = pool.getConnection();
+        Integer output = null;
+
+        try {
+
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("INSERT INTO InviteWhitelist (ChildGuildID, TargetGuildID) VALUES (%d, %d)", guildID, serverID));
+            output = st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return output;
+    }
+
+    // REMOVE A BLACKLISTED WORD FROM THE DATABASE
+    public Integer deWhiteListServer(Long guildID, Long serverID) throws SQLException {
+
+        Connection connection = pool.getConnection();
+        Integer output = null;
+
+        try {
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("DELETE FROM InviteWhitelist WHERE (ChildGuildID = %d) AND (TargetGuildID = %d)", guildID, serverID));
+            output = st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return output;
     }
 
     private boolean checkSize(Long guildID, String tableName) throws SQLException {
@@ -945,4 +1031,62 @@ public class SQLHandler {
         }
         return resultSet;
     }
+
+    public String nextActivity(Integer currentIndex) throws SQLException {
+        String result = null;
+
+        Connection connection = pool.getConnection();
+        try {
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("SELECT ID, Activity FROM ActivityList WHERE ID > %d LIMIT 1",currentIndex));
+            while(rs.next()){
+                result = rs.getString("Activity");
+                SherlockBot.activityIndex = rs.getInt("ID");
+            }
+
+            if(result == null){
+                rs = st.executeQuery(String.format("SELECT ID, Activity FROM ActivityList ORDER BY ID"));
+                while(rs.next()){
+                    result = rs.getString("Activity");
+                    SherlockBot.activityIndex = rs.getInt("ID");
+                }
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+
+        return result;
+    }
+
+    public void logCommandUsage(String commandName) throws SQLException {
+
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("SELECT UsageCount FROM CommandTracker WHERE Name = \"%s\"", commandName));
+
+            boolean commandFound = false;
+            while (rs.next()) {
+                commandFound = true;
+                int newCount = rs.getInt(1) + 1;
+
+                st.execute(String.format("UPDATE CommandTracker SET UsageCount = %d, LastUsed = current_timestamp WHERE Name = \"%s\"", newCount, commandName));
+            }
+            if (!commandFound) {
+                st.execute(String.format("INSERT INTO CommandTracker (Name, UsageCount) VALUES (\"%s\", 1)", commandName));
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+    }
+
+
 }

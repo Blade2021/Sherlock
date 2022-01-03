@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.utils.TimeFormat;
 import rsystems.Config;
 import rsystems.SherlockBot;
 import rsystems.commands.botManager.ForceDisconnect;
@@ -78,6 +77,15 @@ public class Dispatcher extends ListenerAdapter {
 
         //Ignore all bots
         if (event.getAuthor().isBot()) {
+            return;
+        }
+
+        // Filter out join messages
+        if (event.getMessage().getType().equals(MessageType.GUILD_MEMBER_JOIN)) {
+            return;
+        }
+
+        if(event.getMessage().getType().isSystem()){
             return;
         }
 
@@ -155,11 +163,21 @@ public class Dispatcher extends ListenerAdapter {
                     for (final Command c : this.getCommands()) {
                         if (message.toLowerCase().startsWith(prefix.toLowerCase() + c.getName().toLowerCase() + ' ') || message.equalsIgnoreCase(prefix + c.getName())) {
                             this.executeCommand(c, c.getName(), prefix, message, event);
+                            try {
+                                SherlockBot.database.logCommandUsage(c.getName());
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
                             return;
                         } else {
                             for (final String alias : c.getAliases()) {
                                 if (message.toLowerCase().startsWith(prefix.toLowerCase() + alias.toLowerCase() + ' ') || message.equalsIgnoreCase(prefix + alias)) {
                                     this.executeCommand(c, alias, prefix, message, event);
+                                    try {
+                                        SherlockBot.database.logCommandUsage(c.getName());
+                                    } catch (SQLException e) {
+                                        e.printStackTrace();
+                                    }
                                     return;
                                 }
                             }
@@ -198,8 +216,7 @@ public class Dispatcher extends ListenerAdapter {
             }
         } else {
             // Private Message
-            event.getMessage().reply("Sorry I haven't been taught how to reply to direct messages yet.  Try again later").queue();
-
+            //event.getMessage().reply("Sorry I haven't been taught how to reply to direct messages yet.  Try again later").queue();
         }
 
 
@@ -266,13 +283,8 @@ public class Dispatcher extends ListenerAdapter {
                              final MessageReceivedEvent event) {
         this.pool.submit(() ->
         {
-
-            // Filter out join messages
-            if (event.getMessage().getType().equals(MessageType.GUILD_MEMBER_JOIN)) {
-                return;
-            }
-
             // SPAM MONITORING
+            /*
             if((!event.getMember().isOwner()) && (!event.getMember().hasPermission(Permission.ADMINISTRATOR) && (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)))) {
 
                 event.getChannel().getHistoryBefore(event.getMessage(), 12).queue(messageHistory -> {
@@ -319,8 +331,9 @@ public class Dispatcher extends ListenerAdapter {
                     }
                 });
             }
+            */
 
-            // Language Filter
+            // Word Filter
             String filterWord = filterWordFound(event.getMessage(), event.getGuild().getIdLong());
             if (filterWord != null) {
 
@@ -328,22 +341,33 @@ public class Dispatcher extends ListenerAdapter {
 
                 // TRIGGER DELETION AND NOTIFICATION
                 event.getMessage().addReaction("⚠").queue();
-                event.getMessage().reply(String.format("This server does not allow the word || %s || to be used here.\nPlease edit your message accordingly or it will be **deleted** automatically", filterWord)).queue(success -> {
+
+                EmbedBuilder builder = new EmbedBuilder();
+                builder.setTitle("Filtered Word Detected");
+                builder.setColor(SherlockBot.getColor(SherlockBot.colorType.WARNING));
+                builder.setDescription(String.format("This server does not allow the word || %s || to be used here.\nPlease edit your message accordingly or it will be **deleted** automatically", filterWord));
+                builder.setFooter("This action has been logged");
+
+                event.getMessage().replyEmbeds(builder.build()).queue(success -> {
                     success.delete().queueAfter(60, TimeUnit.SECONDS);
                 });
+
+                builder.clear();
 
                 futures.put(event.getMessageId(), event.getMessage().delete().submitAfter(60, TimeUnit.SECONDS));
 
                 if (LogMessage.hasLogChannel(event.getGuild().getIdLong())) {
-                    InfractionObject infractionObject = new InfractionObject(event.getGuild().getIdLong());
-                    infractionObject.setModeratorTag(SherlockBot.jda.getSelfUser().getAsTag());
-                    infractionObject.setModeratorID(SherlockBot.jda.getSelfUser().getIdLong());
-                    infractionObject.setEventType(InfractionObject.EventType.WARNING);
-                    infractionObject.setUserTag(event.getAuthor().getAsTag());
-                    infractionObject.setUserID(event.getAuthor().getIdLong());
-                    infractionObject.setNote(String.format("Filter word detected! \n||%s||", filterWord));
 
-                    LogMessage.sendLogMessage(event.getGuild().getIdLong(), infractionObject);
+                    builder.setDescription("A filtered word was detected on this message: [Message Link]("+event.getMessage().getJumpUrl() + ")")
+                            .addField("User:",event.getMessage().getMember().getEffectiveName(),true)
+                            .addField("Channel:", event.getChannel().getAsMention(),true)
+                            .addField("Trigger Word:",String.format("||%s||", filterWord),true)
+                            .setFooter("User ID: " + event.getMessage().getMember().getId())
+                            .setColor(SherlockBot.getColor(SherlockBot.colorType.WARNING));
+
+                    LogMessage.sendLogMessage(event.getGuild().getIdLong(), builder.build());
+
+                    builder.clear();
                 }
 
                 SherlockBot.overseer.submitTracker(event.getGuild().getIdLong(),event.getAuthor().getIdLong(),0,"Word Filter");

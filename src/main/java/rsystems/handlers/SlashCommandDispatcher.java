@@ -217,6 +217,14 @@ public class SlashCommandDispatcher extends ListenerAdapter {
 
             guild.retrieveCommands().queue(commandsList -> {
 
+                ArrayList<String> updateList = new ArrayList<>();
+
+                try {
+                    updateList = SherlockBot.database.getList("PushUpdateCommand","CommandName");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
 
                 // DELETE ANY LINGERING COMMANDS THAT ARE NOT PART OF THE APPLICATION ANYMORE FROM THE GUILD COMMAND CACHE
                 for(net.dv8tion.jda.api.interactions.commands.Command command:commandsList){
@@ -238,20 +246,27 @@ public class SlashCommandDispatcher extends ListenerAdapter {
                 // ADD ANY MISSING COMMANDS TO THE GUILD
                 for(SlashCommand slashCommand: this.slashCommands){
 
-                    Boolean cmdFound = false;
-                    for(net.dv8tion.jda.api.interactions.commands.Command command:commandsList){
-                        if(slashCommand.getName().equalsIgnoreCase(command.getName())){
-                            cmdFound = true;
-                            break;
-                        }
-                    }
-
-                    if(!cmdFound) {
-                        System.out.println(String.format("DIDN'T FIND COMMAND: %s FOR GUILD: %d", slashCommand.getName(), guildID));
-
-                        guild.upsertCommand(slashCommand.getCommandData()).queueAfter(5, TimeUnit.SECONDS, success -> {
-                            System.out.println(String.format("UPSERT COMMAND: %s FOR GUILD: %d", success.getName(), guild.getIdLong()));
+                    if(updateList.contains(slashCommand.getName())){
+                        guild.upsertCommand(slashCommand.getCommandData()).queue(success -> {
+                            System.out.println(String.format("UPDATED COMMAND: %s FOR GUILD: %d", success.getName(), guild.getIdLong()));
                         });
+                    } else {
+
+                        Boolean cmdFound = false;
+                        for (net.dv8tion.jda.api.interactions.commands.Command command : commandsList) {
+                            if (slashCommand.getName().equalsIgnoreCase(command.getName())) {
+                                cmdFound = true;
+                                break;
+                            }
+                        }
+
+                        if (!cmdFound) {
+                            System.out.println(String.format("DIDN'T FIND COMMAND: %s FOR GUILD: %d", slashCommand.getName(), guildID));
+
+                            guild.upsertCommand(slashCommand.getCommandData()).queueAfter(5, TimeUnit.SECONDS, success -> {
+                                System.out.println(String.format("UPSERT COMMAND: %s FOR GUILD: %d", success.getName(), guild.getIdLong()));
+                            });
+                        }
                     }
                 }
 
