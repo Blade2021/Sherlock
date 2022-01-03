@@ -4,7 +4,6 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
@@ -32,12 +31,12 @@ import java.util.Timer;
 
 public class SherlockBot {
 
-    public static DBPool dbPool = new DBPool(Config.get("DATABASE_HOST"), Config.get("DATABASE_USER"),Config.get("DATABASE_PASS"));
+    public static DBPool dbPool = new DBPool(Config.get("DATABASE_HOST"), Config.get("DATABASE_USER"), Config.get("DATABASE_PASS"));
     public static SQLHandler database = new SQLHandler(dbPool.getPool());
     public static Dispatcher dispatcher;
     public static SlashCommandDispatcher slashCommandDispatcher;
 
-    public static Map<Long,GuildSettings> guildMap = new HashMap<>();
+    public static Map<Long, GuildSettings> guildMap = new HashMap<>();
     public static Map<Long, Map<Long, ArrayList<UserRoleReactionObject>>> reactionHandleMap = new HashMap<>();
     public static User bot = null;
     public static String version = "2.6.2";
@@ -46,7 +45,7 @@ public class SherlockBot {
     public static Overseer overseer = new Overseer();
     public static int activityIndex = 0;
 
-    private static Map<colorType,String> colorMap = new HashMap<>();
+    private static Map<colorType, String> colorMap = new HashMap<>();
 
     public static String defaultPrefix = Config.get("defaultPrefix");
 
@@ -67,29 +66,24 @@ public class SherlockBot {
 
         loadColorMap();
 
-        try{
+        try {
             api.awaitReady();
-
             api.getPresence().setActivity(Activity.playing("Starting up..."));
-
             api.awaitStatus(JDA.Status.CONNECTED);
 
             jda = api;
             bot = api.getSelfUser();
 
+            slashCommandDispatcher.submitCommands(api);
+
+
             //Get the data for each guild from the database
             api.getGuilds().forEach(guild -> {
 
-                    guild.retrieveCommands().queue(list -> {
-                        for(Command command:list){
-                            System.out.println(String.format("CMD: %s  | ID: %s",command.getName(),command.getId()));
-                        }
-                    });
-
-                    SherlockBot.slashCommandDispatcher.submitCommands(guild.getIdLong());
+                //SherlockBot.slashCommandDispatcher.submitCommands(guild.getIdLong());
 
                 try {
-                    guildMap.put(guild.getIdLong(),SherlockBot.database.getGuildData(guild.getIdLong()));
+                    guildMap.put(guild.getIdLong(), SherlockBot.database.getGuildData(guild.getIdLong()));
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -100,7 +94,7 @@ public class SherlockBot {
             System.out.println("Commands Loaded: " + SherlockBot.slashCommandDispatcher.getCommands().size());
 
 
-        } catch(InterruptedException e){
+        } catch (InterruptedException e) {
 
         }
 
@@ -108,33 +102,33 @@ public class SherlockBot {
         //timer.scheduleAtFixedRate(new ThreeMinute(), 60*1000,60*1000);
 
         //One-Minute Timer
-        timer.scheduleAtFixedRate(new OneMinute(),30*1000, 60*1000);
+        timer.scheduleAtFixedRate(new OneMinute(), 30 * 1000, 60 * 1000);
 
         //Three-Minute Timer
-        timer.scheduleAtFixedRate(new ExpiredTrackersCheck(),60*1000, 180*1000);
+        timer.scheduleAtFixedRate(new ExpiredTrackersCheck(), 60 * 1000, 180 * 1000);
 
     }
 
-    public static GuildSettings getGuildSettings(final Long guildID){
+    public static GuildSettings getGuildSettings(final Long guildID) {
         return guildMap.get(guildID);
     }
 
-    public static Color getColor(colorType colorType){
-        if(colorMap.containsKey(colorType)){
+    public static Color getColor(colorType colorType) {
+        if (colorMap.containsKey(colorType)) {
             return Color.decode(colorMap.get(colorType));
         } else {
             return Color.decode(colorMap.get(SherlockBot.colorType.GENERIC));
         }
     }
 
-    private static void loadColorMap(){
-        colorMap.putIfAbsent(colorType.WARNING,"#F5741A");
-        colorMap.putIfAbsent(colorType.QUARANTINE,"#AF1AF5");
-        colorMap.putIfAbsent(colorType.GENERIC,"#1ABDF5");
-        colorMap.putIfAbsent(colorType.ERROR,"#EC0000");
+    private static void loadColorMap() {
+        colorMap.putIfAbsent(colorType.WARNING, "#F5741A");
+        colorMap.putIfAbsent(colorType.QUARANTINE, "#AF1AF5");
+        colorMap.putIfAbsent(colorType.GENERIC, "#1ABDF5");
+        colorMap.putIfAbsent(colorType.ERROR, "#EC0000");
     }
 
-    public enum colorType{
+    public enum colorType {
         WARNING, QUARANTINE, GENERIC, ERROR
     }
 }

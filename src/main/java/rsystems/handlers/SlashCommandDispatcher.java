@@ -1,8 +1,8 @@
 package rsystems.handlers;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -212,12 +212,9 @@ public class SlashCommandDispatcher extends ListenerAdapter {
         });
     }
 
-    public void submitCommands(final Long guildID){
+    public void submitCommands(final JDA jda){
 
-        final Guild guild = SherlockBot.jda.getGuildById(guildID);
-        if(guild != null){
-
-            guild.retrieveCommands().queue(commandsList -> {
+            jda.retrieveCommands().queue(commandsList -> {
 
                 ArrayList<String> updateList = new ArrayList<>();
 
@@ -240,7 +237,7 @@ public class SlashCommandDispatcher extends ListenerAdapter {
                     }
 
                     if(!cmdFound){
-                        System.out.println(String.format("REMOVING %s FROM GUILD: %d (Command not found in SET)",command.getName(),guildID));
+                        System.out.println(String.format("REMOVING %s FROM GLOBAL (Command not found in SET)",command.getName()));
                         command.delete().queue();
                     }
                 }
@@ -249,8 +246,8 @@ public class SlashCommandDispatcher extends ListenerAdapter {
                 for(SlashCommand slashCommand: this.slashCommands){
 
                     if(updateList.contains(slashCommand.getName())){
-                        guild.upsertCommand(slashCommand.getCommandData()).queue(success -> {
-                            System.out.println(String.format("UPDATED COMMAND: %s FOR GUILD: %d", success.getName(), guild.getIdLong()));
+                        jda.upsertCommand(slashCommand.getCommandData()).queue(success -> {
+                            System.out.println(String.format("UPDATED COMMAND: %s FOR GLOBAL  NEW ID: %d", success.getName(), success.getIdLong()));
                         });
                     } else {
 
@@ -263,17 +260,17 @@ public class SlashCommandDispatcher extends ListenerAdapter {
                         }
 
                         if (!cmdFound) {
-                            System.out.println(String.format("DIDN'T FIND COMMAND: %s FOR GUILD: %d", slashCommand.getName(), guildID));
+                            System.out.println(String.format("DIDN'T FIND COMMAND: %s FOR GLOBAL", slashCommand.getName()));
 
-                            guild.upsertCommand(slashCommand.getCommandData()).queueAfter(5, TimeUnit.SECONDS, success -> {
-                                System.out.println(String.format("UPSERT COMMAND: %s FOR GUILD: %d", success.getName(), guild.getIdLong()));
+                            jda.upsertCommand(slashCommand.getCommandData()).queueAfter(5, TimeUnit.SECONDS, success -> {
+                                System.out.println(String.format("UPSERT COMMAND: %s FOR GLOBAL  NEW ID: %d", success.getName(), success.getIdLong()));
                             });
                         }
                     }
                 }
 
             });
-        }
+
     }
 
 }

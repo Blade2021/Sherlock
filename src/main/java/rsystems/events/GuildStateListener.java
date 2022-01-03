@@ -138,7 +138,7 @@ public class GuildStateListener extends ListenerAdapter {
                 /*
                 Create all bot related interactions on the guild
                  */
-                SherlockBot.slashCommandDispatcher.submitCommands(event.getGuild().getIdLong());
+                //SherlockBot.slashCommandDispatcher.submitCommands(event.getGuild().getIdLong());
 
                 /*
                 Join all active threads
