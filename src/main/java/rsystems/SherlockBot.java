@@ -39,7 +39,7 @@ public class SherlockBot {
     public static Map<Long, GuildSettings> guildMap = new HashMap<>();
     public static Map<Long, Map<Long, ArrayList<UserRoleReactionObject>>> reactionHandleMap = new HashMap<>();
     public static User bot = null;
-    public static String version = "2.6.2";
+    public static String version = "2.6.7";
     public static JDA jda = null;
     public static Long botOwnerID = Long.valueOf(Config.get("OWNER_ID"));
     public static Overseer overseer = new Overseer();

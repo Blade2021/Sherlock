@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.channel.update.GenericChannelUpdateEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
-import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.UnavailableGuildLeaveEvent;
 import net.dv8tion.jda.api.events.role.RoleDeleteEvent;
 import net.dv8tion.jda.api.events.thread.GenericThreadEvent;
@@ -50,14 +49,19 @@ public class GuildStateListener extends ListenerAdapter {
         }
     }
 
-    @Override
+    /*@Override
     public void onGuildLeave(GuildLeaveEvent event) {
+
+        SherlockBot.guildMap.remove(event.getGuild().getIdLong());
+
         try {
             SherlockBot.database.deleteRow("GuildTable", "GuildID", event.getGuild().getIdLong());
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
+     */
 
     @Override
     public void onGuildJoin(GuildJoinEvent event) {
@@ -133,6 +137,7 @@ public class GuildStateListener extends ListenerAdapter {
 
 
                     SherlockBot.guildMap.get(event.getGuild().getIdLong()).setQuarantineRoleID(role.getIdLong());
+                    SherlockBot.guildMap.get(event.getGuild().getIdLong()).save();
                 });
 
                 /*

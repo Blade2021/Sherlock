@@ -78,6 +78,8 @@ public class GuildSetting extends SlashCommand {
                 try{
                     if(SherlockBot.database.updateGuild(SherlockBot.getGuildSettings(event.getGuild().getIdLong())) > 0) {
                         event.getHook().editOriginal(String.format("Your prefix `%s` has been set.", prefix)).queue();
+                    } else {
+                        event.getHook().editOriginal("Failed to update the database.  Contact Support").queue();
                     }
                 } catch (SQLException e) {
                     event.getHook().editOriginal("Failed to update the database.  Contact Support").queue();
@@ -89,6 +91,8 @@ public class GuildSetting extends SlashCommand {
                 try{
                     if(SherlockBot.database.updateGuild(SherlockBot.getGuildSettings(event.getGuild().getIdLong())) > 0) {
                         event.getHook().editOriginal("Your prefix has been cleared").queue();
+                    } else {
+                        event.getHook().editOriginal("Failed to update the database.  Contact Support").queue();
                     }
                 } catch (SQLException e) {
                     event.getHook().editOriginal("Failed to update the database.  Contact Support").queue();

@@ -353,8 +353,21 @@ public class SQLHandler {
         try {
             Statement st = connection.createStatement();
 
-            st.execute(String.format("UPDATE GuildTable SET OwnerID=%d, Prefix=\"%s\", LogChannelID=%d, QuarantineRoleID=%d, EmbedFilter=%d, WelcomeMessageSetting=%d, InviteFilterEnabled=%d " +
-                            "where GuildID=%d", guildSettings.getOwnerID(), guildSettings.getPrefix(), guildSettings.getLogChannelID(), guildSettings.getQuarantineRoleID(),
+            StringBuilder updateString = new StringBuilder();
+            updateString.append("UPDATE GuildTable SET ");
+
+            if(guildSettings.getOwnerID() != null){
+                updateString.append(String.format("OwnerID=%d, ", guildSettings.getOwnerID()));
+            }
+
+            if(guildSettings.getPrefix() != null){
+                updateString.append(String.format("Prefix='%s', ", guildSettings.getPrefix()));
+            } else {
+                updateString.append(" Prefix=NULl, ");
+            }
+
+            st.execute(String.format("%s LogChannelID=%d, QuarantineRoleID=%d, EmbedFilter=%d, WelcomeMessageSetting=%d, InviteFilterEnabled=%d " +
+                            "where GuildID=%d", updateString, guildSettings.getLogChannelID(), guildSettings.getQuarantineRoleID(),
                     guildSettings.getEmbedFilterSetting(), guildSettings.getWelcomeMessageSetting(),guildSettings.isInviteFilterEnabled(), guildSettings.getGuildID()));
             return st.getUpdateCount();
         } catch (SQLException throwables) {
