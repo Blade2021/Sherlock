@@ -39,11 +39,16 @@ public class Verify extends SlashCommand {
 
         String muteRoleStatus = "Disabled";
         Role muteRole = null;
-        if(SherlockBot.guildMap.get(guildID).getQuarantineRoleID() != null){
+
+        Long quarantineRoleID = SherlockBot.guildMap.get(guildID).getQuarantineRoleID();
+
+        if((quarantineRoleID != null) && (quarantineRoleID > 0)){
             if(event.getGuild().getRoleById(SherlockBot.guildMap.get(guildID).getQuarantineRoleID()) != null){
                 muteRole = event.getGuild().getRoleById(SherlockBot.guildMap.get(guildID).getQuarantineRoleID());
                 muteRoleStatus = "Enabled";
             }
+        } else {
+            SherlockBot.createQuarantineRole(event.getGuild().getIdLong());
         }
 
         builder.appendDescription(String.format("**Mute Role**\n" +

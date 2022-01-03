@@ -17,6 +17,11 @@ public class Unban extends Command {
     }
 
     @Override
+    public Integer getPermissionIndex() {
+        return 512;
+    }
+
+    @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, MessageReceivedEvent event) throws SQLException {
         String[] args = content.split("\\s+");
 

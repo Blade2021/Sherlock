@@ -417,10 +417,6 @@ public class Dispatcher extends ListenerAdapter {
 
         if (c.isOwnerOnly()) {
             if (member.getIdLong() == SherlockBot.botOwnerID) {
-
-                //System.out.println(member.getIdLong());
-                //System.out.println(SherlockBot.botOwnerID);
-
                 return true;
             } else {
                 return false;
@@ -434,6 +430,10 @@ public class Dispatcher extends ListenerAdapter {
         if (c.getDiscordPermission() != null) {
             if (member.getPermissions().contains(c.getDiscordPermission())) {
                 return true;
+            } else {
+                if(c.getPermissionIndex() == null){
+                    return false;
+                }
             }
         }
 

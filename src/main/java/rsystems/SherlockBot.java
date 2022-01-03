@@ -2,8 +2,9 @@ package rsystems;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
@@ -39,7 +40,7 @@ public class SherlockBot {
     public static Map<Long, GuildSettings> guildMap = new HashMap<>();
     public static Map<Long, Map<Long, ArrayList<UserRoleReactionObject>>> reactionHandleMap = new HashMap<>();
     public static User bot = null;
-    public static String version = "2.6.7";
+    public static String version = "2.6.8";
     public static JDA jda = null;
     public static Long botOwnerID = Long.valueOf(Config.get("OWNER_ID"));
     public static Overseer overseer = new Overseer();
@@ -130,5 +131,52 @@ public class SherlockBot {
 
     public enum colorType {
         WARNING, QUARANTINE, GENERIC, ERROR
+    }
+
+    public static void createQuarantineRole(final Long guildID){
+        final Guild guild = SherlockBot.jda.getGuildById(guildID);
+
+        guild.createRole().setColor(Color.decode("#9B1AF5")).setName("SL-Quarantine").queue(role -> {
+            role.getManager().revokePermissions(role.getPermissions()).queue();
+
+            ArrayList<Permission> mutePerms = new ArrayList<>();
+            mutePerms.add(Permission.MESSAGE_SEND);
+            mutePerms.add(Permission.MESSAGE_ADD_REACTION);
+            mutePerms.add(Permission.VOICE_STREAM);
+            mutePerms.add(Permission.VOICE_SPEAK);
+            mutePerms.add(Permission.CREATE_INSTANT_INVITE);
+            mutePerms.add(Permission.CREATE_PUBLIC_THREADS);
+            mutePerms.add(Permission.MESSAGE_SEND_IN_THREADS);
+
+            for (Category category : guild.getCategories()) {
+                try {
+                    category.createPermissionOverride(role).setDeny(mutePerms).reason("Initiating bot perms").queue();
+                } catch (PermissionException e) {
+                    break;
+                }
+            }
+
+            //Set the mute role permission override for each channel
+            for (TextChannel channel : guild.getTextChannels()) {
+                try {
+                    channel.createPermissionOverride(role).setDeny(mutePerms).queue();
+                } catch (PermissionException e) {
+                    break;
+                }
+            }
+
+            for (VoiceChannel voiceChannel : guild.getVoiceChannels()) {
+                try {
+                    voiceChannel.createPermissionOverride(role).setDeny(mutePerms).queue();
+                } catch (PermissionException e) {
+                    break;
+                }
+            }
+
+
+            SherlockBot.guildMap.get(guild.getIdLong()).setQuarantineRoleID(role.getIdLong());
+            SherlockBot.guildMap.get(guild.getIdLong()).save();
+        });
+
     }
 }

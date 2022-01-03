@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 import rsystems.SherlockBot;
 import rsystems.objects.SlashCommand;
 
@@ -20,7 +19,6 @@ public class Moderator extends SlashCommand {
     @Override
     public CommandData getCommandData() {
 
-        ArrayList<SubcommandGroupData> subCmdGroupData = new ArrayList<>();
         CommandData commandData = new CommandData(this.getName().toLowerCase(), "Moderator settings");
 
         ArrayList<SubcommandData> modSubCommands = new ArrayList<>();
@@ -63,12 +61,18 @@ public class Moderator extends SlashCommand {
 
                 event.getHook().editOriginal(String.format("An error occurred when trying to add the mod role.  Does it exist in the table already?")).queue();
             }
-        } else if (event.getSubcommandName().equalsIgnoreCase("remove")) {
+        }
+        else if (event.getSubcommandName().equalsIgnoreCase("remove")) {
 
             if (event.getOption("role").getAsRole() != null) {
                 try {
                     if(SherlockBot.database.deleteRow("ModRoleTable","ModRoleID",event.getOption("role").getAsRole().getIdLong()) >= 1){
                         event.getHook().editOriginal(String.format("%s removed successfully",event.getOption("role").getAsRole().getAsMention())).queue();
+
+                        return;
+                    } else {
+                        event.getHook().editOriginal(String.format("An error occurred when trying to remove the mod role.")).queue();
+                        return;
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -90,7 +94,7 @@ public class Moderator extends SlashCommand {
                     for(Map.Entry<Long,Integer> entry:modRoleMap.entrySet()){
 
                         if(event.getGuild().getRoleById(entry.getKey()) != null) {
-                            roleNameString.append(event.getGuild().getRoleById(entry.getKey()).getName());
+                            roleNameString.append(event.getGuild().getRoleById(entry.getKey()).getName()).append("\n");
                             roleIDSting.append(entry.getKey()).append("\n");
                             rolePermString.append(entry.getValue()).append("\n");
                         }

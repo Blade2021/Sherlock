@@ -1,17 +1,17 @@
 package rsystems.events;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.ThreadChannel;
 import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.channel.update.GenericChannelUpdateEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.UnavailableGuildLeaveEvent;
 import net.dv8tion.jda.api.events.role.RoleDeleteEvent;
 import net.dv8tion.jda.api.events.thread.GenericThreadEvent;
 import net.dv8tion.jda.api.events.thread.ThreadRevealedEvent;
-import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import rsystems.Config;
@@ -20,10 +20,11 @@ import rsystems.handlers.ErrorReportHandler;
 import rsystems.handlers.LogMessage;
 import rsystems.objects.GuildSettings;
 
-import java.awt.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
+
+import static rsystems.SherlockBot.createQuarantineRole;
 
 public class GuildStateListener extends ListenerAdapter {
 
@@ -49,7 +50,7 @@ public class GuildStateListener extends ListenerAdapter {
         }
     }
 
-    /*@Override
+    @Override
     public void onGuildLeave(GuildLeaveEvent event) {
 
         SherlockBot.guildMap.remove(event.getGuild().getIdLong());
@@ -61,7 +62,7 @@ public class GuildStateListener extends ListenerAdapter {
         }
     }
 
-     */
+
 
     @Override
     public void onGuildJoin(GuildJoinEvent event) {
@@ -98,47 +99,7 @@ public class GuildStateListener extends ListenerAdapter {
                 /*
                 Create quarantine Role
                  */
-                event.getGuild().createRole().setColor(Color.decode("#9B1AF5")).setName("SL-Quarantine").queue(role -> {
-                    role.getManager().revokePermissions(role.getPermissions()).queue();
-
-                    ArrayList<Permission> mutePerms = new ArrayList<>();
-                    mutePerms.add(Permission.MESSAGE_SEND);
-                    mutePerms.add(Permission.MESSAGE_ADD_REACTION);
-                    mutePerms.add(Permission.VOICE_STREAM);
-                    mutePerms.add(Permission.VOICE_SPEAK);
-                    mutePerms.add(Permission.CREATE_INSTANT_INVITE);
-                    mutePerms.add(Permission.CREATE_PUBLIC_THREADS);
-                    mutePerms.add(Permission.MESSAGE_SEND_IN_THREADS);
-
-                    for (Category category : event.getGuild().getCategories()) {
-                        try {
-                            category.createPermissionOverride(role).setDeny(mutePerms).reason("Initiating bot perms").queue();
-                        } catch (PermissionException e) {
-                            break;
-                        }
-                    }
-
-                    //Set the mute role permission override for each channel
-                    for (TextChannel channel : event.getGuild().getTextChannels()) {
-                        try {
-                            channel.createPermissionOverride(role).setDeny(mutePerms).queue();
-                        } catch (PermissionException e) {
-                            break;
-                        }
-                    }
-
-                    for (VoiceChannel voiceChannel : event.getGuild().getVoiceChannels()) {
-                        try {
-                            voiceChannel.createPermissionOverride(role).setDeny(mutePerms).queue();
-                        } catch (PermissionException e) {
-                            break;
-                        }
-                    }
-
-
-                    SherlockBot.guildMap.get(event.getGuild().getIdLong()).setQuarantineRoleID(role.getIdLong());
-                    SherlockBot.guildMap.get(event.getGuild().getIdLong()).save();
-                });
+                createQuarantineRole(event.getGuild().getIdLong());
 
                 /*
                 Create all bot related interactions on the guild
