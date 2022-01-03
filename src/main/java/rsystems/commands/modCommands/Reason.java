@@ -12,7 +12,7 @@ public class Reason extends Command {
 
     @Override
     public Integer getPermissionIndex() {
-        return 32;
+        return 4;
     }
 
     @Override

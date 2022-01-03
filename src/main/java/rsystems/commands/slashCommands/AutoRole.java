@@ -2,6 +2,7 @@ package rsystems.commands.slashCommands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
@@ -23,10 +24,21 @@ import java.util.List;
 import java.util.Map;
 
 public class AutoRole extends SlashCommand {
+
+    @Override
+    public Integer getPermissionIndex() {
+        return 64;
+    }
+
+    @Override
+    public Permission getDiscordPermission() {
+        return Permission.ADMINISTRATOR;
+    }
+
     @Override
     public CommandData getCommandData() {
 
-        CommandData commandData = new CommandData(this.getName().toLowerCase(),"Auto Roles are roles that are added to any users upon joining");
+        CommandData commandData = new CommandData(this.getName().toLowerCase(),this.getDescription());
 
         // Filter Group
         ArrayList<SubcommandData> subCommands = new ArrayList<>();

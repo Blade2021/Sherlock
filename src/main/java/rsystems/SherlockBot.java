@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import rsystems.events.ButtonClickEvents;
 import rsystems.events.GuildMemberEvents;
+import rsystems.events.GuildNicknameListener;
 import rsystems.events.GuildStateListener;
 import rsystems.handlers.Dispatcher;
 import rsystems.handlers.Overseer;
@@ -62,6 +63,7 @@ public class SherlockBot {
         api.addEventListener(new GuildStateListener());
         api.addEventListener(new GuildMemberEvents());
         api.addEventListener(new ButtonClickEvents());
+        api.addEventListener(new GuildNicknameListener());
 
         loadColorMap();
 
@@ -129,9 +131,10 @@ public class SherlockBot {
         colorMap.putIfAbsent(colorType.WARNING,"#F5741A");
         colorMap.putIfAbsent(colorType.QUARANTINE,"#AF1AF5");
         colorMap.putIfAbsent(colorType.GENERIC,"#1ABDF5");
+        colorMap.putIfAbsent(colorType.ERROR,"#EC0000");
     }
 
     public enum colorType{
-        WARNING, QUARANTINE, GENERIC
+        WARNING, QUARANTINE, GENERIC, ERROR
     }
 }

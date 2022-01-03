@@ -37,7 +37,7 @@ public class SelfRole extends SlashCommand {
 
     @Override
     public Integer getPermissionIndex() {
-        return 32768;
+        return 32;
     }
 
     @Override

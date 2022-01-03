@@ -28,6 +28,11 @@ public class Ban extends SlashCommand {
     }
 
     @Override
+    public Integer getPermissionIndex() {
+        return 256;
+    }
+
+    @Override
     public CommandData getCommandData() {
 
         CommandData commandData = new CommandData(this.getName().toLowerCase(),"Ban a user");

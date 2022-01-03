@@ -39,6 +39,11 @@ public class Moderator extends SlashCommand {
     }
 
     @Override
+    public Integer getPermissionIndex() {
+        return 16384;
+    }
+
+    @Override
     public void dispatch(User sender, MessageChannel channel, String content, SlashCommandEvent event) {
 
         event.deferReply().setEphemeral(true).queue();

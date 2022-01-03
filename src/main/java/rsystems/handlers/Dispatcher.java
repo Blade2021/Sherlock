@@ -146,7 +146,12 @@ public class Dispatcher extends ListenerAdapter {
 
                 //Check for Guild invites
                 if (event.getMessage().getInvites().size() > 0) {
-                    handleDiscordInvite(event);
+
+                    if(SherlockBot.guildMap.get(event.getGuild().getIdLong()).isInviteFilterEnabled() > 0) {
+
+                        handleDiscordInvite(event);
+
+                    }
                 }
 
 

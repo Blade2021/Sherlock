@@ -20,6 +20,11 @@ public class WatchChannel extends Command {
     }
 
     @Override
+    public Integer getPermissionIndex() {
+        return 16;
+    }
+
+    @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, MessageReceivedEvent event) throws SQLException {
         //Long channelID
         //Mentioned Channel

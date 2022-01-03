@@ -16,6 +16,11 @@ public class Unban extends SlashCommand {
     }
 
     @Override
+    public Integer getPermissionIndex() {
+        return 512;
+    }
+
+    @Override
     public CommandData getCommandData() {
 
         CommandData commandData = new CommandData(this.getName().toLowerCase(),"Unban a user");

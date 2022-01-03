@@ -14,6 +14,7 @@ public class GuildSettings {
     private int grantedSelfRoleCount;
     private int grantedAutoRoleCount;
     private int welcomeMessageSetting;
+    private int inviteFilterEnabled;
 
     public GuildSettings(Long guildID) {
         this.guildID = guildID;
@@ -85,6 +86,14 @@ public class GuildSettings {
 
     public void setWelcomeMessageSetting(int welcomeMessageSetting) {
         this.welcomeMessageSetting = welcomeMessageSetting;
+    }
+
+    public int isInviteFilterEnabled() {
+        return inviteFilterEnabled;
+    }
+
+    public void setInviteFilterEnabled(int inviteFilterEnabled) {
+        this.inviteFilterEnabled = inviteFilterEnabled;
     }
 
     public void save(){

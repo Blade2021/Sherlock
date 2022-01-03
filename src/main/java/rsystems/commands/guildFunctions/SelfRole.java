@@ -18,7 +18,7 @@ import java.util.Map;
 public class SelfRole extends Command {
     @Override
     public Integer getPermissionIndex() {
-        return 64;
+        return 32;
     }
 
     @Override

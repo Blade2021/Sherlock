@@ -31,14 +31,6 @@ public class GuildSetting extends SlashCommand {
 
         subCmdGroupData.add(new SubcommandGroupData("bot-prefix","Prefix Set/Clear commands").addSubcommands(prefixCommands));
 
-        // Filter Group
-        ArrayList<SubcommandData> filteringCommands = new ArrayList<>();
-        filteringCommands.add(new SubcommandData("add","Enable filtering for a word").addOption(OptionType.STRING,"word","Word to be filterd",true));
-        filteringCommands.add(new SubcommandData("remove","Remove filtering for a word").addOption(OptionType.STRING,"word","Word to be cleared from the filter",true));
-        filteringCommands.add(new SubcommandData("list","List all filtered words"));
-
-        subCmdGroupData.add(new SubcommandGroupData("filter","Language filtering commands").addSubcommands(filteringCommands));
-
         // Logging Group
         ArrayList<SubcommandData> loggingCommands = new ArrayList<>();
         loggingCommands.add(new SubcommandData("set","Set the log channel to be used by the BoT").addOption(OptionType.CHANNEL,"channel","The log channel",true));
@@ -52,15 +44,6 @@ public class GuildSetting extends SlashCommand {
         welcomeCommands.add(new SubcommandData("clear","Clear the welcome message for this server."));
 
         subCmdGroupData.add(new SubcommandGroupData("welcome","Welcome Message Commands").addSubcommands(welcomeCommands));
-
-        // Whitelist Guild Group
-        ArrayList<SubcommandData> whitelistCommands = new ArrayList<>();
-        whitelistCommands.add(new SubcommandData("add","Enable a sever's invites to be posted here").addOption(OptionType.STRING,"serverid","ID of the server to be whitelisted",true));
-        whitelistCommands.add(new SubcommandData("remove","Disable a server's invites from being posted here").addOption(OptionType.STRING,"serverid","ID of the server to be removed from the whitelist",true));
-        whitelistCommands.add(new SubcommandData("list","List all whitelisted servers"));
-
-        subCmdGroupData.add(new SubcommandGroupData("invites","Server Invite Whitelist Commands").addSubcommands(whitelistCommands));
-
 
         commandData.addSubcommandGroups(subCmdGroupData);
 
@@ -167,90 +150,6 @@ public class GuildSetting extends SlashCommand {
                     event.getHook().editOriginal("Welcome message cleared.").queue();
                 } catch(SQLException e){
                     event.getHook().editOriginal("An error occured").queue();
-                }
-            }
-        }
-
-        if(event.getSubcommandGroup().equalsIgnoreCase("filter")){
-
-            event.deferReply().setEphemeral(true).queue();
-
-            String word = null;
-            if(event.getOption("word") != null){
-                word = event.getOption("word").getAsString();
-            }
-
-            if(event.getSubcommandName().equalsIgnoreCase("add")){
-                try {
-                    if(SherlockBot.database.addFilterWord(event.getGuild().getIdLong(),word) > 0) {
-                        event.getHook().editOriginal(String.format("I have added `%s` to the filter.", word)).queue();
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            } else if(event.getSubcommandName().equalsIgnoreCase("remove")){
-                try {
-                    if(SherlockBot.database.removeFilterWord(event.getGuild().getIdLong(),word) > 0) {
-                        event.getHook().editOriginal(String.format("I have removed `%s` from the filter.", word)).queue();
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            } else if(event.getSubcommandName().equalsIgnoreCase("list")){
-                try {
-                    ArrayList<String> filterWordList = SherlockBot.database.getFilterWords(event.getGuild().getIdLong());
-
-                    if(filterWordList.size() > 0) {
-                        event.getHook().editOriginal(filterWordList.toString()).queue();
-                    } else {
-                        event.getHook().editOriginal("There are no words that are currently being filtered.").queue();
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        if(event.getSubcommandGroup().equalsIgnoreCase("invites")){
-
-            event.deferReply().setEphemeral(true).queue();
-
-            Long serverIDLong = null;
-            if(event.getOption("serverid") != null){
-                serverIDLong = event.getOption("serverid").getAsLong();
-            }
-
-            if(event.getSubcommandName().equalsIgnoreCase("add")){
-                try {
-                    if(SherlockBot.database.whiteListServer(event.getGuild().getIdLong(),serverIDLong) > 0) {
-                        event.getHook().editOriginal(String.format("I have added `%d` to the whitelist.", serverIDLong)).queue();
-                    } else {
-                        event.getHook().editOriginal("Nothing happened...").queue();
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            } else if(event.getSubcommandName().equalsIgnoreCase("remove")){
-                try {
-                    if(SherlockBot.database.deWhiteListServer(event.getGuild().getIdLong(),serverIDLong) > 0) {
-                        event.getHook().editOriginal(String.format("I have removed `%d` from the whitelist.", serverIDLong)).queue();
-                    } else {
-                        event.getHook().editOriginal("Nothing happened...").queue();
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            } else if(event.getSubcommandName().equalsIgnoreCase("list")){
-                try {
-                    ArrayList<String> whiteList = SherlockBot.database.getList(event.getGuild().getIdLong(),"InviteWhitelist","TargetGuildID");
-
-                    if(whiteList.size() > 0) {
-                        event.getHook().editOriginal(whiteList.toString()).queue();
-                    } else {
-                        event.getHook().editOriginal("There are no servers that are currently whitelisted.").queue();
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
                 }
             }
         }
