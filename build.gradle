@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'rsystems'
-version '2.6.8'
+version '2.6.9'
 
 mainClassName = 'rsystems.SherlockBot'
 

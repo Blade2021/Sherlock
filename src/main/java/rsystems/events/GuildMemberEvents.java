@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
@@ -17,6 +18,7 @@ import java.awt.*;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class GuildMemberEvents extends ListenerAdapter {
@@ -26,6 +28,24 @@ public class GuildMemberEvents extends ListenerAdapter {
 
         if(SherlockBot.guildMap.get(event.getGuild().getIdLong()).getWelcomeMessageSetting() >= 1){
             welcomeUser(event.getGuild(), event.getMember());
+        }
+
+        try {
+            if(SherlockBot.database.getAutoRoles(event.getGuild().getIdLong()).size() > 0){
+                ArrayList<Role> rolesToAdd = new ArrayList<>();
+
+                for(Long roleID:SherlockBot.database.getAutoRoles(event.getGuild().getIdLong())){
+                    if(event.getGuild().getRoleById(roleID) != null){
+                        rolesToAdd.add(event.getGuild().getRoleById(roleID));
+                    }
+                }
+
+                if(rolesToAdd.size() > 0){
+                    event.getGuild().modifyMemberRoles(event.getMember(),rolesToAdd).queue();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
