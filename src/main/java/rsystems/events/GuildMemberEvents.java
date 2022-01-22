@@ -55,7 +55,7 @@ public class GuildMemberEvents extends ListenerAdapter {
 
             final AuditLogEntry logEntry = success.get(0);
 
-            if ((logEntry.getTargetIdLong() == event.getUser().getIdLong()) &&(logEntry.getTimeCreated().minusSeconds(2).isBefore(OffsetDateTime.now(ZoneId.of("Z"))))) {
+            if ((logEntry.getTargetIdLong() == event.getUser().getIdLong()) &&(logEntry.getTimeCreated().minusSeconds(5).isBefore(OffsetDateTime.now(ZoneId.of("Z"))))) {
                 //Logged within acceptable amount of time.
                 if((logEntry.getType().equals(ActionType.KICK) || (logEntry.getType().equals(ActionType.BAN)))){
 
