@@ -732,7 +732,7 @@ public class SQLHandler {
         return output;
     }
 
-    public ArrayList<String> getFilterWords(Long guildID) throws SQLException {
+    public ArrayList<String> getSoftFilteredWords(Long guildID) throws SQLException {
         ArrayList<String> badWordsList = new ArrayList<>();
         Connection connection = pool.getConnection();
 
@@ -751,6 +751,28 @@ public class SQLHandler {
         }
 
         return badWordsList;
+    }
+
+    public Map<String, Integer> getHardFilteredWords(Long guildID) throws SQLException {
+        Map<String, Integer> map = new HashMap<>();
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("SELECT Word, Resolution FROM HardFilter WHERE ChildGuildID = %d",guildID));
+            while (rs.next()) {
+
+                map.putIfAbsent(rs.getString("Word"),rs.getInt("Resolution"));
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+
+        return map;
     }
 
     public ArrayList<String> getList(String tableName,String columnName) throws SQLException {
@@ -818,7 +840,47 @@ public class SQLHandler {
     }
 
     // INSERT A BADWORD INTO THE DATABASE
-    public Integer addFilterWord(Long guildID, String filterWord) throws SQLException {
+    public Integer addHardFilterWord(Long guildID, String filterWord, Integer resolution) throws SQLException {
+
+        Connection connection = pool.getConnection();
+        try {
+
+            Statement st = connection.createStatement();
+
+            if(resolution > 3){
+                resolution = 3;
+            }
+
+            st.execute(String.format("INSERT INTO HardFilter (ChildGuildID, Word, Resolution) VALUES (%d, \"%s\", %d)", guildID, filterWord, resolution));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return 0;
+    }
+
+    // REMOVE A BLACKLISTED WORD FROM THE DATABASE
+    public Integer removeHardFilterWord(Long guildID, String word) throws SQLException {
+
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("DELETE FROM HardFilter WHERE (ChildGuildID = %d) AND (Word = \"%s\")", guildID, word));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return 0;
+    }
+
+    // INSERT A BADWORD INTO THE DATABASE
+    public Integer addSoftFilterWord(Long guildID, String filterWord) throws SQLException {
 
         Connection connection = pool.getConnection();
         try {
@@ -836,14 +898,14 @@ public class SQLHandler {
     }
 
     // REMOVE A BLACKLISTED WORD FROM THE DATABASE
-    public Integer removeFilterWord(Long guildID, String badWord) throws SQLException {
+    public Integer removeSoftFilterWord(Long guildID, String word) throws SQLException {
 
         Connection connection = pool.getConnection();
 
         try {
             Statement st = connection.createStatement();
 
-            st.execute(String.format("DELETE FROM LanguageFilter WHERE (ChildGuildID = %d) AND (Word = \"%s\")", guildID, badWord));
+            st.execute(String.format("DELETE FROM LanguageFilter WHERE (ChildGuildID = %d) AND (Word = \"%s\")", guildID, word));
             return st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -853,7 +915,7 @@ public class SQLHandler {
         return 0;
     }
 
-    // INSERT A BADWORD INTO THE DATABASE
+
     public Integer whiteListServer(Long guildID, Long serverID, String note) throws SQLException {
 
         Connection connection = pool.getConnection();

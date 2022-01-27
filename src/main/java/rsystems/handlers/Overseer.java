@@ -11,19 +11,37 @@ import rsystems.SherlockBot;
 import rsystems.objects.TrackerObject;
 
 import java.sql.SQLException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 
 public class Overseer {
 
+    /**
+     *
+     * @param guildID
+     * @param userID
+     * @param type <p>0 = Warning  (Expires after 1 hour)</p>
+     *             <p>1 = Medium Level (Expires after 2 hours)</p>
+     *             <p>2 = High Level (Expires after 4 hours)</p>
+     *             <p>3 = Very High Level (Expires after 12 hours)</p>
+     * @param note
+     */
     public void submitTracker(final Long guildID, final Long userID, final Integer type, final String note) {
         try {
-            if(type==0){
-                SherlockBot.database.insertTracker(guildID, userID, type,1,note);
-            } else if(type==1){
-                SherlockBot.database.insertTracker(guildID, userID, type,2,note);
-            } else {
-                SherlockBot.database.insertTracker(guildID, userID, type,4,note);
+            switch(type){
+                case 0:
+                    SherlockBot.database.insertTracker(guildID, userID, type,1,note);
+                    break;
+                case 1:
+                    SherlockBot.database.insertTracker(guildID, userID, type,2,note);
+                    break;
+                case 3:
+                    SherlockBot.database.insertTracker(guildID, userID, type,12,note);
+                    break;
+                default:
+                    SherlockBot.database.insertTracker(guildID, userID, type,4,note);
+                    break;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -41,12 +59,18 @@ public class Overseer {
             for(TrackerObject trackerObject:trackers){
 
                 Integer type = trackerObject.getType();
-                if(type == 2){
-                    heatLevel = heatLevel + Integer.parseInt(Config.get("HighTrigger"));
-                } else if(type == 1){
-                    heatLevel = heatLevel + Integer.parseInt(Config.get("MidTrigger"));
-                } else {
-                    heatLevel = heatLevel + Integer.parseInt(Config.get("LowTrigger"));
+                switch(type){
+                    case 3:
+                        heatLevel = heatLevel + Integer.parseInt(Config.get("VeryHighTrigger"));
+                    case 2:
+                        heatLevel = heatLevel + Integer.parseInt(Config.get("HighTrigger"));
+                        break;
+                    case 1:
+                        heatLevel = heatLevel + Integer.parseInt(Config.get("MidTrigger"));
+                        break;
+                    default:
+                        heatLevel = heatLevel + Integer.parseInt(Config.get("LowTrigger"));
+                        break;
                 }
             }
 
@@ -62,6 +86,8 @@ public class Overseer {
     private void quarantineUser(final Long guildID, final Long userID) {
         Guild guild = SherlockBot.jda.getGuildById(guildID);
         if (guild != null) {
+
+            guild.timeoutForById(userID, Duration.ofDays(1)).queue();
 
             //Member member = guild.getMember(userID);
             Role quarantineRole = guild.getRoleById(SherlockBot.guildMap.get(guildID).getQuarantineRoleID());

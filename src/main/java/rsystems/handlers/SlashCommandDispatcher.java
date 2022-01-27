@@ -37,7 +37,8 @@ public class SlashCommandDispatcher extends ListenerAdapter {
         registerCommand(new Moderator());
         registerCommand(new BotSupport());
         registerCommand(new Whitelist());
-        registerCommand(new Filter());
+        registerCommand(new SoftFilter());
+        registerCommand(new HardFilter());
     }
 
     public Set<SlashCommand> getCommands() {

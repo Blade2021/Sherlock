@@ -13,7 +13,7 @@ import rsystems.objects.SlashCommand;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class Filter extends SlashCommand {
+public class SoftFilter extends SlashCommand {
 
     @Override
     public CommandData getCommandData() {
@@ -22,7 +22,7 @@ public class Filter extends SlashCommand {
 
         // Filter Group
         ArrayList<SubcommandData> filteringCommands = new ArrayList<>();
-        filteringCommands.add(new SubcommandData("add", "Enable filtering for a word").addOption(OptionType.STRING, "word", "Word to be filterd", true));
+        filteringCommands.add(new SubcommandData("add", "Enable filtering for a word").addOption(OptionType.STRING, "word", "Word to be filtered", true));
         filteringCommands.add(new SubcommandData("remove", "Remove filtering for a word").addOption(OptionType.STRING, "word", "Word to be cleared from the filter", true));
         filteringCommands.add(new SubcommandData("list", "List all filtered words"));
 
@@ -44,7 +44,7 @@ public class Filter extends SlashCommand {
 
         if (event.getSubcommandName().equalsIgnoreCase("add")) {
             try {
-                if (SherlockBot.database.addFilterWord(event.getGuild().getIdLong(), word) > 0) {
+                if (SherlockBot.database.addSoftFilterWord(event.getGuild().getIdLong(), word) > 0) {
                     event.getHook().editOriginal(String.format("I have added `%s` to the filter.", word)).queue();
                 }
             } catch (SQLException e) {
@@ -52,7 +52,7 @@ public class Filter extends SlashCommand {
             }
         } else if (event.getSubcommandName().equalsIgnoreCase("remove")) {
             try {
-                if (SherlockBot.database.removeFilterWord(event.getGuild().getIdLong(), word) > 0) {
+                if (SherlockBot.database.removeSoftFilterWord(event.getGuild().getIdLong(), word) > 0) {
                     event.getHook().editOriginal(String.format("I have removed `%s` from the filter.", word)).queue();
                 }
             } catch (SQLException e) {
@@ -60,7 +60,7 @@ public class Filter extends SlashCommand {
             }
         } else if (event.getSubcommandName().equalsIgnoreCase("list")) {
             try {
-                ArrayList<String> filterWordList = SherlockBot.database.getFilterWords(event.getGuild().getIdLong());
+                ArrayList<String> filterWordList = SherlockBot.database.getSoftFilteredWords(event.getGuild().getIdLong());
 
                 if (filterWordList.size() > 0) {
                     event.getHook().editOriginal(filterWordList.toString()).queue();

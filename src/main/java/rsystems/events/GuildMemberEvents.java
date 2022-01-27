@@ -79,17 +79,28 @@ public class GuildMemberEvents extends ListenerAdapter {
                         infractionObject.setEventType(InfractionObject.EventType.KICK);
                     }
 
-                    if(event.getGuild().getMemberById(modID) != null){
-                        infractionObject.setModeratorTag(event.getGuild().getMemberById(modID).getUser().getAsTag());
-                    }
+                    event.getGuild().retrieveMemberById(modID).queue(modFound -> {
 
-                    try {
-                        SherlockBot.database.insertCaseEvent(event.getGuild().getIdLong(),infractionObject);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                        infractionObject.setModeratorTag(modFound.getUser().getAsTag());
 
-                    LogMessage.sendLogMessage(event.getGuild().getIdLong(),infractionObject);
+                        try {
+                            SherlockBot.database.insertCaseEvent(event.getGuild().getIdLong(),infractionObject);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+
+                        LogMessage.sendLogMessage(event.getGuild().getIdLong(),infractionObject);
+                    }, modNotFound -> {
+                        infractionObject.setModeratorTag("null");
+
+                        try {
+                            SherlockBot.database.insertCaseEvent(event.getGuild().getIdLong(),infractionObject);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+
+                        LogMessage.sendLogMessage(event.getGuild().getIdLong(),infractionObject);
+                    });
                 }
 
             }

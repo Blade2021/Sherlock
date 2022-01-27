@@ -338,8 +338,38 @@ public class Dispatcher extends ListenerAdapter {
             }
             */
 
-            // Word Filter
-            String filterWord = filterWordFound(event.getMessage(), event.getGuild().getIdLong());
+
+            if(!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
+
+                // Word Filters
+                String hardFilterWord = checkHardFilter(event);
+                if (hardFilterWord != null) {
+
+                    hardFilterWord = hardFilterWord.trim();
+
+                    if (LogMessage.hasLogChannel(event.getGuild().getIdLong())) {
+
+                        EmbedBuilder builder = new EmbedBuilder();
+
+                        builder.setDescription("A hard filter word was detected")
+                                .addField("User:", event.getMessage().getMember().getEffectiveName(), true)
+                                .addField("Channel:", event.getChannel().getAsMention(), true)
+                                .addField("Trigger Word:", String.format("||%s||", hardFilterWord), true)
+                                .setFooter("User ID: " + event.getMessage().getMember().getId())
+                                .setColor(SherlockBot.getColor(SherlockBot.colorType.WARNING));
+
+                        LogMessage.sendLogMessage(event.getGuild().getIdLong(), builder.build());
+
+                        builder.clear();
+                    }
+
+                    event.getMessage().delete().queue();
+                }
+            }
+
+            // SOFT WORD FILTER
+
+            String filterWord = checkSoftFilter(event.getMessage(), event.getGuild().getIdLong());
             if (filterWord != null) {
 
                 filterWord = filterWord.trim();
@@ -562,11 +592,11 @@ public class Dispatcher extends ListenerAdapter {
         }
     }
 
-    private String filterWordFound(final Message message, final Long guildID) {
+    private String checkSoftFilter(final Message message, final Long guildID) {
         // Language Filter
         ArrayList<String> filterWordList = null;
         try {
-            filterWordList = SherlockBot.database.getFilterWords(guildID);
+            filterWordList = SherlockBot.database.getSoftFilteredWords(guildID);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -590,6 +620,51 @@ public class Dispatcher extends ListenerAdapter {
         return null;
     }
 
+    private String checkHardFilter(final MessageReceivedEvent event) {
+
+        try {
+            Map<String,Integer> hardFilteredWords = SherlockBot.database.getHardFilteredWords(event.getGuild().getIdLong());
+
+            for (Map.Entry<String,Integer> entry:hardFilteredWords.entrySet()) {
+
+                String s = entry.getKey();
+
+                s = s.replaceAll("%"," ");
+                if (event.getMessage().getContentRaw().toLowerCase().contains(s.toLowerCase())) {
+                    // bad word detected
+
+                    String[] args = event.getMessage().getContentRaw().split("\\s+");
+
+                    if(event.getMessage().getContentRaw().startsWith("https://tenor.com")){
+                        return null;
+                    } else {
+
+                        switch (entry.getValue()){
+                            default:
+                                SherlockBot.overseer.submitTracker(event.getGuild().getIdLong(),event.getAuthor().getIdLong(),0,"Hard Word Filter");
+                                break;
+                            case 1:
+                                SherlockBot.overseer.submitTracker(event.getGuild().getIdLong(),event.getAuthor().getIdLong(),3,"Hard Word Filter");
+                                break;
+                            case 2:
+                                event.getMember().kick("Automatic kick for sending a message containing a hard filtered word").queue();
+                                break;
+                            case 3:
+                                event.getMember().ban(7,"Automatic ban for sending a message containing a hard filtered word").queue();
+                                break;
+                        }
+
+                        return s;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     @Override
     public void onMessageUpdate(MessageUpdateEvent event) {
         if (event.isFromGuild()) {
@@ -600,7 +675,7 @@ public class Dispatcher extends ListenerAdapter {
 
             final boolean futureFound = futures.containsKey(event.getMessageId());
 
-            String filterWordFound = filterWordFound(event.getMessage(), event.getGuild().getIdLong());
+            String filterWordFound = checkSoftFilter(event.getMessage(), event.getGuild().getIdLong());
 
             if (filterWordFound != null) {
                 // Filtered word found on message
