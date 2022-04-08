@@ -3,10 +3,7 @@ package rsystems.events;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -110,7 +107,7 @@ public class GuildMemberEvents extends ListenerAdapter {
 
 
     private void welcomeUser(final Guild guild, final Member member){
-        final TextChannel welcomeChannel = guild.getDefaultChannel();
+        final BaseGuildMessageChannel welcomeChannel = guild.getDefaultChannel();
 
         if((welcomeChannel != null) && (welcomeChannel.canTalk())){
 

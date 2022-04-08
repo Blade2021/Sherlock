@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.SherlockBot;
@@ -39,13 +39,15 @@ public class SlashCommandDispatcher extends ListenerAdapter {
         registerCommand(new Whitelist());
         registerCommand(new SoftFilter());
         registerCommand(new HardFilter());
+        registerCommand(new AutoPush());
     }
 
     public Set<SlashCommand> getCommands() {
         return Collections.unmodifiableSet(new HashSet<>(this.slashCommands));
     }
 
-    public void onSlashCommand(final SlashCommandEvent event) {
+    @Override
+    public void onSlashCommandInteraction(final SlashCommandInteractionEvent event) {
 
         for (final SlashCommand c : this.getCommands()) {
             if (event.getName().equalsIgnoreCase(c.getName())) {
@@ -66,7 +68,7 @@ public class SlashCommandDispatcher extends ListenerAdapter {
     }
 
     private void executeCommand(final SlashCommand c, final String message,
-                                final SlashCommandEvent event) {
+                                final SlashCommandInteractionEvent event) {
         this.pool.submit(() ->
         {
 

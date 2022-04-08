@@ -915,6 +915,67 @@ public class SQLHandler {
         return 0;
     }
 
+    // INSERT A CHANNEL ID INTO THE DATABASE
+    public Integer insertAutoPushChannel(Long guildID, Long channelID) throws SQLException {
+
+        Connection connection = pool.getConnection();
+        try {
+
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("INSERT INTO AutoPush (ChildGuildID, ChannelID) VALUES (%d, %d)", guildID, channelID));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return 0;
+    }
+
+    // REMOVE A CHANNEL ID FROM THE DATABASE
+    public Integer removeAutoPushChannel(Long guildID, Long channelID) throws SQLException {
+
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("DELETE FROM AutoPush WHERE (ChildGuildID = %d) AND (ChannelID = %d)", guildID, channelID));
+            return st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return 0;
+    }
+
+    // REMOVE A CHANNEL ID FROM THE DATABASE
+    public Boolean checkForChannelID(final Long guildID, final Long channelID) throws SQLException {
+
+        Connection connection = pool.getConnection();
+        int returnCount = 0;
+
+        try {
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("SELECT ChannelID FROM AutoPush WHERE (ChildGuildID = %d) AND (ChannelID = %d)", guildID, channelID));
+            while (rs.next()) {
+                returnCount++;
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        if(returnCount > 0){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 
     public Integer whiteListServer(Long guildID, Long serverID, String note) throws SQLException {
 

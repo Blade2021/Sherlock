@@ -95,6 +95,12 @@ public class Dispatcher extends ListenerAdapter {
             final String guildPrefix = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix();
             final boolean defaultPrefixFound = message.toLowerCase().startsWith(SherlockBot.defaultPrefix.toLowerCase());
 
+            if(!event.getMessage().getAttachments().isEmpty()){
+                if(!handleMessageAttachment(event)){
+                    return;
+                }
+            }
+
             //Is channel set to be ignored ( not monitored )?
             if (!isChannelIgnored(event.getGuild().getIdLong(), event.getChannel().getIdLong())) {
 
@@ -769,6 +775,52 @@ public class Dispatcher extends ListenerAdapter {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Check to see if the author is allowed to post the attachment's extension type
+     * @param event The message event
+     * @return True = Continue processing the message </br>
+     * False = The message was queued for deletion and does not need to be processed further
+     */
+    private boolean handleMessageAttachment(final MessageReceivedEvent event){
+
+        boolean returnValue = false;
+
+        final String attachmentExtension = event.getMessage().getAttachments().get(0).getFileExtension();
+
+        //todo check for bypass
+        try {
+            ArrayList<String> allowedTypes = SherlockBot.database.getList(event.getGuild().getIdLong(),"ExtensionWhitelist","Extension");
+
+            if(allowedTypes.contains(attachmentExtension.toLowerCase())){
+                returnValue = true;
+            } else {
+                // File Extension not allowed
+                EmbedBuilder embedBuilder = new EmbedBuilder();
+                embedBuilder.setTitle("Unauthorized File Attachment");
+                embedBuilder.setColor(SherlockBot.getColor(SherlockBot.colorType.WARNING));
+                embedBuilder.setDescription(String.format("Sorry %s,\n\n" +
+                        "" +
+                        "This server does not allow that file type to be uploaded here.",event.getAuthor().getAsMention()));
+                embedBuilder.setTimestamp(Instant.now());
+                embedBuilder.addField("File Extension",attachmentExtension,false);
+
+                event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
+
+                embedBuilder.setDescription(String.format("User Tag: %s\n" +
+                        "User ID: %d",event.getAuthor().getAsTag(),event.getAuthor().getIdLong()));
+
+                LogMessage.sendLogMessage(event.getGuild().getIdLong(),embedBuilder.build());
+
+                event.getMessage().delete().reason("Unauthorized file attachment").queue();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return returnValue;
     }
 
 }

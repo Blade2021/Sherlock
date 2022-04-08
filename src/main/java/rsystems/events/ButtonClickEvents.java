@@ -1,13 +1,13 @@
 package rsystems.events;
 
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.commands.slashCommands.AutoRole;
 
 public class ButtonClickEvents extends ListenerAdapter {
 
     @Override
-    public void onButtonClick(ButtonClickEvent event) {
+    public void onButtonInteraction(ButtonInteractionEvent event) {
 
         if (event.getComponentId().equals("hello")) {
             event.reply("Hello :)").queue(); // send a message in the channel

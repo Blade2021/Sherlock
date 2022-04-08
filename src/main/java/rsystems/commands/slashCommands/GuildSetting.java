@@ -4,9 +4,10 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 import rsystems.SherlockBot;
@@ -22,7 +23,6 @@ public class GuildSetting extends SlashCommand {
     public CommandData getCommandData() {
 
         ArrayList<SubcommandGroupData> subCmdGroupData = new ArrayList<>();
-        CommandData commandData = new CommandData(this.getName().toLowerCase(),"Guild Setting");
 
         // Prefix Group
         ArrayList<SubcommandData> prefixCommands = new ArrayList<>();
@@ -45,9 +45,7 @@ public class GuildSetting extends SlashCommand {
 
         subCmdGroupData.add(new SubcommandGroupData("welcome","Welcome Message Commands").addSubcommands(welcomeCommands));
 
-        commandData.addSubcommandGroups(subCmdGroupData);
-
-        return commandData;
+        return Commands.slash(this.getName().toLowerCase(), this.getDescription()).addSubcommandGroups(subCmdGroupData);
     }
 
     @Override
@@ -61,7 +59,7 @@ public class GuildSetting extends SlashCommand {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandEvent event) {
+    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandInteractionEvent event) {
 
         if(event.getSubcommandGroup().equalsIgnoreCase("bot-prefix")){
 

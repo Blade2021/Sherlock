@@ -4,9 +4,10 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import rsystems.SherlockBot;
 import rsystems.objects.SlashCommand;
@@ -20,21 +21,17 @@ public class HardFilter extends SlashCommand {
     @Override
     public CommandData getCommandData() {
 
-        CommandData commandData = new CommandData(this.getName().toLowerCase(), this.getDescription());
-
         // Filter Group
         ArrayList<SubcommandData> filteringCommands = new ArrayList<>();
         filteringCommands.add(new SubcommandData("add", "Enable hard filtering for a word").addOption(OptionType.STRING, "word", "Word to be filtered", true).addOption(OptionType.STRING,"action","What action to take?",true));
         filteringCommands.add(new SubcommandData("remove", "Remove filtering for a word").addOption(OptionType.STRING, "word", "Word to be cleared from the filter", true));
         filteringCommands.add(new SubcommandData("list", "List all hard filtered words"));
 
-        commandData.addSubcommands(filteringCommands);
-
-        return commandData;
+        return Commands.slash(this.getName().toLowerCase(), this.getDescription()).addSubcommands(filteringCommands);
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandEvent event) {
+    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandInteractionEvent event) {
 
 
         event.deferReply().setEphemeral(this.isEphemeral()).queue();

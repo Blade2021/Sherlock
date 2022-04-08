@@ -5,11 +5,12 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import rsystems.SherlockBot;
 import rsystems.objects.SlashCommand;
 
@@ -35,15 +36,15 @@ public class Ban extends SlashCommand {
     @Override
     public CommandData getCommandData() {
 
-        CommandData commandData = new CommandData(this.getName().toLowerCase(),"Ban a user");
-        commandData.addOption(OptionType.USER, "user", "User to be banned", true)
+        CommandData commandData = Commands.slash(this.getName().toLowerCase(),"Ban a user")
+                .addOption(OptionType.USER, "user", "User to be banned", true)
                 .addOption(OptionType.STRING,"reason","The reason the user is getting banned", true);
 
         return commandData;
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandEvent event) {
+    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandInteractionEvent event) {
 
         event.deferReply(this.isEphemeral()).queue();
 
@@ -58,7 +59,7 @@ public class Ban extends SlashCommand {
 
     }
 
-    public void handleBanEvent(final Member member, final Member moderator, final SlashCommandEvent event, final String reason){
+    public void handleBanEvent(final Member member, final Member moderator, final SlashCommandInteractionEvent event, final String reason){
         event.getGuild().ban(member,0,reason).queue(success -> {
 
             MessageBuilder messageBuilder = new MessageBuilder();

@@ -7,12 +7,13 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import rsystems.SherlockBot;
 import rsystems.objects.SlashCommand;
 
@@ -38,7 +39,7 @@ public class AutoRole extends SlashCommand {
     @Override
     public CommandData getCommandData() {
 
-        CommandData commandData = new CommandData(this.getName().toLowerCase(),this.getDescription());
+        //CommandData commandData = Commands.slash(this.getName().toLowerCase(),this.getDescription());
 
         // Filter Group
         ArrayList<SubcommandData> subCommands = new ArrayList<>();
@@ -46,13 +47,13 @@ public class AutoRole extends SlashCommand {
         subCommands.add(new SubcommandData("remove", "Remove an AutoRole").addOption(OptionType.ROLE, "role", "The role to be removed", true));
         subCommands.add(new SubcommandData("list", "List all AutoRoles"));
 
-        commandData.addSubcommands(subCommands);
+        CommandData commandData = Commands.slash(this.getName().toLowerCase(),this.getDescription()).addSubcommands(subCommands);
 
         return commandData;
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandEvent event) {
+    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandInteractionEvent event) {
 
         if (event.getSubcommandName().equalsIgnoreCase("add")) {
 

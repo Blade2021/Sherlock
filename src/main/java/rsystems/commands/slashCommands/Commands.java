@@ -2,7 +2,7 @@ package rsystems.commands.slashCommands;
 
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import rsystems.SherlockBot;
 import rsystems.handlers.Dispatcher;
 import rsystems.handlers.SlashCommandDispatcher;
@@ -20,7 +20,7 @@ public class Commands extends SlashCommand {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandEvent event) {
+    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandInteractionEvent event) {
         event.deferReply(this.isEphemeral()).queue();
 
 

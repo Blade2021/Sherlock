@@ -6,9 +6,10 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import rsystems.SherlockBot;
 import rsystems.objects.SlashCommand;
@@ -23,16 +24,12 @@ public class SelfRole extends SlashCommand {
     @Override
     public CommandData getCommandData() {
 
-        CommandData commandData = new CommandData(this.getName().toLowerCase(),"Self roles are roles that any user can add/remove from themselves");
-
         ArrayList<SubcommandData> selfRoleCommands = new ArrayList<>();
         selfRoleCommands.add(new SubcommandData("add", "Enable a role to self added/removed").addOption(OptionType.STRING, "trigger", "The trigger to be used to add/remove the role", true).addOption(OptionType.ROLE, "role", "The role to be added/removed", true));
         selfRoleCommands.add(new SubcommandData("remove", "Remove a self-role").addOption(OptionType.STRING, "trigger", "The trigger of the self role to be removed", true));
         selfRoleCommands.add(new SubcommandData("list", "List all Self-Roles"));
 
-        commandData.addSubcommands(selfRoleCommands);
-
-        return commandData;
+        return Commands.slash(this.getName().toLowerCase(), this.getDescription()).addSubcommands(selfRoleCommands);
     }
 
     @Override
@@ -46,7 +43,7 @@ public class SelfRole extends SlashCommand {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandEvent event) {
+    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandInteractionEvent event) {
 
         if (event.getSubcommandName().equalsIgnoreCase("add")) {
 
@@ -128,6 +125,6 @@ public class SelfRole extends SlashCommand {
 
     @Override
     public String getDescription() {
-        return "Control Self-Roles";
+        return "Self roles are roles that any user can add/remove from themselves";
     }
 }

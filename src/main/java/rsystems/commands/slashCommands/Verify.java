@@ -3,7 +3,7 @@ package rsystems.commands.slashCommands;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import rsystems.SherlockBot;
 import rsystems.objects.SlashCommand;
 
@@ -17,7 +17,7 @@ public class Verify extends SlashCommand {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandEvent event) {
+    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandInteractionEvent event) {
         event.deferReply(isEphemeral()).queue();
         Long guildID = event.getGuild().getIdLong();
 

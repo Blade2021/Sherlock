@@ -8,10 +8,7 @@ import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
-import rsystems.events.ButtonClickEvents;
-import rsystems.events.GuildMemberEvents;
-import rsystems.events.GuildNicknameListener;
-import rsystems.events.GuildStateListener;
+import rsystems.events.*;
 import rsystems.handlers.Dispatcher;
 import rsystems.handlers.Overseer;
 import rsystems.handlers.SQLHandler;
@@ -40,7 +37,7 @@ public class SherlockBot {
     public static Map<Long, GuildSettings> guildMap = new HashMap<>();
     public static Map<Long, Map<Long, ArrayList<UserRoleReactionObject>>> reactionHandleMap = new HashMap<>();
     public static User bot = null;
-    public static String version = "2.6.8";
+    public static String version = "2.8.0";
     public static JDA jda = null;
     public static Long botOwnerID = Long.valueOf(Config.get("OWNER_ID"));
     public static Overseer overseer = new Overseer();
@@ -64,6 +61,7 @@ public class SherlockBot {
         api.addEventListener(new GuildMemberEvents());
         api.addEventListener(new ButtonClickEvents());
         api.addEventListener(new GuildNicknameListener());
+        api.addEventListener(new GuildNewsMessageListener());
 
         loadColorMap();
 

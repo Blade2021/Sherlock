@@ -3,9 +3,9 @@ package rsystems.commands.slashCommands;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import rsystems.Config;
 import rsystems.objects.SlashCommand;
 
@@ -16,7 +16,7 @@ public class BotSupport extends SlashCommand {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandEvent event) {
+    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandInteractionEvent event) {
         event.deferReply(this.isEphemeral()).queue();
 
         MessageBuilder messageBuilder = new MessageBuilder();
@@ -27,7 +27,7 @@ public class BotSupport extends SlashCommand {
                 "" +
                 "Please remember, you can always do `/setup` to get the initial setup instructions posted to your server.",event.getMember().getAsMention()));
 
-        messageBuilder.setActionRows(ActionRow.of(Button.link(Config.get("SUPPORTDISCORDURL"),"Sherlock Support Discord"),Button.link("https://github.com/blade2021/Sherlock/","GitHub")));
+        messageBuilder.setActionRows(ActionRow.of(Button.link(Config.get("SUPPORTDISCORDURL"),"Sherlock Support Discord"), Button.link("https://github.com/blade2021/Sherlock/","GitHub")));
 
         reply(event,messageBuilder.build(),this.isEphemeral());
     }

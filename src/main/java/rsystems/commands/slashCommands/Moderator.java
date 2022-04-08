@@ -4,9 +4,10 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import rsystems.SherlockBot;
 import rsystems.objects.SlashCommand;
@@ -19,16 +20,12 @@ public class Moderator extends SlashCommand {
     @Override
     public CommandData getCommandData() {
 
-        CommandData commandData = new CommandData(this.getName().toLowerCase(), "Moderator settings");
-
         ArrayList<SubcommandData> modSubCommands = new ArrayList<>();
         modSubCommands.add(new SubcommandData("add", "Add a moderator role").addOption(OptionType.ROLE, "role", "The role to be configured", true).addOption(OptionType.NUMBER, "permlevel", "Permission level for this moderator group",true));
         modSubCommands.add(new SubcommandData("remove", "Remove a moderator role").addOption(OptionType.ROLE, "role", "The role to be removed from the moderator table", true));
         modSubCommands.add(new SubcommandData("list", "List all moderator roles"));
 
-        commandData.addSubcommands(modSubCommands);
-
-        return commandData;
+        return Commands.slash(this.getName().toLowerCase(), this.getDescription()).addSubcommands(modSubCommands);
     }
 
     @Override
@@ -42,7 +39,7 @@ public class Moderator extends SlashCommand {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandEvent event) {
+    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandInteractionEvent event) {
 
         event.deferReply().setEphemeral(true).queue();
 

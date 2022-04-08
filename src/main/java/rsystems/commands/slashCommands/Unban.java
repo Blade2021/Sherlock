@@ -3,9 +3,10 @@ package rsystems.commands.slashCommands;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import rsystems.objects.SlashCommand;
 
 public class Unban extends SlashCommand {
@@ -23,10 +24,7 @@ public class Unban extends SlashCommand {
     @Override
     public CommandData getCommandData() {
 
-        CommandData commandData = new CommandData(this.getName().toLowerCase(),"Unban a user");
-        commandData.addOption(OptionType.NUMBER,"userid","The banned user's ID");
-
-        return commandData;
+        return Commands.slash(this.getName().toLowerCase(), this.getDescription()).addOption(OptionType.NUMBER,"userid","The banned user's ID");
     }
 
     @Override
@@ -35,7 +33,7 @@ public class Unban extends SlashCommand {
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandEvent event) {
+    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandInteractionEvent event) {
         event.deferReply(this.isEphemeral()).queue();
 
         final Long userID = event.getOption("userid").getAsLong();

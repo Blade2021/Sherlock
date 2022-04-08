@@ -151,6 +151,14 @@ public class GuildStateListener extends ListenerAdapter {
                 LogMessage.clearLogChannel(guildID);
             }
         }
+
+        if(event.isFromGuild()){
+            try {
+                SherlockBot.database.removeAutoPushChannel(event.getGuild().getIdLong(),event.getChannel().getIdLong());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

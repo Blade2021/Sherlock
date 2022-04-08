@@ -4,9 +4,10 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import rsystems.SherlockBot;
 import rsystems.objects.SlashCommand;
@@ -20,8 +21,6 @@ public class Whitelist extends SlashCommand {
     @Override
     public CommandData getCommandData() {
 
-        CommandData commandData = new CommandData(this.getName().toLowerCase(), this.getDescription());
-
         // Whitelist Guild Group
         ArrayList<SubcommandData> whitelistCommands = new ArrayList<>();
         whitelistCommands.add(new SubcommandData("enable", "Enable/Disable this function").addOption(OptionType.BOOLEAN, "enable", "True = Enable the Filter, False = Disable the filter", true));
@@ -30,13 +29,11 @@ public class Whitelist extends SlashCommand {
         whitelistCommands.add(new SubcommandData("remove", "Disable a server's invites from being posted here").addOption(OptionType.STRING, "server_id", "ID of the server to be removed from the whitelist", true));
         whitelistCommands.add(new SubcommandData("list", "List all whitelisted servers"));
 
-        commandData.addSubcommands(whitelistCommands);
-
-        return commandData;
+        return Commands.slash(this.getName().toLowerCase(), this.getDescription()).addSubcommands(whitelistCommands);
     }
 
     @Override
-    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandEvent event) {
+    public void dispatch(User sender, MessageChannel channel, String content, SlashCommandInteractionEvent event) {
 
 
         event.deferReply().setEphemeral(this.isEphemeral()).queue();
