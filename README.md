@@ -20,15 +20,12 @@ I fully welcome all new ideas and feature requests however for this bot, I am tr
 ## Current Features  
 
 - **User Muting** - Remove a user's ability to write messages in all channels.  
-- **Channel Cooldown** - Mute a channel for a certain length of time.
-- **Language Filtering** - Custom triggers to warn/delete messages containing explicit content.
+- **Word Filtering** - Custom triggers to warn/delete messages containing explicit content.
 - **Timed Events (Muting/Ban)** - Automatic unban/unmute after time expiration.
 - **Infraction System** - Log mod/admin notes against a user.
 - **Self Roles** - Allows users to self assign themselves roles that are determined by you.
-- **Embed Filtering** - Suppresses embed messages if too many embeds are detected within a certain amount of time/messages.
 - **Welcome Messages** - Give members who join your server a nice hearty welcome!
 - **Customizable Moderator Roles** - Give your moderators access to the commands that YOU designate using our moderator permission system.
-- **Channel Archiving** - Set a category for archiving channels then send or return them with easy commands.
 
 ## Upcoming Features
 
