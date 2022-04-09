@@ -95,11 +95,13 @@ public class Dispatcher extends ListenerAdapter {
             final String guildPrefix = SherlockBot.guildMap.get(event.getGuild().getIdLong()).getPrefix();
             final boolean defaultPrefixFound = message.toLowerCase().startsWith(SherlockBot.defaultPrefix.toLowerCase());
 
+            /*
             if(!event.getMessage().getAttachments().isEmpty()){
                 if(!handleMessageAttachment(event)){
                     return;
                 }
             }
+             */
 
             //Is channel set to be ignored ( not monitored )?
             if (!isChannelIgnored(event.getGuild().getIdLong(), event.getChannel().getIdLong())) {
