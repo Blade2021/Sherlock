@@ -1,5 +1,6 @@
 package rsystems.commands.slashCommands;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.NewsChannel;
@@ -13,6 +14,7 @@ import rsystems.SherlockBot;
 import rsystems.objects.SlashCommand;
 
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 
 public class AutoPush extends SlashCommand {
@@ -42,48 +44,79 @@ public class AutoPush extends SlashCommand {
             event.deferReply().setEphemeral(this.isEphemeral()).queue();
             final NewsChannel targetChannel = event.getOption("channel").getAsNewsChannel();
 
-            if(targetChannel != null){
+            if (targetChannel != null) {
 
                 // Add channel to database
                 try {
-                    SherlockBot.database.insertAutoPushChannel(event.getGuild().getIdLong(),targetChannel.getIdLong());
-
-                    reply(event,"Success",this.isEphemeral());
-                } catch (SQLException e) {
-                    e.printStackTrace();
+                    if (SherlockBot.database.insertAutoPushChannel(event.getGuild().getIdLong(), targetChannel.getIdLong()) > 0) {
+                        reply(event, "Success", this.isEphemeral());
+                    }
+                }
+                catch (SQLIntegrityConstraintViolationException ex){
+                    reply(event, "Failed to add channel.\n**Channel is already in the system**", this.isEphemeral());
+                }
+                catch (SQLException e) {
+                    reply(event, "An Error Occurred", this.isEphemeral());
                 }
 
             } else {
-                reply(event,"Failed to add channel.\nWas the channel provided an announcement channel?",this.isEphemeral());
-            }
-        }
 
-        else if(event.getSubcommandName().equalsIgnoreCase("remove")){
+                reply(event, "Failed to add channel.\nWas the channel provided an announcement channel?", this.isEphemeral());
+
+            }
+        } else if (event.getSubcommandName().equalsIgnoreCase("remove")) {
 
             // Remove channel from database
             event.deferReply().setEphemeral(this.isEphemeral()).queue();
             final NewsChannel targetChannel = event.getOption("channel").getAsNewsChannel();
 
-            if(targetChannel != null){
+            if (targetChannel != null) {
 
                 try {
-                    SherlockBot.database.removeAutoPushChannel(event.getGuild().getIdLong(),targetChannel.getIdLong());
-
-                    reply(event,"Success",this.isEphemeral());
+                    if (SherlockBot.database.removeAutoPushChannel(event.getGuild().getIdLong(), targetChannel.getIdLong()) > 0) {
+                        reply(event, "Success", this.isEphemeral());
+                    } else {
+                        reply(event, "Failed to remove channel", this.isEphemeral());
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
 
             } else {
-                reply(event,"Failed to remove channel.\nWas the channel provided an announcement channel?",this.isEphemeral());
+                reply(event, "Failed to remove channel.\nWas the channel provided an announcement channel?", this.isEphemeral());
             }
 
-        }
+        } else if (event.getSubcommandName().equalsIgnoreCase("list")) {
+            event.deferReply(this.isEphemeral()).queue();
 
-        else if(event.getSubcommandName().equalsIgnoreCase("list")){
-            event.deferReply().queue();
+            try {
+                ArrayList<Long> channelList = SherlockBot.database.getListLong(event.getGuild().getIdLong(),"AutoPush","ChannelID");
+                if(channelList != null && !channelList.isEmpty()){
 
-            reply(event,"This function is not ready yet",this.isEphemeral());
+                    EmbedBuilder builder = new EmbedBuilder();
+                    StringBuilder sb = new StringBuilder();
+
+                    for(Long entry:channelList){
+
+                        final NewsChannel entryChannel = event.getGuild().getNewsChannelById(entry);
+
+                        if(entryChannel != null){
+                            sb.append(entryChannel.getAsMention()).append(", ");
+                        }
+                    }
+
+                    builder.setTitle("Auto Pushed Channels:");
+                    builder.setDescription(sb.toString());
+                    builder.setColor(SherlockBot.getColor(SherlockBot.colorType.GENERIC));
+
+                    reply(event,builder.build());
+
+                } else {
+                    reply(event,"No channels found",this.isEphemeral());
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 

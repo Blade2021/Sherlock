@@ -823,6 +823,27 @@ public class SQLHandler {
         return list;
     }
 
+    public ArrayList<Long> getListLong(Long guildID,String tableName,String columnName) throws SQLException {
+        ArrayList<Long> list = new ArrayList<>();
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement st = connection.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("SELECT %s FROM %s WHERE ChildGuildID = %d",columnName,tableName,guildID));
+            while (rs.next()) {
+                list.add(rs.getLong(columnName));
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+
+        return list;
+    }
+
     public Map<Long, String> getMap(Long guildID,String tableName,String firstColumn,String secondColumn) throws SQLException {
         Map<Long, String> map = new HashMap<>();
         Connection connection = pool.getConnection();
@@ -961,7 +982,15 @@ public class SQLHandler {
         return returnValue;
     }
 
-    // REMOVE A CHANNEL ID FROM THE DATABASE
+    // CHECK FOR CHANNEL ID IN THE DATABASE
+
+    /**
+     * Checks the database for a given channelID to see if it should automatically push any announcements
+     * @param guildID
+     * @param channelID
+     * @return Channel was found
+     * @throws SQLException
+     */
     public Boolean checkForChannelID(final Long guildID, final Long channelID) throws SQLException {
 
         Connection connection = pool.getConnection();
