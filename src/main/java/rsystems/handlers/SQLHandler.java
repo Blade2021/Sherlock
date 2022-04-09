@@ -28,7 +28,7 @@ public class SQLHandler {
      */
 
     public String getString(String table, String columnName, String identifierColumn, Long identifier) throws SQLException {
-        String output = null;
+        String returnValue = null;
 
         Connection connection = pool.getConnection();
         try {
@@ -36,7 +36,7 @@ public class SQLHandler {
             ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %d", columnName, table, identifierColumn, identifier));
 
             while (rs.next()) {
-                output = rs.getString(columnName.toUpperCase());
+                returnValue = rs.getString(columnName.toUpperCase());
             }
 
         } catch (SQLException throwables) {
@@ -45,11 +45,11 @@ public class SQLHandler {
             connection.close();
         }
 
-        return output;
+        return returnValue;
     }
 
     public String getString(String table, String columnName, String identifierColumn, String identifier) throws SQLException {
-        String output = null;
+        String returnValue = null;
 
         Connection connection = pool.getConnection();
         try {
@@ -57,7 +57,7 @@ public class SQLHandler {
             ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = '%s'", columnName, table, identifierColumn, identifier));
 
             while (rs.next()) {
-                output = rs.getString(columnName);
+                returnValue = rs.getString(columnName);
             }
 
         } catch (SQLException throwables) {
@@ -66,11 +66,11 @@ public class SQLHandler {
             connection.close();
         }
 
-        return output;
+        return returnValue;
     }
 
     public Integer getInt(String table, String columnName, String identifierColumn, Long identifier) throws SQLException {
-        Integer output = null;
+        Integer returnValue = null;
 
         Connection connection = pool.getConnection();
 
@@ -79,7 +79,7 @@ public class SQLHandler {
             ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s where %s = %d", columnName, table, identifierColumn, identifier));
 
             while (rs.next()) {
-                output = rs.getInt(columnName);
+                returnValue = rs.getInt(columnName);
             }
 
         } catch (SQLException throwables) {
@@ -88,7 +88,7 @@ public class SQLHandler {
             connection.close();
         }
 
-        return output;
+        return returnValue;
     }
 
     /**
@@ -100,7 +100,7 @@ public class SQLHandler {
      * @throws SQLException
      */
     public Long getLong(String table, String columnName, String identifierColumn, Long identifier) throws SQLException {
-        Long output = null;
+        Long returnValue = null;
 
         Connection connection = pool.getConnection();
 
@@ -109,7 +109,7 @@ public class SQLHandler {
             ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s where %s = %d", columnName, table, identifierColumn, identifier));
 
             while (rs.next()) {
-                output = rs.getLong(columnName);
+                returnValue = rs.getLong(columnName);
             }
 
         } catch (SQLException throwables) {
@@ -118,11 +118,11 @@ public class SQLHandler {
             connection.close();
         }
 
-        return output;
+        return returnValue;
     }
 
     public Long getLong(String table, String columnName, String firstIdentityCol, Long firstId, String secondIdentityCol, int secondId) throws SQLException {
-        Long output = null;
+        Long returnValue = null;
 
         Connection connection = pool.getConnection();
 
@@ -131,7 +131,7 @@ public class SQLHandler {
             ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s where %s = %d AND %s = %d", columnName, table, firstIdentityCol, firstId, secondIdentityCol, secondId));
 
             while (rs.next()) {
-                output = rs.getLong(columnName);
+                returnValue = rs.getLong(columnName);
             }
 
         } catch (SQLException throwables) {
@@ -140,11 +140,11 @@ public class SQLHandler {
             connection.close();
         }
 
-        return output;
+        return returnValue;
     }
 
     public Long getLong(String table, String columnName, String firstIdentityCol, Long firstId, String secondIdentityCol, Long secondId) throws SQLException {
-        Long output = null;
+        Long returnValue = null;
         Connection connection = pool.getConnection();
 
         try {
@@ -152,7 +152,7 @@ public class SQLHandler {
             ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s where %s = %d AND %s = %d", columnName, table, firstIdentityCol, firstId, secondIdentityCol, secondId));
 
             while (rs.next()) {
-                output = rs.getLong(columnName);
+                returnValue = rs.getLong(columnName);
             }
 
         } catch (SQLException throwables) {
@@ -161,11 +161,11 @@ public class SQLHandler {
             connection.close();
         }
 
-        return output;
+        return returnValue;
     }
 
     public List<Long> getLongMultiple(String table, String columnName, String identifierColumn, Long identifier) throws SQLException {
-        ArrayList<Long> output = new ArrayList<>();
+        ArrayList<Long> returnValue = new ArrayList<>();
 
         Connection connection = pool.getConnection();
 
@@ -174,7 +174,7 @@ public class SQLHandler {
             ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s where %s = %d", columnName, table, identifierColumn, identifier));
 
             while (rs.next()) {
-                output.add(rs.getLong(columnName));
+                returnValue.add(rs.getLong(columnName));
             }
 
         } catch (SQLException throwables) {
@@ -183,43 +183,43 @@ public class SQLHandler {
             connection.close();
         }
 
-        return output;
+        return returnValue;
     }
 
-    public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, Long value) throws SQLException {
-        int output = 0;
+    public Integer putValue(String tableName, String columnName, String identifierColumn, Long identifier, Long value) throws SQLException {
+        int returnValue = 0;
 
         Connection connection = pool.getConnection();
 
         try {
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
-            output = st.getUpdateCount();
+            returnValue = st.getUpdateCount();
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return output;
+        return returnValue;
     }
 
-    public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, String value) throws SQLException {
-        int output = 0;
+    public Integer putValue(String tableName, String columnName, String identifierColumn, Long identifier, String value) throws SQLException {
+        int returnValue = 0;
 
         Connection connection = pool.getConnection();
 
         try {
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = '%s' WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
-            output = st.getUpdateCount();
+            returnValue = st.getUpdateCount();
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return output;
+        return returnValue;
     }
 
     /**
@@ -230,91 +230,91 @@ public class SQLHandler {
      * @param value
      * @return
      */
-    public int putValue(String tableName, String columnName, String identifierColumn, int identifier, Long value) throws SQLException {
-        int output = 0;
+    public Integer putValue(String tableName, String columnName, String identifierColumn, int identifier, Long value) throws SQLException {
+        int returnValue = 0;
         Connection connection = pool.getConnection();
 
         try {
 
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
-            output = st.getUpdateCount();
+            returnValue = st.getUpdateCount();
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return output;
+        return returnValue;
     }
 
-    public int putValueNull(String tableName, String columnName, String identifierColumn, Long identifier) throws SQLException {
-        int output = 0;
+    public Integer putValueNull(String tableName, String columnName, String identifierColumn, Long identifier) throws SQLException {
+        int returnValue = 0;
 
         Connection connection = pool.getConnection();
 
         try {
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = null WHERE %s = %d", tableName, columnName, identifierColumn, identifier));
-            output = st.getUpdateCount();
+            returnValue = st.getUpdateCount();
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return output;
+        return returnValue;
     }
 
-    public int putValue(String tableName, String columnName, String identifierColumn, Long identifier, int value) throws SQLException {
-        int output = 0;
+    public Integer putValue(String tableName, String columnName, String identifierColumn, Long identifier, int value) throws SQLException {
+        int returnValue = 0;
 
         Connection connection = pool.getConnection();
         try {
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d", tableName, columnName, value, identifierColumn, identifier));
 
-            output = st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return output;
+        return returnValue;
     }
 
-    public int putValue(String tableName, String columnName, String firstIdentityCol, Long firstId, String secondIdentityCol, int secondId, Long value) throws SQLException {
-        int output = 0;
+    public Integer putValue(String tableName, String columnName, String firstIdentityCol, Long firstId, String secondIdentityCol, int secondId, Long value) throws SQLException {
+        int returnValue = 0;
 
         Connection connection = pool.getConnection();
         try {
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = %d WHERE %s = %d AND %s = %d", tableName, columnName, value, firstIdentityCol, firstId, secondIdentityCol, secondId));
 
-            output = st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return output;
+        return returnValue;
     }
 
-    public int putValue(String tableName, String columnName, String firstIdentityCol, Long firstId, String secondIdentityCol, int secondId, String value) throws SQLException {
-        int output = 0;
+    public Integer putValue(String tableName, String columnName, String firstIdentityCol, Long firstId, String secondIdentityCol, int secondId, String value) throws SQLException {
+        int returnValue = 0;
 
         Connection connection = pool.getConnection();
         try {
             Statement st = connection.createStatement();
             st.execute(String.format("UPDATE %s SET %s = \"%s\" WHERE %s = %d AND %s = %d", tableName, columnName, value, firstIdentityCol, firstId, secondIdentityCol, secondId));
 
-            output = st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return output;
+        return returnValue;
     }
 
     public void addWelcomeRow(Long guildID, String message) throws SQLException {
@@ -367,6 +367,7 @@ public class SQLHandler {
     public Integer updateGuild(GuildSettings guildSettings) throws SQLException {
 
         Connection connection = pool.getConnection();
+        Integer returnValue = null;
 
         try {
             Statement st = connection.createStatement();
@@ -387,35 +388,36 @@ public class SQLHandler {
             st.execute(String.format("%s LogChannelID=%d, QuarantineRoleID=%d, EmbedFilter=%d, WelcomeMessageSetting=%d, InviteFilterEnabled=%d " +
                             "where GuildID=%d", updateString, guildSettings.getLogChannelID(), guildSettings.getQuarantineRoleID(),
                     guildSettings.getEmbedFilterSetting(), guildSettings.getWelcomeMessageSetting(),guildSettings.isInviteFilterEnabled(), guildSettings.getGuildID()));
-            return st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return 0;
+        return returnValue;
     }
 
     public Integer insertGuild(Long guildID, Long guildOwnerID) throws SQLException {
 
         Connection connection = pool.getConnection();
+        Integer returnValue = null;
 
         try {
             Statement st = connection.createStatement();
 
             st.execute(String.format("INSERT INTO GuildTable SET GuildID=%d, OwnerID=%d", guildID, guildOwnerID));
-            return st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return 0;
+        return returnValue;
     }
 
     public Integer insertCaseEvent(Long guildID, InfractionObject caseObject) throws SQLException {
 
-        int output = 0;
+        int returnValue = 0;
         int eventTypeIdentifier = -1;
 
         switch (caseObject.getEventType()) {
@@ -456,18 +458,18 @@ public class SQLHandler {
                     eventTypeIdentifier)
             );
 
-            output = st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return output;
+        return returnValue;
 
     }
 
     public Integer insertBanEvent(final Long guildID, final Long bannedUserID, final Long moderatorID, final Long repliedMessageID) throws SQLException {
-        int output = 0;
+        int returnValue = 0;
 
         Connection connection = pool.getConnection();
         try {
@@ -476,13 +478,13 @@ public class SQLHandler {
                     guildID, bannedUserID, moderatorID, repliedMessageID
             ));
 
-            output = st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return output;
+        return returnValue;
     }
 
     /*
@@ -493,6 +495,8 @@ public class SQLHandler {
 
     // Add an self role to the database
     public Integer insertAutoRole(Long guildID, Long roleID) throws SQLException {
+        
+        Integer returnValue = 0;
 
         if (checkSize(guildID, "AutoRoles")) {
 
@@ -507,44 +511,45 @@ public class SQLHandler {
                     results++;
                 }
                 if (results > 0) {
-                    return 400;
+                    returnValue = 400;
                 } else {
                     st.execute(String.format("INSERT INTO AutoRoles (ChildGuildID, RoleID) VALUES (%d, %d)", guildID, roleID));
-                    return 200;
+                    returnValue = 200;
                 }
             } catch (SQLException throwables) {
-                throwables.printStackTrace();
+                returnValue = 0;
             } finally {
                 connection.close();
             }
         } else {
             //DB Row Max limit reached
-            return 201;
+            returnValue = 201;
         }
-        return 0;
+        return returnValue;
     }
 
     // Remove an self role to the database
     public Integer removeAutoRole(Long guildID, Long roleID) throws SQLException {
 
         Connection connection = pool.getConnection();
+        Integer returnValue = 0;
 
         try {
             Statement st = connection.createStatement();
 
             st.execute(String.format("DELETE FROM AutoRoles WHERE (ChildGuildID = %d) AND (RoleID = %d)", guildID, roleID));
-            return st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return 0;
+        return returnValue;
     }
 
     //Get self Roles - Called by GuildLoader
     public ArrayList<Long> getAutoRoles(Long guildID) throws SQLException {
-        ArrayList<Long> output = new ArrayList<>();
+        ArrayList<Long> returnValue = new ArrayList<>();
         Connection connection = pool.getConnection();
 
         try {
@@ -554,7 +559,7 @@ public class SQLHandler {
 
             while (rs.next()) {
                 Long nextInput = rs.getLong("RoleID");
-                output.add(nextInput);
+                returnValue.add(nextInput);
             }
 
         } catch (SQLException throwables) {
@@ -562,7 +567,7 @@ public class SQLHandler {
         } finally {
             connection.close();
         }
-        return output;
+        return returnValue;
     }
 
 
@@ -586,10 +591,10 @@ public class SQLHandler {
      */
     public Integer insertSelfRole(Long guildID, String command, Long roleID) throws SQLException {
 
-        Integer output = 400;
+        Integer returnValue = 0;
 
         if(getString("SelfRoles","RoleCommand","RoleCommand",command) != null){
-            output = 201;
+            returnValue = 201;
         } else {
 
             Connection connection = pool.getConnection();
@@ -599,37 +604,38 @@ public class SQLHandler {
                 st.execute(String.format("INSERT INTO SelfRoles (ChildGuildID, RoleCommand, RoleID) VALUES (%d, \"%s\", %d)", guildID, command, roleID));
 
                 if (st.getUpdateCount() > 0) {
-                    output = 200;
+                    returnValue = 200;
                 } else {
-                    output = 201;
+                    returnValue = 201;
                 }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
-                output = 400;
+                returnValue = 400;
             } finally {
                 connection.close();
             }
         }
 
-        return output;
+        return returnValue;
     }
 
     // Remove an self role to the database
     public Integer removeSelfRole(Long guildID, String command) throws SQLException {
 
         Connection connection = pool.getConnection();
+        Integer returnValue = 0;
 
         try {
             Statement st = connection.createStatement();
 
             st.execute(String.format("DELETE FROM SelfRoles WHERE (ChildGuildID = %d) AND (RoleCommand = \"%s\")", guildID, command));
-            return st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return 0;
+        return returnValue;
     }
 
     public Map<String, Long> getGuildSelfRoles(Long guildID) throws SQLException {
@@ -706,7 +712,7 @@ public class SQLHandler {
 
 
     public Integer handleIgnoreChannel(Long GuildID, Long ChannelID, Boolean AddChannel) throws SQLException {
-        int output = 0;
+        int returnValue = 0;
 
         Connection connection = pool.getConnection();
 
@@ -723,13 +729,13 @@ public class SQLHandler {
                 st.execute(String.format("INSERT INTO IgnoreChannelTable (ChildGuildID,ChannelID) VALUES (%d,%d)", GuildID, ChannelID));
             }
 
-            output = st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return output;
+        return returnValue;
     }
 
     public ArrayList<String> getSoftFilteredWords(Long guildID) throws SQLException {
@@ -843,6 +849,7 @@ public class SQLHandler {
     public Integer addHardFilterWord(Long guildID, String filterWord, Integer resolution) throws SQLException {
 
         Connection connection = pool.getConnection();
+        Integer returnValue = 0;
         try {
 
             Statement st = connection.createStatement();
@@ -852,103 +859,106 @@ public class SQLHandler {
             }
 
             st.execute(String.format("INSERT INTO HardFilter (ChildGuildID, Word, Resolution) VALUES (%d, \"%s\", %d)", guildID, filterWord, resolution));
-            return st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return 0;
+        return returnValue;
     }
 
     // REMOVE A BLACKLISTED WORD FROM THE DATABASE
     public Integer removeHardFilterWord(Long guildID, String word) throws SQLException {
 
         Connection connection = pool.getConnection();
+        Integer returnValue = 0;
 
         try {
             Statement st = connection.createStatement();
 
             st.execute(String.format("DELETE FROM HardFilter WHERE (ChildGuildID = %d) AND (Word = \"%s\")", guildID, word));
-            return st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return 0;
+        return returnValue;
     }
 
     // INSERT A BADWORD INTO THE DATABASE
     public Integer addSoftFilterWord(Long guildID, String filterWord) throws SQLException {
 
         Connection connection = pool.getConnection();
+        Integer returnValue = null;
         try {
 
             Statement st = connection.createStatement();
 
             st.execute(String.format("INSERT INTO LanguageFilter (ChildGuildID, Word) VALUES (%d, \"%s\")", guildID, filterWord));
-            return st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return 0;
+        return returnValue;
     }
 
     // REMOVE A BLACKLISTED WORD FROM THE DATABASE
     public Integer removeSoftFilterWord(Long guildID, String word) throws SQLException {
 
         Connection connection = pool.getConnection();
+        Integer returnValue = null;
 
         try {
             Statement st = connection.createStatement();
 
             st.execute(String.format("DELETE FROM LanguageFilter WHERE (ChildGuildID = %d) AND (Word = \"%s\")", guildID, word));
-            return st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return 0;
+        return returnValue;
     }
 
     // INSERT A CHANNEL ID INTO THE DATABASE
     public Integer insertAutoPushChannel(Long guildID, Long channelID) throws SQLException {
 
         Connection connection = pool.getConnection();
+        Integer returnValue = 0;
         try {
 
             Statement st = connection.createStatement();
 
             st.execute(String.format("INSERT INTO AutoPush (ChildGuildID, ChannelID) VALUES (%d, %d)", guildID, channelID));
-            return st.getUpdateCount();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            returnValue = st.getUpdateCount();
         } finally {
             connection.close();
         }
-        return 0;
+        return returnValue;
     }
 
     // REMOVE A CHANNEL ID FROM THE DATABASE
     public Integer removeAutoPushChannel(Long guildID, Long channelID) throws SQLException {
 
         Connection connection = pool.getConnection();
+        Integer returnValue = null;
 
         try {
             Statement st = connection.createStatement();
 
             st.execute(String.format("DELETE FROM AutoPush WHERE (ChildGuildID = %d) AND (ChannelID = %d)", guildID, channelID));
-            return st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return 0;
+        return returnValue;
     }
 
     // REMOVE A CHANNEL ID FROM THE DATABASE
@@ -980,45 +990,46 @@ public class SQLHandler {
     public Integer whiteListServer(Long guildID, Long serverID, String note) throws SQLException {
 
         Connection connection = pool.getConnection();
-        Integer output = null;
+        Integer returnValue = null;
 
         try {
 
             Statement st = connection.createStatement();
 
             st.execute(String.format("INSERT INTO InviteWhitelist (ChildGuildID, TargetGuildID, Note) VALUES (%d, %d, '%s')", guildID, serverID, note));
-            output = st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return output;
+        return returnValue;
     }
 
     // REMOVE A BLACKLISTED WORD FROM THE DATABASE
     public Integer deWhiteListServer(Long guildID, Long serverID) throws SQLException {
 
         Connection connection = pool.getConnection();
-        Integer output = null;
+        Integer returnValue = null;
 
         try {
             Statement st = connection.createStatement();
 
             st.execute(String.format("DELETE FROM InviteWhitelist WHERE (ChildGuildID = %d) AND (TargetGuildID = %d)", guildID, serverID));
-            output = st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return output;
+        return returnValue;
     }
 
     private boolean checkSize(Long guildID, String tableName) throws SQLException {
         int rowCount = 0;
 
         Connection connection = pool.getConnection();
+        Boolean returnValue = false;
 
         try {
             Statement st = connection.createStatement();
@@ -1029,7 +1040,7 @@ public class SQLHandler {
             }
 
             if (rowCount < Integer.parseInt(Config.get("max_row_count"))) {
-                return true;
+                returnValue = true;
             }
 
         } catch (SQLException throwables) {
@@ -1038,12 +1049,12 @@ public class SQLHandler {
             connection.close();
         }
 
-        return false;
+        return returnValue;
     }
 
     private boolean checkSize(Long guildID, String tableName, Integer max) throws SQLException {
         int rowCount = 0;
-        boolean output = false;
+        boolean returnValue = false;
 
         Connection connection = pool.getConnection();
 
@@ -1056,7 +1067,7 @@ public class SQLHandler {
             }
 
             if (rowCount < max) {
-                output = true;
+                returnValue = true;
             }
 
         } catch (SQLException throwables) {
@@ -1065,7 +1076,7 @@ public class SQLHandler {
             connection.close();
         }
 
-        return output;
+        return returnValue;
     }
 
     public int getTableCount(Long guildID, String tableName) throws SQLException {
@@ -1094,20 +1105,20 @@ public class SQLHandler {
 
     public Integer deleteRow(String TableName, String IdentifierColumn, Long Identifier) throws SQLException {
 
-        Integer output = null;
+        Integer returnValue = null;
         Connection connection = pool.getConnection();
 
         try {
             Statement st = connection.createStatement();
 
             st.execute(String.format("DELETE FROM %s WHERE %s = %d", TableName, IdentifierColumn, Identifier));
-            output = st.getUpdateCount();
+            returnValue = st.getUpdateCount();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             connection.close();
         }
-        return output;
+        return returnValue;
     }
 
     public ArrayList<TrackerObject> getTrackers(final Long guildID, final Long userID) throws SQLException {
@@ -1168,7 +1179,7 @@ public class SQLHandler {
     }
 
     public Integer submitModeratorRole(final Long guildID, final Long roleID, final Integer permLevel) throws SQLException {
-        Integer updateCount = 0;
+        Integer returnValue = 0;
 
         if (this.getInt("ModRoleTable", "Permissions", "ModRoleID", roleID) == null) {
 
@@ -1178,7 +1189,7 @@ public class SQLHandler {
                 Statement st = connection.createStatement();
 
                 st.executeUpdate(String.format("INSERT INTO ModRoleTable (ChildGuildID, ModRoleID, Permissions) VALUES (%d, %d, %d)", guildID, roleID, permLevel));
-                updateCount = st.getUpdateCount();
+                returnValue = st.getUpdateCount();
 
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -1186,7 +1197,7 @@ public class SQLHandler {
                 connection.close();
             }
         }
-        return updateCount;
+        return returnValue;
     }
 
     public Map<Long, Integer> getModRoles(Long guildID) throws SQLException {
@@ -1210,7 +1221,7 @@ public class SQLHandler {
     }
 
     public String nextActivity(Integer currentIndex) throws SQLException {
-        String result = null;
+        String returnValue = null;
 
         Connection connection = pool.getConnection();
         try {
@@ -1218,14 +1229,14 @@ public class SQLHandler {
 
             ResultSet rs = st.executeQuery(String.format("SELECT ID, Activity FROM ActivityList WHERE ID > %d LIMIT 1",currentIndex));
             while(rs.next()){
-                result = rs.getString("Activity");
+                returnValue = rs.getString("Activity");
                 SherlockBot.activityIndex = rs.getInt("ID");
             }
 
-            if(result == null){
+            if(returnValue == null){
                 rs = st.executeQuery("SELECT ID, Activity FROM ActivityList ORDER BY ID");
                 while(rs.next()){
-                    result = rs.getString("Activity");
+                    returnValue = rs.getString("Activity");
                     SherlockBot.activityIndex = rs.getInt("ID");
                     break;
                 }
@@ -1236,7 +1247,7 @@ public class SQLHandler {
             connection.close();
         }
 
-        return result;
+        return returnValue;
     }
 
     public void logCommandUsage(String commandName) throws SQLException {
