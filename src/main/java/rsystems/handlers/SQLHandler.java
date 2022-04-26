@@ -1150,6 +1150,24 @@ public class SQLHandler {
         return returnValue;
     }
 
+    public Integer deleteRow(String TableName, String FirstIdentifierColumn, Long FirstIdentifier, String SecondIdentifierColumn, Long SecondIdentifier) throws SQLException {
+
+        Integer returnValue = null;
+        Connection connection = pool.getConnection();
+
+        try {
+            Statement st = connection.createStatement();
+
+            st.execute(String.format("DELETE FROM %s WHERE %s = %d AND %s = %d", TableName, FirstIdentifierColumn, FirstIdentifier, SecondIdentifierColumn, SecondIdentifier));
+            returnValue = st.getUpdateCount();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            connection.close();
+        }
+        return returnValue;
+    }
+
     public ArrayList<TrackerObject> getTrackers(final Long guildID, final Long userID) throws SQLException {
         ArrayList<TrackerObject> trackers = new ArrayList<>();
 
