@@ -40,4 +40,8 @@ This bot is still in early stage of development and may contain bugs.  By inviti
 Without Admin Permission:  [Authorize Link](https://discord.com/api/oauth2/authorize?client_id=758855978853859340&permissions=268528758&scope=bot)  
 With Admin Permission:  [Authorize Link](https://discord.com/api/oauth2/authorize?client_id=758855978853859340&permissions=8&scope=bot)
 
+# PREVENT SPAMMERS!
+![image](https://user-images.githubusercontent.com/1572869/183296519-3d391aaa-24ad-4555-97fb-7c8568588d90.png)
+
+
 
