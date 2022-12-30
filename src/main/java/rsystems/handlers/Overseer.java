@@ -6,6 +6,7 @@ package rsystems.handlers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 import rsystems.Config;
 import rsystems.SherlockBot;
 import rsystems.objects.TrackerObject;
@@ -87,7 +88,8 @@ public class Overseer {
         Guild guild = SherlockBot.jda.getGuildById(guildID);
         if (guild != null) {
 
-            guild.timeoutForById(userID, Duration.ofDays(1)).queue();
+            final User user = guild.getMemberById(userID).getUser();
+            guild.timeoutFor(user, Duration.ofDays(1)).queue();
 
             //Member member = guild.getMember(userID);
             Role quarantineRole = guild.getRoleById(SherlockBot.guildMap.get(guildID).getQuarantineRoleID());

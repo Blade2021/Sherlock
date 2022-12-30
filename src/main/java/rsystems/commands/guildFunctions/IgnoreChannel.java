@@ -2,9 +2,10 @@ package rsystems.commands.guildFunctions;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import rsystems.SherlockBot;
 import rsystems.objects.Command;
@@ -32,11 +33,11 @@ public class IgnoreChannel extends Command {
         String[] args = content.split("\\s+");
 
         if (args.length >= 1) {
-            ArrayList<TextChannel> requestedIgnoreList = new ArrayList<>();
+            ArrayList<GuildChannel> requestedIgnoreList = new ArrayList<>();
             //TextChannel targetChannel = null;
 
-            if (message.getMentionedChannels().size() >= 1) {
-                for (TextChannel requestedChannel : message.getMentionedChannels()) {
+            if (message.getMentions().getChannels().size() >= 1) {
+                for (GuildChannel requestedChannel : message.getMentions().getChannels()) {
                     //Don't allow other guild channels to be put into database
                     if (requestedChannel.getGuild().getIdLong() == event.getGuild().getIdLong()) {
                         requestedIgnoreList.add(requestedChannel);
@@ -49,9 +50,9 @@ public class IgnoreChannel extends Command {
             }
 
             if (requestedIgnoreList.size() > 0) {
-                for (TextChannel targetChannel : requestedIgnoreList) {
+                for (GuildChannel targetChannel : requestedIgnoreList) {
                     if (SherlockBot.database.handleIgnoreChannel(event.getGuild().getIdLong(), targetChannel.getIdLong(), true) >= 1) {
-                        message.addReaction("✅").queue();
+                        message.addReaction(Emoji.fromUnicode("✅")).queue();
                     }
                 }
             }

@@ -3,9 +3,10 @@ package rsystems.commands.guildFunctions;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import rsystems.SherlockBot;
 import rsystems.objects.Command;
@@ -43,7 +44,7 @@ public class AutoRole extends Command {
                     //Query Database for current auto role count
                     if(SherlockBot.database.getTableCount(event.getGuild().getIdLong(),"AutoRoles") < SherlockBot.database.getGuildData(event.getGuild().getIdLong()).getGrantedAutoRoleCount()){
                         if(SherlockBot.database.insertAutoRole(event.getGuild().getIdLong(),roleID) == 200){
-                            event.getMessage().addReaction("✅").queue();
+                            event.getMessage().addReaction(Emoji.fromUnicode("✅")).queue();
                         } else {
                             // DATABASE ERROR
                             reply(event,"A system error occurred.  Please try again later or contact us for support.  ERROR_ID:2302");
@@ -68,9 +69,9 @@ public class AutoRole extends Command {
 
                     int removableResult = SherlockBot.database.removeAutoRole(event.getGuild().getIdLong(),roleID);
                     if(removableResult >= 1){
-                        event.getMessage().addReaction("✅").queue();
+                        event.getMessage().addReaction(Emoji.fromUnicode("✅")).queue();
                     } else {
-                        event.getMessage().addReaction("⚠").queue();
+                        event.getMessage().addReaction(Emoji.fromUnicode("⚠")).queue();
                     }
                 }
             }

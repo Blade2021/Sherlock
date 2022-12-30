@@ -1,6 +1,8 @@
 package rsystems.handlers;
 
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import rsystems.Config;
 import rsystems.SherlockBot;

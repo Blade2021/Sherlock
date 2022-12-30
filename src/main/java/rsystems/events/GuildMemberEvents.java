@@ -3,7 +3,10 @@ package rsystems.events;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.unions.DefaultGuildChannelUnion;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -107,9 +110,11 @@ public class GuildMemberEvents extends ListenerAdapter {
 
 
     private void welcomeUser(final Guild guild, final Member member){
-        final BaseGuildMessageChannel welcomeChannel = guild.getDefaultChannel();
 
-        if((welcomeChannel != null) && (welcomeChannel.canTalk())){
+
+        final DefaultGuildChannelUnion welcomeChannel = guild.getDefaultChannel();
+
+        if((welcomeChannel != null) && (welcomeChannel.asTextChannel().canTalk())){
 
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.setThumbnail(member.getEffectiveAvatarUrl());
@@ -118,7 +123,7 @@ public class GuildMemberEvents extends ListenerAdapter {
             embedBuilder.setDescription(formattedWelcomeMSG(guild,member));
             embedBuilder.setFooter("UserID: " + member.getId());
 
-            welcomeChannel.sendMessageEmbeds(embedBuilder.build()).queue();
+            welcomeChannel.asTextChannel().sendMessageEmbeds(embedBuilder.build()).queue();
             embedBuilder.clear();
 
         }

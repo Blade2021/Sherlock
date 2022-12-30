@@ -1,11 +1,10 @@
 package rsystems.commands.slashCommands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -107,9 +106,7 @@ public class SelfRole extends SlashCommand {
                                 .addField("Role Name:", roleNameList.toString(), true)
                                 .addField("Role ID", roleIDList.toString(), true);
 
-                        MessageBuilder mb = new MessageBuilder();
-                        mb.setEmbeds(embedBuilder.build());
-                        reply(event, mb.build(),true);
+                        reply(event, embedBuilder.build(),true);
 
                     } else {
                         reply(event,"No self roles found",true);

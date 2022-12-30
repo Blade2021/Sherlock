@@ -2,9 +2,9 @@ package rsystems.commands.slashCommands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.NewsChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -42,7 +42,7 @@ public class AutoPush extends SlashCommand {
         if (event.getSubcommandName().equalsIgnoreCase("add")) {
 
             event.deferReply().setEphemeral(this.isEphemeral()).queue();
-            final NewsChannel targetChannel = event.getOption("channel").getAsNewsChannel();
+            final NewsChannel targetChannel = event.getOption("channel").getAsChannel().asNewsChannel();
 
             if (targetChannel != null) {
 
@@ -68,7 +68,7 @@ public class AutoPush extends SlashCommand {
 
             // Remove channel from database
             event.deferReply().setEphemeral(this.isEphemeral()).queue();
-            final NewsChannel targetChannel = event.getOption("channel").getAsNewsChannel();
+            final NewsChannel targetChannel = event.getOption("channel").getAsChannel().asNewsChannel();
 
             if (targetChannel != null) {
 

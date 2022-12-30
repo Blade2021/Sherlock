@@ -1,19 +1,18 @@
 package rsystems.commands.slashCommands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import rsystems.SherlockBot;
 import rsystems.objects.SlashCommand;
 
@@ -73,9 +72,10 @@ public class AutoRole extends SlashCommand {
                         if (SherlockBot.database.getTableCount(event.getGuild().getIdLong(), "AutoRoles") < SherlockBot.database.getGuildData(event.getGuild().getIdLong()).getGrantedAutoRoleCount()) {
                             if (SherlockBot.database.insertAutoRole(event.getGuild().getIdLong(), role.getIdLong()) == 200) {
 
-                                MessageBuilder mb = new MessageBuilder();
-                                mb.append(String.format("`%s` has been added as an AutoRole", role.getName()));
-                                mb.setActionRows(ActionRow.of(Button.primary("listar", "List Roles")));
+                                MessageCreateBuilder mb = new MessageCreateBuilder();
+
+                                mb.setContent(String.format("`%s` has been added as an AutoRole", role.getName()));
+                                mb.addActionRow(Button.primary("listar", "List Roles"));
 
                                 reply(event, mb.build(), false, MessageHook -> {
 
@@ -83,9 +83,10 @@ public class AutoRole extends SlashCommand {
 
                             } else if (SherlockBot.database.insertAutoRole(event.getGuild().getIdLong(), role.getIdLong()) == 400) {
 
-                                MessageBuilder mb = new MessageBuilder();
-                                mb.append(String.format("`%s` is already listed as an AutoRole", role.getName()));
-                                mb.setActionRows(ActionRow.of(Button.primary("listar", "List Roles")));
+                                MessageCreateBuilder mb = new MessageCreateBuilder();
+
+                                mb.setContent(String.format("`%s` is already listed as an AutoRole", role.getName()));
+                                mb.addActionRow(Button.primary("listar", "List Roles"));
 
                                 reply(event, mb.build(), false, MessageHook -> {
 

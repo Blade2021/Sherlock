@@ -9,8 +9,8 @@ public class GrabRoleID {
         Long roleID = null;
 
         String modifiedContent = content;
-        if(message.getMentionedMembers().size() >0){
-            for(Member member:message.getMentionedMembers()){
+        if(message.getMentions().getMembers().size() >0){
+            for(Member member:message.getMentions().getMembers()){
                 modifiedContent = modifiedContent.replaceAll(member.getAsMention(),"");
             }
         }

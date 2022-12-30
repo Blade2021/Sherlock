@@ -3,7 +3,12 @@ package rsystems;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
@@ -148,7 +153,7 @@ public class SherlockBot {
 
             for (Category category : guild.getCategories()) {
                 try {
-                    category.createPermissionOverride(role).setDeny(mutePerms).reason("Initiating bot perms").queue();
+                    category.upsertPermissionOverride(role).deny(mutePerms).reason("Initiating bot perms").queue();
                 } catch (PermissionException e) {
                     break;
                 }
@@ -157,7 +162,7 @@ public class SherlockBot {
             //Set the mute role permission override for each channel
             for (TextChannel channel : guild.getTextChannels()) {
                 try {
-                    channel.createPermissionOverride(role).setDeny(mutePerms).queue();
+                    channel.upsertPermissionOverride(role).deny(mutePerms).queue();
                 } catch (PermissionException e) {
                     break;
                 }
@@ -165,7 +170,7 @@ public class SherlockBot {
 
             for (VoiceChannel voiceChannel : guild.getVoiceChannels()) {
                 try {
-                    voiceChannel.createPermissionOverride(role).setDeny(mutePerms).queue();
+                    voiceChannel.upsertPermissionOverride(role).deny(mutePerms).queue();
                 } catch (PermissionException e) {
                     break;
                 }

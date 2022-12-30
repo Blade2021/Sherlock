@@ -15,7 +15,7 @@ public class OneMinute extends TimerTask {
 
     public void pushNextActivity(){
         try {
-            String newActivity = SherlockBot.database.nextActivity(SherlockBot.activityIndex);
+            final String newActivity = SherlockBot.database.nextActivity(SherlockBot.activityIndex);
 
             if(!newActivity.equalsIgnoreCase(SherlockBot.jda.getPresence().getActivity().getName())) {
                 SherlockBot.jda.getPresence().setActivity(Activity.playing(newActivity));

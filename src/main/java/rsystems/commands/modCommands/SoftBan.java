@@ -3,8 +3,9 @@ package rsystems.commands.modCommands;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import rsystems.objects.Command;
@@ -27,16 +28,16 @@ public class SoftBan extends Command {
 
     @Override
     public void dispatch(User sender, MessageChannel channel, Message message, String content, MessageReceivedEvent event) {
-        if(message.getMentionedMembers().size() > 0){
-            for(Member member:message.getMentionedMembers()){
+        if(message.getMentions().getMembers().size() > 0){
+            for(Member member:message.getMentions().getMembers()){
                 try{
                     User user = member.getUser();
                     if(message.getAuthor() == user){
                         reply(event,"You cannot call this command on yourself.");
                         break;
                     } else {
-                        event.getGuild().ban(member, 7, "Softban requested by: " + message.getAuthor().getAsTag()).queueAfter(5, TimeUnit.SECONDS, success -> {
-                            message.addReaction("✅").queue();
+                        event.getGuild().ban(member, 7,TimeUnit.DAYS).reason("Softban requested by: " + message.getAuthor().getAsTag()).queueAfter(5, TimeUnit.SECONDS, success -> {
+                            message.addReaction(Emoji.fromUnicode("✅")).queue();
                             event.getGuild().unban(user).queueAfter(5, TimeUnit.SECONDS);
                         });
                     }

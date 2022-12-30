@@ -3,9 +3,10 @@ package rsystems.commands.guildFunctions;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import rsystems.SherlockBot;
 import rsystems.objects.Command;
@@ -44,7 +45,7 @@ public class SelfRole extends Command {
                     //Query Database for current self role count
                     if(SherlockBot.database.getTableCount(event.getGuild().getIdLong(),"SelfRoles") < SherlockBot.database.getGuildData(event.getGuild().getIdLong()).getGrantedSelfRoleCount()){
                         if(SherlockBot.database.insertSelfRole(event.getGuild().getIdLong(),roleTrigger,roleID) == 200){
-                            event.getMessage().addReaction("✅").queue();
+                            event.getMessage().addReaction(Emoji.fromUnicode("✅")).queue();
                         } else {
                             // DATABASE ERROR
                             reply(event,"A system error occurred.  Please try again later or contact us for support.  ERROR_ID:2301");
@@ -69,9 +70,9 @@ public class SelfRole extends Command {
 
                     int removableResult = SherlockBot.database.removeSelfRole(event.getGuild().getIdLong(),roleTrigger);
                     if(removableResult >= 1){
-                        event.getMessage().addReaction("✅").queue();
+                        event.getMessage().addReaction(Emoji.fromUnicode("✅")).queue();
                     } else {
-                        event.getMessage().addReaction("⚠").queue();
+                        event.getMessage().addReaction(Emoji.fromUnicode("⚠")).queue();
                     }
                 }
             }

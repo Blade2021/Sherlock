@@ -2,6 +2,9 @@ package rsystems.commands.modCommands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import rsystems.SherlockBot;
 import rsystems.objects.Command;
@@ -30,7 +33,7 @@ public class Reason extends Command {
             }
 
             if(SherlockBot.database.putValue("CaseTable","Reason","ChildGuildID",event.getGuild().getIdLong(),"CaseID",caseID,reason) >= 1){
-                message.addReaction("✅").queue();
+                message.addReaction(Emoji.fromUnicode("✅")).queue();
 
                 Long previousMessageID = SherlockBot.database.getLong("CaseTable","LogMessageID","ChildGuildID",event.getGuild().getIdLong(),"CaseID",caseID);
                 Long logChannelID = SherlockBot.database.getLong("GuildTable","LogChannelID","GuildID",event.getGuild().getIdLong());

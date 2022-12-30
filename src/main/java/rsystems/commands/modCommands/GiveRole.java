@@ -3,6 +3,8 @@ package rsystems.commands.modCommands;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.PermissionException;
@@ -38,7 +40,7 @@ public class GiveRole extends Command {
             String modifiedContent = content;
             Long roleID = null;
 
-            if (message.getMentionedMembers().size() == 0) {
+            if (message.getMentions().getMembers().size() == 0) {
                 // DON'T ALLOW COMMAND TO BE USED WITHOUT MENTIONABLES
                 // Mentionables is now a word.  If you ever come across this, let me know.  I'll give you a gold star.
 
@@ -54,8 +56,8 @@ public class GiveRole extends Command {
             } else {
                 // MENTIONABLES WERE FOUND!  HOORAY!
 
-                memberList = message.getMentionedMembers();
-                for (Member member : message.getMentionedMembers()) {
+                memberList = message.getMentions().getMembers();
+                for (Member member : message.getMentions().getMembers()) {
                     modifiedContent = modifiedContent.replaceAll("<@!" + member.getId() + ">", "");
                 }
 
@@ -84,8 +86,10 @@ public class GiveRole extends Command {
 
                     for (Member member : memberList) {
                         try {
-                            event.getGuild().addRoleToMember(member.getId(), role).reason(String.format("Requested by %s", message.getAuthor().getAsTag())).queueAfter(3, TimeUnit.SECONDS, Success -> {
-                                message.addReaction("✅").queue();
+
+
+                            event.getGuild().addRoleToMember(member, role).reason(String.format("Requested by %s", message.getAuthor().getAsTag())).queueAfter(3, TimeUnit.SECONDS, Success -> {
+                                message.addReaction(Emoji.fromUnicode("✅")).queue();
                             });
                         } catch (HierarchyException e) {
                             Role highestSelfRole = event.getGuild().getSelfMember().getRoles().get(0);

@@ -3,6 +3,7 @@ package rsystems.handlers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
@@ -12,9 +13,6 @@ import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import rsystems.Config;
 import rsystems.SherlockBot;
-import rsystems.commands.botManager.ForceDisconnect;
-import rsystems.commands.botManager.Shutdown;
-import rsystems.commands.botManager.Test;
 import rsystems.commands.channelCommands.Topic;
 import rsystems.commands.guildFunctions.*;
 import rsystems.commands.modCommands.*;
@@ -42,24 +40,16 @@ public class Dispatcher extends ListenerAdapter {
 
     public Dispatcher() {
 
-        registerCommand(new Shutdown());
         registerCommand(new SelfRole());
         registerCommand(new AutoRole());
         registerCommand(new GiveRole());
         registerCommand(new TakeRole());
         registerCommand(new SoftBan());
-        //registerCommand(new Infraction());
         registerCommand(new Reason());
-        registerCommand(new Test());
-        //registerCommand(new GuildSetting());
-        //registerCommand(new CopyChannel());
         registerCommand(new IgnoreChannel());
         registerCommand(new WatchChannel());
-        //registerCommand(new ColorRole());
         registerCommand(new Help());
-        registerCommand(new ForceDisconnect());
         registerCommand(new Leave());
-        registerCommand(new Unban());
         registerCommand(new Info());
         registerCommand(new Commands());
         registerCommand(new Topic());
@@ -383,7 +373,7 @@ public class Dispatcher extends ListenerAdapter {
                 filterWord = filterWord.trim();
 
                 // TRIGGER DELETION AND NOTIFICATION
-                event.getMessage().addReaction("⚠").queue();
+                event.getMessage().addReaction(Emoji.fromUnicode("⚠")).queue();
 
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setTitle("Filtered Word Detected");
@@ -555,21 +545,21 @@ public class Dispatcher extends ListenerAdapter {
             try {
 
                 if (event.getMember().getRoles().contains(role)) {
-                    event.getGuild().removeRoleFromMember(event.getMember().getIdLong(), role).reason("Requested via SelfRole").queue(success -> {
-                        event.getMessage().addReaction("\uD83D\uDD3D").queue();
+                    event.getGuild().removeRoleFromMember(event.getMember(), role).reason("Requested via SelfRole").queue(success -> {
+                        event.getMessage().addReaction(Emoji.fromUnicode("\uD83D\uDD3D")).queue();
                     });
                 } else {
-                    event.getGuild().addRoleToMember(event.getMember().getIdLong(), role).reason("Requested via SelfRole").queue(success -> {
-                        event.getMessage().addReaction("\uD83D\uDD3C").queue();
+                    event.getGuild().addRoleToMember(event.getMember(), role).reason("Requested via SelfRole").queue(success -> {
+                        event.getMessage().addReaction(Emoji.fromUnicode("\uD83D\uDD3C")).queue();
                     });
                 }
 
             } catch (HierarchyException e){
                 event.getMessage().reply("Sorry that role is above me in the permission hierarchy.").queue();
-                event.getMessage().addReaction("⚠").queue();
+                event.getMessage().addReaction(Emoji.fromUnicode("⚠")).queue();
             } catch (PermissionException permissionException) {
                 event.getMessage().reply("Missing Permissions: " + permissionException.getPermission().toString()).queue();
-                event.getMessage().addReaction("⚠").queue();
+                event.getMessage().addReaction(Emoji.fromUnicode("⚠")).queue();
             }
         }
     }
@@ -658,7 +648,7 @@ public class Dispatcher extends ListenerAdapter {
                                 event.getMember().kick("Automatic kick for sending a message containing a hard filtered word").queue();
                                 break;
                             case 3:
-                                event.getMember().ban(7,"Automatic ban for sending a message containing a hard filtered word").queue();
+                                event.getMember().ban(7,TimeUnit.DAYS).reason("Automatic ban for sending a message containing a hard filtered word").queue();
                                 break;
                         }
 
@@ -691,7 +681,7 @@ public class Dispatcher extends ListenerAdapter {
                 if(!futureFound){
                     futures.put(event.getMessageId(), event.getMessage().delete().submitAfter(30, TimeUnit.SECONDS));
                     try {
-                        event.getMessage().addReaction("⁉").queue();
+                        event.getMessage().addReaction(Emoji.fromUnicode("⁉")).queue();
                     } catch (NullPointerException e) {
 
                     }
@@ -721,8 +711,8 @@ public class Dispatcher extends ListenerAdapter {
                         }
                     }
 
-                    event.getMessage().removeReaction("⚠").queue();
-                    event.getMessage().removeReaction("⁉").queue();
+                    event.getMessage().removeReaction(Emoji.fromUnicode("⚠")).queue();
+                    event.getMessage().removeReaction(Emoji.fromUnicode("⁉")).queue();
                 } catch (NullPointerException ignored) {
 
                 }

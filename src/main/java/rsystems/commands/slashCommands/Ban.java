@@ -1,20 +1,20 @@
 package rsystems.commands.slashCommands;
 
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import rsystems.SherlockBot;
 import rsystems.objects.SlashCommand;
 
 import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 
 public class Ban extends SlashCommand {
 
@@ -60,11 +60,11 @@ public class Ban extends SlashCommand {
     }
 
     public void handleBanEvent(final Member member, final Member moderator, final SlashCommandInteractionEvent event, final String reason){
-        event.getGuild().ban(member,0,reason).queue(success -> {
+        event.getGuild().ban(member,0, TimeUnit.SECONDS).reason(reason).queue(success -> {
 
-            MessageBuilder messageBuilder = new MessageBuilder();
+            MessageCreateBuilder messageBuilder = new MessageCreateBuilder();
             messageBuilder.setContent(String.format("%s has been banned",member.getUser().getAsTag()));
-            messageBuilder.setActionRows(ActionRow.of(Button.danger("unban:"+member.getIdLong(),"Unban")));
+            messageBuilder.addActionRow(Button.danger("unban:"+member.getIdLong(),"Unban"));
 
             reply(event,messageBuilder.build(),this.isEphemeral(),messageReply -> {
                 try {

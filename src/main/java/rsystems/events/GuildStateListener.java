@@ -1,8 +1,8 @@
 package rsystems.events;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.ThreadChannel;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.channel.update.GenericChannelUpdateEvent;
@@ -91,7 +91,7 @@ public class GuildStateListener extends ListenerAdapter {
                         sendSetupMessage(event);
                     }
                 } else {
-                    if(event.getGuild().getDefaultChannel().canTalk()){
+                    if(event.getGuild().getDefaultChannel().asTextChannel().canTalk()){
                         sendSetupMessage(event);
                     }
                 }
@@ -136,7 +136,7 @@ public class GuildStateListener extends ListenerAdapter {
                 "I am Sherlock!  It is great to meet you.  I have a few tasks that must be completed for me to work efficiently for your server.\n\nIf you are a server administrator, please do %ssetup to finish the setup steps.", Config.get("DEFAULTPREFIX")));
         builder.setColor(SherlockBot.getColor(SherlockBot.colorType.GENERIC));
 
-        event.getGuild().getDefaultChannel().sendMessageEmbeds(builder.build()).queue();
+        event.getGuild().getDefaultChannel().asTextChannel().sendMessageEmbeds(builder.build()).queue();
 
         builder.clear();
     }

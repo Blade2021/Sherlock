@@ -1,9 +1,9 @@
 package rsystems.commands.slashCommands;
 
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -105,8 +105,8 @@ public class GuildSetting extends SlashCommand {
 
             if (event.getSubcommandName().equalsIgnoreCase("set")) {
 
-                if (event.getOption("channel").getAsMessageChannel() != null) {
-                    Long channelID = event.getOption("channel").getAsMessageChannel().getIdLong();
+                if (event.getOption("channel").getAsChannel() != null) {
+                    Long channelID = event.getOption("channel").getAsChannel().getIdLong();
 
                     if (event.getGuild().getTextChannelById(channelID) != null) {
                         TextChannel logChannel = event.getGuild().getTextChannelById(channelID);
@@ -115,7 +115,7 @@ public class GuildSetting extends SlashCommand {
                         event.getHook().editOriginal(String.format("%s has been registered as the Log Channel going forward", logChannel.getAsMention())).queue();
                         return;
                     }
-                } else if (event.getOption("channel").getAsGuildChannel() != null) {
+                } else if (event.getOption("channel").getAsChannel().asCategory() != null) {
                     event.getHook().editOriginal("Categories cannot be registered as a Log Channel").queue();
                     return;
                 }

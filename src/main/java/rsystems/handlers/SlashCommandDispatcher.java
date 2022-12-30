@@ -33,7 +33,6 @@ public class SlashCommandDispatcher extends ListenerAdapter {
         registerCommand(new SelfRole());
         registerCommand(new AutoRole());
         registerCommand(new Verify());
-        registerCommand(new Unban());
         registerCommand(new Moderator());
         registerCommand(new BotSupport());
         registerCommand(new Whitelist());

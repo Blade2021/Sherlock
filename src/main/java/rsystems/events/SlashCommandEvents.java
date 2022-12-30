@@ -1,7 +1,7 @@
 package rsystems.events;
 
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -32,11 +32,11 @@ public class SlashCommandEvents extends ListenerAdapter {
 
             if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
                 if (event.getSubcommandName().equals("logchannel")) {
-                    if ((event.getOptions().size() > 0) && (event.getOption("channel").getAsMessageChannel() != null)) {
-                        MessageChannel channel = event.getOption("channel").getAsMessageChannel();
+                    if ((event.getOptions().size() > 0) && (event.getOption("channel").getAsChannel() != null)) {
+                        MessageChannel channel = event.getOption("channel").getAsChannel().asTextChannel();
 
                         event.getHook().sendMessage(String.format("Setting Log Channel for Sherlock to: %s | %s", channel.getName(), channel.getId())).setEphemeral(true).queue();
-                        System.out.println(event.getOption("channel").getAsMessageChannel().getName());
+                        System.out.println(event.getOption("channel").getAsChannel().asTextChannel().getName());
                     } else {
 
                         if ((SherlockBot.getGuildSettings(event.getGuild().getIdLong()).getLogChannelID() != null) && (SherlockBot.getGuildSettings(event.getGuild().getIdLong()).getLogChannelID() != 0)) {
